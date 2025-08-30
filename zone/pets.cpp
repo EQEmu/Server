@@ -547,22 +547,22 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 		if (buffs[j1].spellid <= (uint32)SPDAT_RECORDS) {
 			for (int x1=0; x1 < EFFECT_COUNT; x1++) {
 				switch (spells[buffs[j1].spellid].effect_id[x1]) {
-					case SE_AddMeleeProc:
-					case SE_WeaponProc:
+					case SpellEffect::AddMeleeProc:
+					case SpellEffect::WeaponProc:
 						// We need to reapply buff based procs
 						// We need to do this here so suspended pets also regain their procs.
 						AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100+spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
 						break;
-					case SE_DefensiveProc:
+					case SpellEffect::DefensiveProc:
 						AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
 						break;
-					case SE_RangedProc:
+					case SpellEffect::RangedProc:
 						AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
 						break;
-					case SE_Charm:
-					case SE_Rune:
-					case SE_NegateAttacks:
-					case SE_Illusion:
+					case SpellEffect::Charm:
+					case SpellEffect::Rune:
+					case SpellEffect::NegateAttacks:
+					case SpellEffect::Illusion:
 						buffs[j1].spellid = SPELL_UNKNOWN;
 						pet_buffs[j1].spellid = SPELLBOOK_UNKNOWN;
 						pet_buffs[j1].effect_type = 0;

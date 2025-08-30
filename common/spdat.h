@@ -1059,537 +1059,536 @@ typedef enum {
 //Spell Effect IDs
 // https://web.archive.org/web/20250816011656/https://forums.everquest.com/index.php?threads/enumerated-spa-list.206288/
 // mirror: http://pastebin.com/MYeQqGwe
-#define SE_CurrentHP					0	// implemented - Heals and nukes, repeates every tic if in a buff
-#define SE_ArmorClass					1	// implemented
-#define SE_ATK							2	// implemented
-#define SE_MovementSpeed				3	// implemented - SoW, SoC, etc
-#define SE_STR							4	// implemented
-#define SE_DEX							5	// implemented
-#define SE_AGI							6	// implemented
-#define SE_STA							7	// implemented
-#define SE_INT							8	// implemented
-#define SE_WIS							9	// implemented
-#define SE_CHA							10	// implemented - used as a spacer
-#define SE_AttackSpeed					11	// implemented
-#define SE_Invisibility					12	// implemented - TO DO: Implemented Invisiblity Levels
-#define SE_SeeInvis						13	// implemented - TO DO: Implemented See Invisiblity Levels
-#define SE_WaterBreathing				14	// implemented
-#define SE_CurrentMana					15	// implemented
-//#define SE_NPCFrenzy					16	// not used
-//#define SE_NPCAwareness				17	// not used
-#define SE_Lull							18	// implemented - Reaction Radius
-#define SE_AddFaction					19	// implemented - Alliance line
-#define SE_Blind						20	// implemented
-#define SE_Stun							21	// implemented
-#define SE_Charm						22	// implemented
-#define SE_Fear							23	// implemented
-#define SE_Stamina						24	// implemented - Invigor and such
-#define SE_BindAffinity					25	// implemented - TO DO: Implement 2nd and 3rd Recall (value 2,3 ect). Sets additional bind points.
-#define SE_Gate							26	// implemented - Gate to bind point
-#define SE_CancelMagic					27	// implemented
-#define SE_InvisVsUndead				28	// implemented
-#define SE_InvisVsAnimals				29	// implemented
-#define SE_ChangeFrenzyRad				30	// implemented - Pacify
-#define SE_Mez							31	// implemented
-#define SE_SummonItem					32	// implemented
-#define SE_SummonPet					33	// implemented
-//#define SE_Confuse					34	// not used (Nimbus of Temporal Rifting) ?
-#define SE_DiseaseCounter				35	// implemented
-#define SE_PoisonCounter				36	// implemented
-//#define SE_DetectHostile				37	// not used
-//#define SE_DetectMagic				38	// not used
-#define SE_TwinCastBlocker				39	// implemented - If present in spell, then the spell can not be twincast.
-#define SE_DivineAura					40	// implemented
-#define SE_Destroy						41	// implemented - Disintegrate, Banishment of Shadows
-#define SE_ShadowStep					42	// implemented
-#define SE_Berserk						43	// implemented (*not used in any known live spell) Makes client 'Berserk' giving crip blow chance.
-#define SE_Lycanthropy					44	// implemented
-#define SE_Vampirism					45	// implemented (*not used in any known live spell) Stackable lifetap from melee.
-#define SE_ResistFire					46	// implemented
-#define SE_ResistCold					47	// implemented
-#define SE_ResistPoison					48	// implemented
-#define SE_ResistDisease				49	// implemented
-#define SE_ResistMagic					50	// implemented
-//#define SE_DetectTraps				51	// not used
-#define SE_SenseDead					52	// implemented
-#define SE_SenseSummoned				53	// implemented
-#define SE_SenseAnimals					54	// implemented
-#define SE_Rune							55	// implemented
-#define SE_TrueNorth					56	// implemented
-#define SE_Levitate						57	// implemented
-#define SE_Illusion						58	// implemented
-#define SE_DamageShield					59	// implemented
-//#define SE_TransferItem				60	// not used
-#define SE_Identify						61	// implemented
-//#define SE_ItemID						62	// not used
-#define SE_WipeHateList					63	// implemented, @Memblur, chance to wipe hate list of target, base: pct chance, limit: none, max: ? (not implemented), Note: caster level and CHA add to pct chance
-#define SE_SpinTarget					64	// implemented - TO DO: Not sure stun portion is working correctly
-#define SE_InfraVision					65	// implemented
-#define SE_UltraVision					66	// implemented
-#define SE_EyeOfZomm					67	// implemented
-#define SE_ReclaimPet					68	// implemented
-#define SE_TotalHP						69	// implemented
-//#define SE_CorpseBomb					70	// not used
-#define SE_NecPet						71	// implemented
-//#define SE_PreserveCorpse				72	// not used
-#define SE_BindSight					73	// implemented, @Vision, see through the eyes of your target, click off buff to end effect, base: 1, limit: none, max: none
-#define SE_FeignDeath					74	// implemented
-#define SE_VoiceGraft					75	// implemented
-#define SE_Sentinel						76	// *not implemented?(just seems to send a message)
-#define SE_LocateCorpse					77	// implemented
-#define SE_AbsorbMagicAtt				78	// implemented - Rune for spells
-#define SE_CurrentHPOnce				79	// implemented - Heals and nukes, non-repeating if in a buff
-//#define SE_EnchantLight				80	// not used
-#define SE_Revive						81	// implemented - Resurrect
-#define SE_SummonPC						82	// implemented
-#define SE_Teleport						83	// implemented
-#define SE_TossUp						84	// implemented - Gravity Flux
-#define SE_WeaponProc					85	// implemented - i.e. Call of Fire
-#define SE_Harmony						86	// implemented
-#define SE_MagnifyVision				87	// implemented - Telescope
-#define SE_Succor						88	// implemented - Evacuate/Succor lines
-#define SE_ModelSize					89	// implemented - Shrink, Growth
-//#define SE_Cloak						90	// *not implemented - Used in only 2 spells
-#define SE_SummonCorpse					91	// implemented
-#define SE_InstantHate					92	// implemented - add hate
-#define SE_StopRain						93	// implemented - Wake of Karana
-#define SE_NegateIfCombat				94	// implemented
-#define SE_Sacrifice					95	// implemented
-#define SE_Silence						96	// implemented
-#define SE_ManaPool						97	// implemented
-#define SE_AttackSpeed2					98	// implemented - Melody of Ervaj
-#define SE_Root							99	// implemented
-#define SE_HealOverTime					100	// implemented
-#define SE_CompleteHeal					101	// implemented
-#define SE_Fearless						102	// implemented - Valiant Companion
-#define SE_CallPet						103	// implemented - Summon Companion
-#define SE_Translocate					104	// implemented
-#define SE_AntiGate						105	// implemented - Translocational Anchor
-#define SE_SummonBSTPet					106	// implemented
-#define SE_AlterNPCLevel				107	// implemented - not used on live
-#define SE_Familiar						108	// implemented
-#define SE_SummonItemIntoBag			109	// implemented - summons stuff into container
-#define SE_IncreaseArchery				110	// implemented
-#define SE_ResistAll					111	// implemented - Note: Physical Resists are not modified by this effect.
-#define SE_CastingLevel					112	// implemented
-#define	SE_SummonHorse					113	// implemented
-#define SE_ChangeAggro					114	// implemented - Hate modifing buffs(ie horrifying visage)
-#define SE_Hunger						115	// implemented - Song of Sustenance
-#define SE_CurseCounter					116	// implemented
-#define SE_MagicWeapon					117	// implemented - makes weapon magical
-#define SE_Amplification				118	// implemented, @Song, stackable singing mod, base: mod%, limit: none, max: none, Note: Can focus itself.
-#define SE_AttackSpeed3					119	// implemented
-#define SE_HealRate						120	// implemented - reduces healing by a %
-#define SE_ReverseDS					121 // implemented
-#define SE_ReduceSkill					122	// implemented - base: skill id, limit: none, max: none, formula: % skill is reduced (positive)
-#define SE_Screech						123	// implemented Spell Blocker(If have buff with value +1 will block any effect with -1)
-#define SE_ImprovedDamage				124 // implemented
-#define SE_ImprovedHeal					125 // implemented
-#define SE_SpellResistReduction			126 // implemented
-#define SE_IncreaseSpellHaste			127 // implemented, @Fc, On Caster, cast time mod pct, base: pct
-#define SE_IncreaseSpellDuration		128 // implemented, @Fc, On Caster, spell duration mod pct, base: pct
-#define SE_IncreaseRange				129 // implemented, @Fc, On Caster, spell range mod pct, base: pct
-#define SE_SpellHateMod					130 // implemented, @Fc, On Caster, spell hate mod pct, base: min pct, limit: max pct
-#define SE_ReduceReagentCost			131 // implemented, @Fc, On Caster, do not consume reagent pct chance, base: min pct, limit: max pct
-#define SE_ReduceManaCost				132 // implemented, @Fc, On Caster, reduce mana cost by pct, base: min pct, limt: max pct
-#define SE_FcStunTimeMod				133	// implemented, @Fc, On Caster, spell range mod pct, base: pct
-#define SE_LimitMaxLevel				134 // implemented, @Ff, Max level of spell that can be focused, if base2 then decrease effectiviness by base2 % per level over max, base:  lv, base2: effectiveness pct
-#define SE_LimitResist					135 // implemented, @Ff, Resist Type(s) that a spell focus can require or exclude, base1: resist type, Include: Positive Exclude: Negative
-#define SE_LimitTarget					136 // implemented, @Ff, Target Type(s) that a spell focus can require or exclude, base1: target type, Include: Positive Exclude: Negative
-#define SE_LimitEffect					137 // implemented, @Ff, Spell effect(s) that a spell focus can require or exclude, base1: SPA id, Include: Positive Exclude: Negative
-#define SE_LimitSpellType				138 // implemented, @Ff, Only allow focus spells that are Beneficial or Detrimental, base1: 0=det 1=bene
-#define SE_LimitSpell					139 // implemented, @Ff, Specific spell id(s) that a spell focus can require or exclude, base1: SPA id, Include: Positive Exclude: Negative
-#define SE_LimitMinDur					140 // implemented, @Ff, Mininum duration of spell that can be focused, base1: tics
-#define SE_LimitInstant					141 // implemented, @Ff, Include or exclude if an isntant cast spell can be focused, base1: 0=Exclude if Instant 1=Allow only if Instant
-#define SE_LimitMinLevel				142 // implemented, @Ff, Mininum level of spell that can be focused, base1: lv
-#define SE_LimitCastTimeMin				143 // implemented, @Ff, Mininum cast time of spell that can be focused, base1: milliseconds
-#define SE_LimitCastTimeMax				144	// implemented, @Ff, Max cast time of spell that can be focused, base1: milliseconds
-#define SE_Teleport2					145	// implemented - Banishment of the Pantheon
-//#define SE_ElectricityResist			146	// *not implemented TODO: Now used on live, xyz for teleport spells? also in temp pets?
-#define SE_PercentalHeal				147 // implemented
-#define SE_StackingCommand_Block		148 // implemented?
-#define SE_StackingCommand_Overwrite	149 // implemented?
-#define SE_DeathSave					150 // implemented
-#define SE_SuspendPet					151	// implemented, @Pet, allow caster to have an extra suspended pet, base: 0=no buffs/items 1=buffs+items, limit: none, max: none
-#define SE_TemporaryPets				152	// implemented
-#define SE_BalanceHP					153 // implemented
-#define SE_DispelDetrimental			154 // implemented, @Dispel, removes only detrimental effects on a target, base: pct chance (950=95%), limit: none, max: none
-#define SE_SpellCritDmgIncrease			155 // implemented - no known live spells use this currently
-#define SE_IllusionCopy					156	// implemented - Deception
-#define SE_SpellDamageShield			157	// implemented, @DS, causes non-melee damage on caster of a spell, base: Amt DS (negative), limit: none, max: unknown (same as base but +)
-#define SE_Reflect						158 // implemented, @SpellMisc, reflect casted detrimental spell back at caster, base: chance pct, limit: resist modifier (positive value reduces resists), max: pct of base dmg mod (50=50pct of base)
-#define SE_AllStats						159	// implemented
-#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
-#define SE_MitigateSpellDamage			161	// implemented, @Runes, mitigate incoming spell damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
-#define SE_MitigateMeleeDamage			162	// implemented - rune with max value
-#define SE_NegateAttacks				163	// implemented
-#define SE_AppraiseLDonChest			164	// implemented
-#define SE_DisarmLDoNTrap				165	// implemented
-#define SE_UnlockLDoNChest				166	// implemented
-#define SE_PetPowerIncrease				167 // implemented, @Fc, On Caster, pet power mod, base: value
-#define SE_MeleeMitigation				168	// implemented
-#define SE_CriticalHitChance			169	// implemented
-#define SE_SpellCritChance				170	// implemented
-#define SE_CrippBlowChance				171	// implemented
-#define SE_AvoidMeleeChance				172	// implemented
-#define SE_RiposteChance				173	// implemented
-#define SE_DodgeChance					174	// implemented
-#define SE_ParryChance					175	// implemented
-#define SE_DualWieldChance				176	// implemented
-#define SE_DoubleAttackChance			177	// implemented
-#define SE_MeleeLifetap					178	// implemented
-#define SE_AllInstrumentMod				179	// implemented, @Song, set mod for ALL instrument/singing skills that will be used if higher then item mods, base: mod%, limit: none, max: none
-#define SE_ResistSpellChance			180	// implemented
-#define SE_ResistFearChance				181	// implemented
-#define SE_HundredHands					182	// implemented
-#define SE_MeleeSkillCheck				183	// implemented
-#define SE_HitChance					184	// implemented
-#define SE_DamageModifier				185	// implemented
-#define SE_MinDamageModifier			186	// implemented
-#define SE_BalanceMana					187	// implemented - Balances party mana
-#define SE_IncreaseBlockChance			188	// implemented
-#define SE_CurrentEndurance				189	// implemented
-#define SE_EndurancePool				190	// implemented
-#define SE_Amnesia						191	// implemented - Silence vs Melee Effect
-#define SE_Hate							192	// implemented - Instant and hate over time.
-#define SE_SkillAttack					193	// implemented,
-#define SE_FadingMemories				194	// implemented, @Aggro, Remove from hate lists and make invisible. Can set max level of NPCs that can be affected. base: success chance, limit: max level (ROF2), max: max level (modern client), Note: Support for max level requires Rule (Spells, UseFadingMemoriesMaxLevel) to be true. If used from limit field, then it set as the level, ie. max level of 75 would use limit value of 75. If set from max field, max level 75 would use max value of 1075, if you want to set it so it checks a level range above the spell target then for it to only work on mobs 5 levels or below you set max value to 5.
-#define SE_StunResist					195	// implemented
-#define SE_StrikeThrough				196	// implemented
-#define SE_SkillDamageTaken				197	// implemented
-#define SE_CurrentEnduranceOnce			198	// implemented
-#define SE_Taunt						199	// implemented - % chance to taunt the target
-#define SE_ProcChance					200	// implemented
-#define SE_RangedProc					201	// implemented
-#define SE_IllusionOther				202	// implemented - Project Illusion
-#define SE_MassGroupBuff				203	// implemented
-#define SE_GroupFearImmunity			204	// implemented - (Does not use bonus)
-#define SE_Rampage						205	// implemented, @Combat Instant, Perform a primary slot combat rounds on all creatures within a 40 foot radius, base: number of attack rounds, limit: max entities hit per round, max: none, Note: AE range is 40 by default. Custom: Set field 'aoe_range' to override default. Adding additional attacks and hit count limit.
-#define SE_AETaunt						206	// implemented
-#define SE_FleshToBone					207	// implemented
-//#define SE_PurgePoison				208	// not used
-#define SE_DispelBeneficial				209 // implemented, @Dispel, removes only beneficial effects on a target, base: pct chance (950=95%), limit: none, max: none
-#define SE_PetShield					210	// implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: Time multiplier 1=12 seconds, 2=24 ect, limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live)
-#define SE_AEMelee						211	// implemented TO DO: Implement to allow NPC use (client only atm).
-#define SE_FrenziedDevastation			212	// implemented - increase spell criticals + all DD spells cast 2x mana.
-#define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
-#define SE_MaxHPChange					214	// implemented
-#define SE_PetAvoidance					215	// implemented[AA] - increases pet ability to avoid melee damage
-#define SE_Accuracy						216	// implemented
-#define SE_HeadShot						217	// implemented - ability to head shot (base2 = damage)
-#define SE_PetCriticalHit				218 // implemented[AA] - gives pets a baseline critical hit chance
-#define SE_SlayUndead					219	// implemented - Allow extra damage against undead (base1 = rate, base2 = damage mod).
-#define SE_SkillDamageAmount			220	// implemented
-#define SE_Packrat						221 // implemented as bonus
-#define SE_BlockBehind					222	// implemented - Chance to block from behind (with our without Shield)
-#define SE_DoubleRiposte				223	// implemented - Chance to double riposte [not used on live]
-#define	SE_GiveDoubleRiposte			224 // implemented[AA]
-#define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
-#define SE_TwoHandBash					226 // *not implemented as bonus
-#define SE_ReduceSkillTimer				227	// implemented
-#define SE_ReduceFallDamage				228	// implented - reduce the damage that you take from falling
-#define SE_PersistantCasting			229 // implemented
-#define SE_ExtendedShielding			230	// implemented, @ShieldAbility, extends the range of your /shield ability by an amount of distance, base: distance units, limit: none, max: none
-#define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
-#define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
-#define SE_Metabolism					233	// implemented - Modifies food/drink consumption rates.
-#define SE_ReduceApplyPoisonTime		234	// not implemented as bonus - reduces the time to apply poison
-#define	SE_ChannelChanceSpells			235 // implemented[AA] - chance to channel from SPELLS *No longer used on live.
-//#define SE_FreePet					236	// not used
-#define SE_GivePetGroupTarget			237 // implemented[AA] - (Pet Affinity)
-#define SE_IllusionPersistence			238	// implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
-#define SE_FeignedCastOnChance			239	// implemented - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
-//#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
-#define SE_ImprovedReclaimEnergy		241	// implemented - increase the amount of mana returned to you when reclaiming your pet.
-#define SE_IncreaseChanceMemwipe		242	// implemented - @Memblur, increases the chance to wipe hate with memory blurr, base: chance pct, limit: none, max: none, Note: Mods final blur chance after other bonuses added.
-#define SE_CharmBreakChance				243	// implemented - Total Domination
-#define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
-#define SE_TrapCircumvention			245	// implemented, @Traps, decreases the chance that you will set off a trap when opening a chest or other similar container by percentage, base: chance modifer, limit: none, max: none
-#define SE_SetBreathLevel				246 // *not implemented as bonus
-#define SE_RaiseSkillCap				247	// implemented[AA] - adds skill over the skill cap.
-#define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
-#define SE_SecondaryDmgInc				249 // implemented[AA] Allows off hand weapon to recieve a damage bonus (Sinister Strikes)
-#define SE_SpellProcChance				250	// implemented - Increase chance to proc from melee proc spells (ie Spirit of Panther)
-#define SE_ConsumeProjectile			251	// implemented[AA] - chance to not consume an arrow (ConsumeProjectile = 100)
-#define SE_FrontalBackstabChance		252	// implemented[AA] - chance to perform a full damage backstab from front.
-#define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
-#define SE_Blank						254 // implemented
-#define SE_ShieldDuration				255	// implemented, , @ShieldAbility, extends the duration of your /shield ability, base: seconds, limit: none, max: none
-#define SE_ShroudofStealth				256	// implemented
-#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold - official name is GivePetHold
-#define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
-#define SE_CombatStability				259 // implemented[AA] - damage mitigation
-#define SE_AddSingingMod				260 // implemented, @Song, set mod for specific instrument/singing skills that will be used if higher then item mods, base: mod%, limit: ItemType ID, max: none
-#define SE_SongModCap					261	// implemented, @Song, raise max song modifier cap, base: amt, limit: none, max: none, Note: No longer used on live
-#define SE_RaiseStatCap					262 // implemented
-#define SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
-#define SE_HastenedAASkill			    264 // implemented
-#define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
-#define SE_ExtraAttackChance			266 // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 2-handed primary weapon, base: chance, limit: amt attacks, max: none
-#define SE_AddPetCommand				267 // implemented - sets command base2 to base1
-#define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
-#define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
-#define SE_BardSongRange				270	// implemented, @Song, increase range of beneficial bard songs, base: mod%, limit: none, max: none , Note: example Sionachie's Crescendo
-#define SE_BaseMovementSpeed			271 // implemented[AA] - mods basemove speed, doesn't stack with other move mods
-#define SE_CastingLevel2				272 // implemented
-#define SE_CriticalDoTChance			273	// implemented
-#define SE_CriticalHealChance			274	// implemented
-#define SE_CriticalMend					275	// implemented[AA] - chance to critical monk mend
-#define SE_Ambidexterity				276 // implemented[AA] - increase chance to duel weild by adding bonus 'skill'
-#define SE_UnfailingDivinity			277	// implemented[AA] - ability grants your Death Pact-type spells a second chance to successfully heal their target, also can cause said spells to do a portion of their healing value even on a complete failure.
-#define	SE_FinishingBlow				278 // implemented[AA] - chance to do massive damage under 10% HP (base1 = chance, base2 = damage)
-#define SE_Flurry						279	// implemented
-#define SE_PetFlurry					280 // implemented[AA]
-#define SE_FeignedMinion				281	// implemented, ability allows you to instruct your pet to feign death via the '/pet feign' command, base: succeed chance, limit: none, max: none, Note: Only implemented as an AA.
-#define SE_ImprovedBindWound			282	// implemented[AA] - increase bind wound amount by percent.
-#define SE_DoubleSpecialAttack			283	// implemented[AA] - Chance to perform second special attack as monk
-//#define SE_LoHSetHeal					284	// not used
-#define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
-#define SE_FcDamageAmt					286	// implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
-#define SE_SpellDurationIncByTic		287 // implemented, @Fc, SPA: 287, SE_SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
-#define SE_SkillAttackProc				288	// implemented, @Procs, chance to cast a spell when using a skill, base: chance, limit: skill, max: spellid, note: if used in AA the spell id is set in aa_ranks spell field, chance is calculated as 100% = value 1000.
-#define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
-#define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
-#define SE_Purify						291 // implemented, @Dispel, remove up specified amount of detiremental spells, base: amt removed, limit: none, max: none, Note: excluding charm, fear, resurrection, and revival sickness
-#define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
-#define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
-#define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
-//#define SE_ReduceTimerSpecial			295	// not used
-#define SE_FcSpellVulnerability			296	// implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
-#define SE_FcDamageAmtIncoming			297 // implemetned, @Fc, On Target, damage taken flat amt, base: amt
-#define SE_ChangeHeight					298	// implemented
-#define SE_WakeTheDead					299	// implemented, @Pets, summon one temporary pet from nearby corpses that last a set duration, base: none, limit: none, max: duration (seconds). Note: max range of corpse is 250.
-#define SE_Doppelganger					300	// implemented
-#define SE_ArcheryDamageModifier		301	// implemented[AA] - increase archery damage by percent
-#define SE_FcDamagePctCrit				302	// implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct, Note: applied after critical hits has been calculated.
-#define SE_FcDamageAmtCrit				303	// implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
-#define SE_OffhandRiposteFail			304 // implemented as bonus - enemy cannot riposte offhand attacks
-#define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
-#define SE_ArmyOfTheDead				306 // implemented, @Pets, summon multiple temporary pets from nearby corpses that last a set duration, base: amount of corpses that a pet can summon from, limit: none, max: duration (seconds). Note: max range of corpse is 250.
-//#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
-#define SE_ZoneSuspendMinion			308 // implemented, @Pet, allow suspended pets to be resummoned upon zoning, base: 1, limit: none, max: none, Calc: Bool
-#define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
-#define SE_ReduceReuseTimer				310 // implemented, @Fc, On Caster, spell and disc reuse time mod by amount, base: milliseconds
-#define SE_LimitCombatSkills			311 // implemented, @Ff, Include or exclude combat skills or procs from being focused, base1: 0=Exclude if proc 1=Allow only if proc.
-#define SE_Sanctuary					312 // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
-#define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
-#define SE_Invisibility2				314 // implemented - fixed duration invisible
-#define SE_InvisVsUndead2				315 // implemented - fixed duration ITU
-#define SE_ImprovedInvisAnimals			316	// implemented
-#define SE_ItemHPRegenCapIncrease		317	// implemented[AA] - increases amount of health regen gained via items
-#define SE_ItemManaRegenCapIncrease		318 // implemented - increases amount of mana regen you can gain via items
-#define SE_CriticalHealOverTime			319 // implemented
-#define SE_ShieldBlock					320	// implemented - Block attacks with shield
-#define SE_ReduceHate					321 // implemented
-#define SE_GateToHomeCity				322 // implemented
-#define SE_DefensiveProc				323 // implemented
-#define SE_HPToMana						324 // implemented
-#define SE_NoBreakAESneak				325	// implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
-#define SE_SpellSlotIncrease			326 // *not implemented as bonus - increases your spell slot availability
-#define SE_MysticalAttune				327 // implemented - increases amount of buffs that a player can have
-#define SE_DelayDeath					328 // implemented - increases how far you can fall below 0 hp before you die
-#define SE_ManaAbsorbPercentDamage		329 // implemented
-#define SE_CriticalDamageMob			330	// implemented
-#define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
-#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp) TOOD: implement this.
-#define SE_CastOnRuneFadeEffect			333 // implemented
-#define SE_BardAEDot					334	// implemented
-#define SE_BlockNextSpellFocus			335	// implemented, @Fc, On Caster, chance to block next spell, base: chance
-//#define SE_IllusionaryTarget			336	// not used
-#define SE_PercentXPIncrease			337	// implemented
-#define SE_SummonAndResAllCorpses		338	// implemented
-#define SE_TriggerOnCast				339	// implemented, @Fc, On Caster, cast on spell use, base: chance pct limit: spellid
-#define SE_SpellTrigger					340	// implemented - chance to trigger spell [Share rolls with 469] All base2 spells share roll chance, only 1 cast.
-#define SE_ItemAttackCapIncrease		341	// implemented[AA] - increases the maximum amount of attack you can gain from items.
-#define SE_ImmuneFleeing				342	// implemented - stop mob from fleeing
-#define SE_InterruptCasting				343	// implemented - % chance to interrupt spells being cast every tic. Cacophony (8272)
-#define SE_ChannelChanceItems			344	// implemented[AA] - chance to not have ITEM effects interrupted when you take damage.
-#define SE_AssassinateLevel				345	// implemented as bonus - AA Assisination max level to kill
-#define SE_HeadShotLevel				346	// implemented[AA] - HeadShot max level to kill
-#define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
-#define SE_LimitManaMin					348	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
-#define SE_ShieldEquipDmgMod			349	// implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
-#define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
-#define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
-#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
-#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
-//#define SE_DeactivateAllTraps			354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
-//#define SE_LearnTrap					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
-//#define SE_ChangeTriggerType			356	// not used
-#define SE_FcMute						357	// implemented, @Fc, On Caster, prevents spell casting, base: chance pct
-#define SE_CurrentManaOnce				358	// implemented
-//#define SE_PassiveSenseTrap			359	// *not implemented - Invulnerability (Brell's Blessing)
-#define SE_ProcOnKillShot				360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
-#define SE_SpellOnDeath					361	// implemented - casts spell on death of buffed
-#define SE_PotionBeltSlots				362	// *not implemented[AA] 'Quick Draw' expands the potion belt by one additional available item slot per rank.
-#define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
-#define SE_TripleAttackChance			364	// implemented
-#define SE_ProcOnSpellKillShot			365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
-//#define SE_GroupShielding				366	// *not implemented[AA] This gives you /shieldgroup
-#define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
-//#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
-#define SE_CorruptionCounter			369	// implemented
-#define SE_ResistCorruption				370	// implemented
-#define SE_AttackSpeed4					371 // implemented - stackable slow effect 'Inhibit Melee'
-#define SE_ForageSkill					372	// implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
-#define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
-#define SE_ApplyEffect					374 // implemented
-#define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
-//#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1)
-#define SE_CastOnFadeEffectNPC			377	// implemented - Triggers only if fades after natural duration (On live these are usually players spells that effect an NPC).
-#define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
-#define SE_ShadowStepDirectional		379 // implemented - handled by client
-#define SE_Knockdown					380 // implemented - small knock back(handled by client)
-//#define SE_KnockTowardCaster			381	// *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
-#define SE_NegateSpellEffect			382 // implemented, @Debuff, negates specific spell effect benefits for the duration of the debuff and prevent non-duration spell effect from working, base: see NegateSpellEffecttype Enum, limit: SPA id, max: none
-#define SE_SympatheticProc				383 // implemented, @Fc, On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
-#define SE_Leap							384	// implemented - Leap effect, ie stomping leap
-#define SE_LimitSpellGroup				385	// implemented, @Ff, Spell group(s) that a spell focus can require or exclude, base1: spellgroup id, Include: Positive Exclude: Negative
-#define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
-#define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
-#define SE_SummonCorpseZone				388 // implemented - summons a corpse from any zone(nec AA)
-#define SE_FcTimerRefresh				389 // implemented, @Fc, On Caster, reset all recast timers, base: 1, Note: Applied from casted spells only
-#define SE_FcTimerLockout				390 // implemented, @Fc, On Caster, set a spell to be on recast timer, base: recast duration milliseconds, Note: Applied from casted spells only
-#define SE_LimitManaMax					391	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
-#define SE_FcHealAmt					392 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
-#define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
-#define SE_FcHealAmtIncoming			394 // implemented, @Fc, On Target, heal received mod flat amt, base: amt
-#define SE_FcHealPctCritIncoming		395 // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
-#define SE_FcHealAmtCrit				396 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
-#define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC
-#define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
-#define SE_FcTwincast					399 // implemented - cast 2 spells for every 1
-#define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
-#define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
-#define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_LimitSpellClass				403 // implemented, @Ff, 'Spell Category' using table field 'spell_class' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
-#define SE_LimitSpellSubclass			404 // implemented, @Ff, 'Spell Category Subclass' using table field 'spell_subclass' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
-#define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
-#define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
-#define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied)
-#define SE_LimitHPPercent				408 // implemented - limited to a certain percent of your hp(ie heals up to 50%)
-#define SE_LimitManaPercent				409 // implemented - limited to a certain percent of your mana
-#define SE_LimitEndPercent				410 // implemented - limited to a certain percent of your end
-#define SE_LimitClass					411 // implemented, @Ff, Class(es) that can use the spell focus, base1: class(es), Note: The class value in dbase is +1 in relation to item class value, set as you would item for multiple classes
-#define SE_LimitRace					412 // implemented, @Ff, Race that can use the spell focus, base1: race, Note: not used in any known live spells. Use only single race at a time.
-#define SE_FcBaseEffects				413 // implemented, @Fc, On Caster, base spell effectiveness mod pct, base: pct
-#define SE_LimitCastingSkill			414 // implemented, @Ff, Spell and singing skills(s) that a spell focus can require or exclude, base1: skill id, Include: Positive Exclude: Negative
-#define SE_FFItemClass					415 // implemented, @Ff, Limits focuses to be applied only from item click. base1: item ItemType (-1 to include for all ItemTypes,-1000 to exclude clicks from getting the focus, or exclude specific SubTypes or Slots if set), limit: item SubType (-1 for all SubTypes), max: item Slots (bitmask of valid slots, -1 ALL slots), Note: not used on live. See comments in Mob::CalcFocusEffect for more details.
-#define SE_ACv2							416 // implemented - New AC spell effect
-#define SE_ManaRegen_v2					417 // implemented - New mana regen effect
-#define SE_SkillDamageAmount2			418 // implemented - adds skill damage directly to certain attacks
-#define SE_AddMeleeProc					419 // implemented - Adds a proc
-#define SE_FcLimitUse					420 // implemented, @Fc, On Caster, numhits mod pct, base: pct, Note: not used in any known live spells
-#define SE_FcIncreaseNumHits			421 // implemented, @Fc, On Caster, numhits mod flat amt, base: amt
-#define SE_LimitUseMin					422 // implemented, @Ff Minium amount of numhits for a spell to be focused, base: numhit amt
-#define SE_LimitUseType					423 // implemented,	@Ff Focus will only affect if has this numhits type, base: numhit type
-#define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
-#define SE_Display						425 // *not implemented - Illusion: Flying Dragon(21626)
-#define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
-#define SE_SkillProcAttempt				427 // implemented - chance to proc when using a skill(ie taunt)
-#define SE_LimitToSkill					428 // implemented, @Procs, limits what combat skills will effect a skill proc, base: skill value, limit: none, max: none
-#define SE_SkillProcSuccess				429 // implemented - chance to proc when tje skill in use successfully fires.
-//#define SE_PostEffect					430 // *not implemented - Fear of the Dark(27641) - Alters vision
-//#define SE_PostEffectData				431 // *not implemented - Fear of the Dark(27641) - Alters vision
-//#define SE_ExpandMaxActiveTrophyBen	432 // not used
-#define SE_CriticalDotDecay				433 // implemented - increase critical dot chance, effect decays based on level of spell it effects. (12266)
-#define SE_CriticalHealDecay			434 // implemented - increase critical heal chance, effect decays based on level of spell it effects.
-#define SE_CriticalRegenDecay			435 // implemented - increase critical heal over time chance, effect decays based on level of spell it effects.
-//#define SE_BeneficialCountDownHold	436 // not used ( 23491 | ABTest Buff Hold)
-//#define SE_TeleporttoAnchor			437 // *not implemented - Teleport Guild Hall Anchor(33099)
-//#define SE_TranslocatetoAnchor		438 // *not implemented - Translocate Primary Anchor (27750)
-#define SE_Assassinate					439 // implemented[AA] - Assassinate damage
-#define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
-#define SE_DistanceRemoval				441 // implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
-#define SE_TriggerOnReqTarget			442 // implemented, @SpellTrigger, triggers a spell when Target Requirement conditions are met (see enum SpellRestriction for IDs), base: spellid, limit: SpellRestriction ID, max: none, Note: Usually cast on a target
-#define SE_TriggerOnReqCaster			443 // implemented, @SpellTrigger, triggers a spell when Caster Requirement conditions are met (see enum SpellRestriction for IDs), base: spellid, limit: SpellRestriction ID, max: none, Note: Usually self only
-#define SE_ImprovedTaunt				444 // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
-//#define SE_AddMercSlot				445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
-#define SE_AStacker						446 // implementet - bufff stacking blocker (26219 | Qirik's Watch)
-#define SE_BStacker						447 // implemented
-#define SE_CStacker						448 // implemented
-#define SE_DStacker						449 // implemented
-#define SE_MitigateDotDamage			450 // implemented, @Runes, mitigate incoming dot damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
-#define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
-#define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
-#define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken in a single hit
-#define SE_TriggerSpellThreshold		454 // implemented  Trigger effect on X amount of spell damage taken in a single hit
-#define SE_AddHatePct					455 // implemented  Modify total hate by %
-#define SE_AddHateOverTimePct			456 // implemented  Modify total hate by % over time.
-#define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
-#define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
-#define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
-#define SE_Ff_Override_NotFocusable		460 // implemented, @Fc, Allow spell to be focused event if flagged with 'not_focusable' in spell table, base: 1
-#define SE_ImprovedDamage2				461 // implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct
-#define SE_FcDamageAmt2					462 // implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
-#define SE_Shield_Target				463 // implemented, Base1 % damage shielded on target
-#define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
-#define SE_PC_Pet_AE_Rampage			465 // implemented - Base1 % chance to do AE rampage for base2 % of damage each melee round
-#define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
-#define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by a flat amount
-#define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
-#define SE_Chance_Best_in_Spell_Grp     469 // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
-#define SE_Trigger_Best_in_Spell_Grp	470 // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
-#define SE_Double_Melee_Round			471 // implemented, @OffBonus, percent chance to repeat primary weapon round with a percent damage modifier, base: pct chance repeat, limit: pct dmg mod, max: none
-#define SE_Buy_AA_Rank					472 // implemented,  @Special, Used in AA abilities that have Enable/Disable toggle. Spell on Disabled Rank has this effect in it, base: 1, limit: none, max: none, Note: This will not just buy an AA
-#define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
-#define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
-#define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
-#define SE_Weapon_Stance				476 // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Dual Wield is equipped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
-#define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
-#define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
-#define SE_Ff_Value_Min					479 // implemented, @Ff, Minimum base value of a spell that can be focused, base: spells to be focused base1 value
-#define SE_Ff_Value_Max					480 // implemented, @Ff, Max base value of a spell that can be focused, base: spells to be focused base1 value
-#define SE_Fc_Cast_Spell_On_Land		481 // implemented, @Fc, On Target, cast spell if hit by spell, base: chance pct, limit: spellid
-#define SE_Skill_Base_Damage_Mod		482 // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
-#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
-#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // implemented, @Fc, On Target, damage taken flat amt, base: amt
-#define SE_Ff_CasterClass				485 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells must be specified class(es). base1: class(es), Note: Set multiple classes same as would for items
-#define SE_Ff_Same_Caster				486 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells, base1: 0=Must be different caster 1=Must be same caster
-//#define SE_Extend_Tradeskill_Cap		487 //
-//#define SE_Defender_Melee_Force_Pct_PC	488 //
-#define SE_Worn_Endurance_Regen_Cap		489 // implemented, modify worn regen cap, base: amt, limit: none, max: none
-#define SE_Ff_ReuseTimeMin				490 // implemented, @Ff, Minimum recast time of a spell that can be focused, base: recast time
-#define SE_Ff_ReuseTimeMax				491 // implemented, @Ff, Max recast time of a spell that can be focused, base: recast time
-#define SE_Ff_Endurance_Min				492 // implemented, @Ff, Minimum endurance cost of a spell that can be focused, base: endurance cost
-#define SE_Ff_Endurance_Max				493 // implemented, @Ff, Max endurance cost of a spell that can be focused, base: endurance cost
-#define SE_Pet_Add_Atk					494 // implemented - Bonus on pet owner which gives their pet increased attack stat
-#define SE_Ff_DurationMax				495 // implemented, @Ff, Max duration of spell that can be focused, base: tics
-#define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - increase or decrease by percent critical damage (not stackable)
-//#define SE_Ff_FocusCastProcNoBypass	497 //
-#define SE_AddExtraAttackPct_1h_Primary	498 // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed primary weapon, base: chance, limit: amt attacks, max: none
-#define SE_AddExtraAttackPct_1h_Secondary	499 //implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed secondary weapon, base: chance, limit: amt attacks, max: none
-#define SE_Fc_CastTimeMod2				500 // implemented, @Fc, On Caster, cast time mod pct, base: pct, Note: Can reduce to instant cast
-#define SE_Fc_CastTimeAmt				501 // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds, Note: Can reduce to instant cast
-#define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
-#define SE_Melee_Damage_Position_Mod	503 // implemented, @OffBonus, modify melee damage by percent if done from Front or Behind opponent, base: pct, limit: 0=back 1=front, max: none
-#define SE_Melee_Damage_Position_Amt	504 // implemented, @OffBonus, modify melee damage by flat amount if done from Front or Behind opponent, base: amt, limit: 0=back 1=front, max: none
-#define SE_Damage_Taken_Position_Mod	505 // implemented, @DefBonus, modify melee damage by percent if dmg taken from Front or Behind, base: pct, limit: 0=back 1=front, max: none
-#define SE_Damage_Taken_Position_Amt	506 // implemented -@DefBonus, modify melee damage by flat amount if dmg taken from your Front or Behind, base: amt, limit: 0=back 1=front, max: none
-#define SE_Fc_Amplify_Mod				507 // implemented, @Fc, On Caster, damage-heal-dot mod pct, base: pct
-#define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
-#define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
-#define SE_Fc_ResistIncoming			510 // implemented, @Fc, On Target, resist modifier, base: amt
-#define SE_Ff_FocusTimerMin				511 // implemented, @Ff, sets a recast time until focus can be used again, base: 1, limit: time ms, Note:  ie. limit to 1 trigger every 1.5 seconds
-#define SE_Proc_Timer_Modifier 			512 // implemented - limits procs per amount of a time based on timer value, base: 1, limit: time ms, Note:, ie limit to 1 proc every 55 seconds)
-//#define SE_Mana_Max_Percent			513 //
-//#define SE_Endurance_Max_Percent		514 //
-#define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
-#define SE_AC_Mitigation_Max_Percent	516 // implemented - stackable defense modifier
-//#define SE_Attack_Offense_Max_Percent	517 //
-#define SE_Attack_Accuracy_Max_Percent	518 // implemented - stackable accurary modifer
-//#define SE_Luck_Amount				519 //
-//#define SE_Luck_Percent				520 //
-#define SE_Endurance_Absorb_Pct_Damage	521 // implemented - Reduces % of Damage using Endurance, drains endurance at a ratio (ie. 0.05 Endurance per Hit Point)
-#define SE_Instant_Mana_Pct				522 // implemented - Increase/Decrease mana by percent of max mana
-#define SE_Instant_Endurance_Pct		523 // implemented - Increase/Decrease mana by percent of max endurance
-#define SE_Duration_HP_Pct				524 // implemented - Decrease Current Hit Points by % of Total Hit Points per Tick, up to a MAX per tick
-#define SE_Duration_Mana_Pct			525 // implemented - Decrease Current Mana by % of Total Mana per Tick, up to a MAX per tick
-#define SE_Duration_Endurance_Pct		526 // implemented - Decrease Current Endurance by % of Total Hit Points per Tick, up to a MAX per tick
 
-
-// LAST
-
+namespace SpellEffect {
+	constexpr int CurrentHP                       = 0; // implemented - Heals and nukes, repeates every tic if in a buff
+	constexpr int ArmorClass                      = 1; // implemented
+	constexpr int ATK                             = 2; // implemented
+	constexpr int MovementSpeed                   = 3; // implemented - SoW, SoC, etc
+	constexpr int STR                             = 4; // implemented
+	constexpr int DEX                             = 5; // implemented
+	constexpr int AGI                             = 6; // implemented
+	constexpr int STA                             = 7; // implemented
+	constexpr int INT                             = 8; // implemented
+	constexpr int WIS                             = 9; // implemented
+	constexpr int CHA                             = 10; // implemented - used as a spacer
+	constexpr int AttackSpeed                     = 11; // implemented
+	constexpr int Invisibility                    = 12; // implemented - TO DO: Implemented Invisiblity Levels
+	constexpr int SeeInvis                        = 13; // implemented - TO DO: Implemented See Invisiblity Levels
+	constexpr int WaterBreathing                  = 14; // implemented
+	constexpr int CurrentMana                     = 15; // implemented
+	constexpr int NPCFrenzy                       = 16; // not used
+	constexpr int NPCAwareness                    = 17; // not used
+	constexpr int Lull                            = 18; // implemented - Reaction Radius
+	constexpr int AddFaction                      = 19; // implemented - Alliance line
+	constexpr int Blind                           = 20; // implemented
+	constexpr int Stun                            = 21; // implemented
+	constexpr int Charm                           = 22; // implemented
+	constexpr int Fear                            = 23; // implemented
+	constexpr int Stamina                         = 24; // implemented - Invigor and such
+	constexpr int BindAffinity                    = 25; // implemented - TO DO: Implement 2nd and 3rd Recall (value 2,3 ect). Sets additional bind points.
+	constexpr int Gate                            = 26; // implemented - Gate to bind point
+	constexpr int CancelMagic                     = 27; // implemented
+	constexpr int InvisVsUndead                   = 28; // implemented
+	constexpr int InvisVsAnimals                  = 29; // implemented
+	constexpr int ChangeFrenzyRad                 = 30; // implemented - Pacify
+	constexpr int Mez                             = 31; // implemented
+	constexpr int SummonItem                      = 32; // implemented
+	constexpr int SummonPet                       = 33; // implemented
+	constexpr int Confuse                         = 34; // not used (Nimbus of Temporal Rifting) ?
+	constexpr int DiseaseCounter                  = 35; // implemented
+	constexpr int PoisonCounter                   = 36; // implemented
+	constexpr int DetectHostile                   = 37; // not used
+	constexpr int DetectMagic                     = 38; // not used
+	constexpr int TwinCastBlocker                 = 39; // implemented - If present in spell, then the spell can not be twincast.
+	constexpr int DivineAura                      = 40; // implemented
+	constexpr int Destroy                         = 41; // implemented - Disintegrate, Banishment of Shadows
+	constexpr int ShadowStep                      = 42; // implemented
+	constexpr int Berserk                         = 43; // implemented (*not used in any known live spell) Makes client 'Berserk' giving crip blow chance.
+	constexpr int Lycanthropy                     = 44; // implemented
+	constexpr int Vampirism                       = 45; // implemented (*not used in any known live spell) Stackable lifetap from melee.
+	constexpr int ResistFire                      = 46; // implemented
+	constexpr int ResistCold                      = 47; // implemented
+	constexpr int ResistPoison                    = 48; // implemented
+	constexpr int ResistDisease                   = 49; // implemented
+	constexpr int ResistMagic                     = 50; // implemented
+	constexpr int DetectTraps                     = 51; // not used
+	constexpr int SenseDead                       = 52; // implemented
+	constexpr int SenseSummoned                   = 53; // implemented
+	constexpr int SenseAnimals                    = 54; // implemented
+	constexpr int Rune                            = 55; // implemented
+	constexpr int TrueNorth                       = 56; // implemented
+	constexpr int Levitate                        = 57; // implemented
+	constexpr int Illusion                        = 58; // implemented
+	constexpr int DamageShield                    = 59; // implemented
+	constexpr int TransferItem                    = 60; // not used
+	constexpr int Identify                        = 61; // implemented
+	constexpr int ItemID                          = 62; // not used
+	constexpr int WipeHateList                    = 63; // implemented, @Memblur, chance to wipe hate list of target, base: pct chance, limit: none, max: ? (not implemented), Note: caster level and CHA add to pct chance
+	constexpr int SpinTarget                      = 64; // implemented - TO DO: Not sure stun portion is working correctly
+	constexpr int InfraVision                     = 65; // implemented
+	constexpr int UltraVision                     = 66; // implemented
+	constexpr int EyeOfZomm                       = 67; // implemented
+	constexpr int ReclaimPet                      = 68; // implemented
+	constexpr int TotalHP                         = 69; // implemented
+	constexpr int CorpseBomb                      = 70; // not used
+	constexpr int NecPet                          = 71; // implemented
+	constexpr int PreserveCorpse                  = 72; // not used
+	constexpr int BindSight                       = 73; // implemented, @Vision, see through the eyes of your target, click off buff to end effect, base: 1, limit: none, max: none
+	constexpr int FeignDeath                      = 74; // implemented
+	constexpr int VoiceGraft                      = 75; // implemented
+	constexpr int Sentinel                        = 76; // *not implemented?(just seems to send a message)
+	constexpr int LocateCorpse                    = 77; // implemented
+	constexpr int AbsorbMagicAtt                  = 78; // implemented - Rune for spells
+	constexpr int CurrentHPOnce                   = 79; // implemented - Heals and nukes, non-repeating if in a buff
+	constexpr int EnchantLight                    = 80; // not used
+	constexpr int Revive                          = 81; // implemented - Resurrect
+	constexpr int SummonPC                        = 82; // implemented
+	constexpr int Teleport                        = 83; // implemented
+	constexpr int TossUp                          = 84; // implemented - Gravity Flux
+	constexpr int WeaponProc                      = 85; // implemented - i.e. Call of Fire
+	constexpr int Harmony                         = 86; // implemented
+	constexpr int MagnifyVision                   = 87; // implemented - Telescope
+	constexpr int Succor                          = 88; // implemented - Evacuate/Succor lines
+	constexpr int ModelSize                       = 89; // implemented - Shrink, Growth
+	constexpr int Cloak                           = 90; // *not implemented - Used in only 2 spells
+	constexpr int SummonCorpse                    = 91; // implemented
+	constexpr int InstantHate                     = 92; // implemented - add hate
+	constexpr int StopRain                        = 93; // implemented - Wake of Karana
+	constexpr int NegateIfCombat                  = 94; // implemented
+	constexpr int Sacrifice                       = 95; // implemented
+	constexpr int Silence                         = 96; // implemented
+	constexpr int ManaPool                        = 97; // implemented
+	constexpr int AttackSpeed2                    = 98; // implemented - Melody of Ervaj
+	constexpr int Root                            = 99; // implemented
+	constexpr int HealOverTime                    = 100; // implemented
+	constexpr int CompleteHeal                    = 101; // implemented
+	constexpr int Fearless                        = 102; // implemented - Valiant Companion
+	constexpr int CallPet                         = 103; // implemented - Summon Companion
+	constexpr int Translocate                     = 104; // implemented
+	constexpr int AntiGate                        = 105; // implemented - Translocational Anchor
+	constexpr int SummonBSTPet                    = 106; // implemented
+	constexpr int AlterNPCLevel                   = 107; // implemented - not used on live
+	constexpr int Familiar                        = 108; // implemented
+	constexpr int SummonItemIntoBag               = 109; // implemented - summons stuff into container
+	constexpr int IncreaseArchery                 = 110; // implemented
+	constexpr int ResistAll                       = 111; // implemented - Note: Physical Resists are not modified by this effect.
+	constexpr int CastingLevel                    = 112; // implemented
+	constexpr int SummonHorse                     = 113; // implemented
+	constexpr int ChangeAggro                     = 114; // implemented - Hate modifing buffs(ie horrifying visage)
+	constexpr int Hunger                          = 115; // implemented - Song of Sustenance
+	constexpr int CurseCounter                    = 116; // implemented
+	constexpr int MagicWeapon                     = 117; // implemented - makes weapon magical
+	constexpr int Amplification                   = 118; // implemented, @Song, stackable singing mod, base: mod%, limit: none, max: none, Note: Can focus itself.
+	constexpr int AttackSpeed3                    = 119; // implemented
+	constexpr int HealRate                        = 120; // implemented - reduces healing by a %
+	constexpr int ReverseDS                       = 121; // implemented
+	constexpr int ReduceSkill                     = 122; // implemented - base: skill id, limit: none, max: none, formula: % skill is reduced (positive)
+	constexpr int Screech                         = 123; // implemented Spell Blocker(If have buff with value +1 will block any effect with -1)
+	constexpr int ImprovedDamage                  = 124; // implemented
+	constexpr int ImprovedHeal                    = 125; // implemented
+	constexpr int SpellResistReduction            = 126; // implemented
+	constexpr int IncreaseSpellHaste              = 127; // implemented, @Fc, On Caster, cast time mod pct, base: pct
+	constexpr int IncreaseSpellDuration           = 128; // implemented, @Fc, On Caster, spell duration mod pct, base: pct
+	constexpr int IncreaseRange                   = 129; // implemented, @Fc, On Caster, spell range mod pct, base: pct
+	constexpr int SpellHateMod                    = 130; // implemented, @Fc, On Caster, spell hate mod pct, base: min pct, limit: max pct
+	constexpr int ReduceReagentCost               = 131; // implemented, @Fc, On Caster, do not consume reagent pct chance, base: min pct, limit: max pct
+	constexpr int ReduceManaCost                  = 132; // implemented, @Fc, On Caster, reduce mana cost by pct, base: min pct, limt: max pct
+	constexpr int FcStunTimeMod                   = 133; // implemented, @Fc, On Caster, spell range mod pct, base: pct
+	constexpr int LimitMaxLevel                   = 134; // implemented, @Ff, Max level of spell that can be focused, if base2 then decrease effectiviness by base2 % per level over max, base: lv, base2: effectiveness pct
+	constexpr int LimitResist                     = 135; // implemented, @Ff, Resist Type(s) that a spell focus can require or exclude, base1: resist type, Include: Positive Exclude: Negative
+	constexpr int LimitTarget                     = 136; // implemented, @Ff, Target Type(s) that a spell focus can require or exclude, base1: target type, Include: Positive Exclude: Negative
+	constexpr int LimitEffect                     = 137; // implemented, @Ff, Spell effect(s) that a spell focus can require or exclude, base1: SPA id, Include: Positive Exclude: Negative
+	constexpr int LimitSpellType                  = 138; // implemented, @Ff, Only allow focus spells that are Beneficial or Detrimental, base1: 0=det 1=bene
+	constexpr int LimitSpell                      = 139; // implemented, @Ff, Specific spell id(s) that a spell focus can require or exclude, base1: SPA id, Include: Positive Exclude: Negative
+	constexpr int LimitMinDur                     = 140; // implemented, @Ff, Mininum duration of spell that can be focused, base1: tics
+	constexpr int LimitInstant                    = 141; // implemented, @Ff, Include or exclude if an isntant cast spell can be focused, base1: 0=Exclude if Instant 1=Allow only if Instant
+	constexpr int LimitMinLevel                   = 142; // implemented, @Ff, Mininum level of spell that can be focused, base1: lv
+	constexpr int LimitCastTimeMin                = 143; // implemented, @Ff, Mininum cast time of spell that can be focused, base1: milliseconds
+	constexpr int LimitCastTimeMax                = 144; // implemented, @Ff, Max cast time of spell that can be focused, base1: milliseconds
+	constexpr int Teleport2                       = 145; // implemented - Banishment of the Pantheon
+	constexpr int ElectricityResist               = 146; // *not implemented TODO: Now used on live, xyz for teleport spells? also in temp pets?
+	constexpr int PercentalHeal                   = 147; // implemented
+	constexpr int StackingCommand_Block           = 148; // implemented?
+	constexpr int StackingCommand_Overwrite       = 149; // implemented?
+	constexpr int DeathSave                       = 150; // implemented
+	constexpr int SuspendPet                      = 151; // implemented, @Pet, allow caster to have an extra suspended pet, base: 0=no buffs/items 1=buffs+items, limit: none, max: none
+	constexpr int TemporaryPets                   = 152; // implemented
+	constexpr int BalanceHP                       = 153; // implemented
+	constexpr int DispelDetrimental               = 154; // implemented, @Dispel, removes only detrimental effects on a target, base: pct chance (950=95%), limit: none, max: none
+	constexpr int SpellCritDmgIncrease            = 155; // implemented - no known live spells use this currently
+	constexpr int IllusionCopy                    = 156; // implemented - Deception
+	constexpr int SpellDamageShield               = 157; // implemented, @DS, causes non-melee damage on caster of a spell, base: Amt DS (negative), limit: none, max: unknown (same as base but +)
+	constexpr int Reflect                         = 158; // implemented, @SpellMisc, reflect casted detrimental spell back at caster, base: chance pct, limit: resist modifier (positive value reduces resists), max: pct of base dmg mod (50=50pct of base)
+	constexpr int AllStats                        = 159; // implemented
+	constexpr int MakeDrunk                       = 160; // *not implemented - Effect works entirely client side (Should check against tolerance)
+	constexpr int MitigateSpellDamage             = 161; // implemented, @Runes, mitigate incoming spell damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
+	constexpr int MitigateMeleeDamage             = 162; // implemented - rune with max value
+	constexpr int NegateAttacks                   = 163; // implemented
+	constexpr int AppraiseLDonChest               = 164; // implemented
+	constexpr int DisarmLDoNTrap                  = 165; // implemented
+	constexpr int UnlockLDoNChest                 = 166; // implemented
+	constexpr int PetPowerIncrease                = 167; // implemented, @Fc, On Caster, pet power mod, base: value
+	constexpr int MeleeMitigation                 = 168; // implemented
+	constexpr int CriticalHitChance               = 169; // implemented
+	constexpr int SpellCritChance                 = 170; // implemented
+	constexpr int CrippBlowChance                 = 171; // implemented
+	constexpr int AvoidMeleeChance                = 172; // implemented
+	constexpr int RiposteChance                   = 173; // implemented
+	constexpr int DodgeChance                     = 174; // implemented
+	constexpr int ParryChance                     = 175; // implemented
+	constexpr int DualWieldChance                 = 176; // implemented
+	constexpr int DoubleAttackChance              = 177; // implemented
+	constexpr int MeleeLifetap                    = 178; // implemented
+	constexpr int AllInstrumentMod                = 179; // implemented, @Song, set mod for ALL instrument/singing skills that will be used if higher then item mods, base: mod%, limit: none, max: none
+	constexpr int ResistSpellChance               = 180; // implemented
+	constexpr int ResistFearChance                = 181; // implemented
+	constexpr int HundredHands                    = 182; // implemented
+	constexpr int MeleeSkillCheck                 = 183; // implemented
+	constexpr int HitChance                       = 184; // implemented
+	constexpr int DamageModifier                  = 185; // implemented
+	constexpr int MinDamageModifier               = 186; // implemented
+	constexpr int BalanceMana                     = 187; // implemented - Balances party mana
+	constexpr int IncreaseBlockChance             = 188; // implemented
+	constexpr int CurrentEndurance                = 189; // implemented
+	constexpr int EndurancePool                   = 190; // implemented
+	constexpr int Amnesia                         = 191; // implemented - Silence vs Melee Effect
+	constexpr int Hate                            = 192; // implemented - Instant and hate over time.
+	constexpr int SkillAttack                     = 193; // implemented,
+	constexpr int FadingMemories                  = 194; // implemented, @Aggro, Remove from hate lists and make invisible. Can set max level of NPCs that can be affected. base: success chance, limit: max level (ROF2), max: max level (modern client), Note: Support for max level requires Rule (Spells, UseFadingMemoriesMaxLevel) to be true. If used from limit field, then it set as the level, ie. max level of 75 would use limit value of 75. If set from max field, max level 75 would use max value of 1075, if you want to set it so it checks a level range above the spell target then for it to only work on mobs 5 levels or below you set max value to 5.
+	constexpr int StunResist                      = 195; // implemented
+	constexpr int StrikeThrough                   = 196; // implemented
+	constexpr int SkillDamageTaken                = 197; // implemented
+	constexpr int CurrentEnduranceOnce            = 198; // implemented
+	constexpr int Taunt                           = 199; // implemented - % chance to taunt the target
+	constexpr int ProcChance                      = 200; // implemented
+	constexpr int RangedProc                      = 201; // implemented
+	constexpr int IllusionOther                   = 202; // implemented - Project Illusion
+	constexpr int MassGroupBuff                   = 203; // implemented
+	constexpr int GroupFearImmunity               = 204; // implemented - (Does not use bonus)
+	constexpr int Rampage                         = 205; // implemented, @Combat Instant, Perform a primary slot combat rounds on all creatures within a 40 foot radius, base: number of attack rounds, limit: max entities hit per round, max: none, Note: AE range is 40 by default. Custom: Set field 'aoe_range' to override default. Adding additional attacks and hit count limit.
+	constexpr int AETaunt                         = 206; // implemented
+	constexpr int FleshToBone                     = 207; // implemented
+	constexpr int PurgePoison                     = 208; // not used
+	constexpr int DispelBeneficial                = 209; // implemented, @Dispel, removes only beneficial effects on a target, base: pct chance (950=95%), limit: none, max: none
+	constexpr int PetShield                       = 210; // implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: Time multiplier 1=12 seconds, 2=24 ect, limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live)
+	constexpr int AEMelee                         = 211; // implemented TO DO: Implement to allow NPC use (client only atm).
+	constexpr int FrenziedDevastation             = 212; // implemented - increase spell criticals + all DD spells cast 2x mana.
+	constexpr int PetMaxHP                        = 213; // implemented[AA] - increases the maximum hit points of your pet
+	constexpr int MaxHPChange                     = 214; // implemented
+	constexpr int PetAvoidance                    = 215; // implemented[AA] - increases pet ability to avoid melee damage
+	constexpr int Accuracy                        = 216; // implemented
+	constexpr int HeadShot                        = 217; // implemented - ability to head shot (base2 = damage)
+	constexpr int PetCriticalHit                  = 218; // implemented[AA] - gives pets a baseline critical hit chance
+	constexpr int SlayUndead                      = 219; // implemented - Allow extra damage against undead (base1 = rate, base2 = damage mod).
+	constexpr int SkillDamageAmount               = 220; // implemented
+	constexpr int Packrat                         = 221; // implemented as bonus
+	constexpr int BlockBehind                     = 222; // implemented - Chance to block from behind (with our without Shield)
+	constexpr int DoubleRiposte                   = 223; // implemented - Chance to double riposte [not used on live]
+	constexpr int GiveDoubleRiposte               = 224; // implemented[AA]
+	constexpr int GiveDoubleAttack                = 225; // implemented[AA] - Allow any class to double attack with set chance.
+	constexpr int TwoHandBash                     = 226; // *not implemented as bonus
+	constexpr int ReduceSkillTimer                = 227; // implemented
+	constexpr int ReduceFallDamage                = 228; // implented - reduce the damage that you take from falling
+	constexpr int PersistantCasting               = 229; // implemented
+	constexpr int ExtendedShielding               = 230; // implemented, @ShieldAbility, extends the range of your /shield ability by an amount of distance, base: distance units, limit: none, max: none
+	constexpr int StunBashChance                  = 231; // implemented - increase chance to stun from bash.
+	constexpr int DivineSave                      = 232; // implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
+	constexpr int Metabolism                      = 233; // implemented - Modifies food/drink consumption rates.
+	constexpr int ReduceApplyPoisonTime           = 234; // not implemented as bonus - reduces the time to apply poison
+	constexpr int ChannelChanceSpells             = 235; // implemented[AA] - chance to channel from SPELLS *No longer used on live.
+	constexpr int FreePet                         = 236; // not used
+	constexpr int GivePetGroupTarget              = 237; // implemented[AA] - (Pet Affinity)
+	constexpr int IllusionPersistence             = 238; // implemented - lends persistence to your illusionary disguises, causing them to last until you die or the illusion is forcibly removed.
+	constexpr int FeignedCastOnChance             = 239; // implemented - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
+	constexpr int StringUnbreakable               = 240; // not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
+	constexpr int ImprovedReclaimEnergy           = 241; // implemented - increase the amount of mana returned to you when reclaiming your pet.
+	constexpr int IncreaseChanceMemwipe           = 242; // implemented - @Memblur, increases the chance to wipe hate with memory blurr, base: chance pct, limit: none, max: none, Note: Mods final blur chance after other bonuses added.
+	constexpr int CharmBreakChance                = 243; // implemented - Total Domination
+	constexpr int RootBreakChance                 = 244; // implemented[AA] reduce the chance that your root will break.
+	constexpr int TrapCircumvention               = 245; // implemented, @Traps, decreases the chance that you will set off a trap when opening a chest or other similar container by percentage, base: chance modifer, limit: none, max: none
+	constexpr int SetBreathLevel                  = 246; // *not implemented as bonus
+	constexpr int RaiseSkillCap                   = 247; // implemented[AA] - adds skill over the skill cap.
+	constexpr int SecondaryForte                  = 248; // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
+	constexpr int SecondaryDmgInc                 = 249; // implemented[AA] Allows off hand weapon to recieve a damage bonus (Sinister Strikes)
+	constexpr int SpellProcChance                 = 250; // implemented - Increase chance to proc from melee proc spells (ie Spirit of Panther)
+	constexpr int ConsumeProjectile               = 251; // implemented[AA] - chance to not consume an arrow (ConsumeProjectile = 100)
+	constexpr int FrontalBackstabChance           = 252; // implemented[AA] - chance to perform a full damage backstab from front.
+	constexpr int FrontalBackstabMinDmg           = 253; // implemented[AA] - allow a frontal backstab for mininum damage.
+	constexpr int Blank                           = 254; // implemented
+	constexpr int ShieldDuration                  = 255; // implemented, , @ShieldAbility, extends the duration of your /shield ability, base: seconds, limit: none, max: none
+	constexpr int ShroudofStealth                 = 256; // implemented
+	constexpr int PetDiscipline                   = 257; // not implemented as bonus - /pet hold - official name is GivePetHold
+	constexpr int TripleBackstab                  = 258; // implemented[AA] - chance to perform a triple backstab
+	constexpr int CombatStability                 = 259; // implemented[AA] - damage mitigation
+	constexpr int AddSingingMod                   = 260; // implemented, @Song, set mod for specific instrument/singing skills that will be used if higher then item mods, base: mod%, limit: ItemType ID, max: none
+	constexpr int SongModCap                      = 261; // implemented, @Song, raise max song modifier cap, base: amt, limit: none, max: none, Note: No longer used on live
+	constexpr int RaiseStatCap                    = 262; // implemented
+	constexpr int TradeSkillMastery               = 263; // implemented - lets you raise more than one tradeskill above master.
+	constexpr int HastenedAASkill                 = 264; // implemented
+	constexpr int MasteryofPast                   = 265; // implemented[AA] - Spells less than effect values level can not be fizzled
+	constexpr int ExtraAttackChance               = 266; // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 2-handed primary weapon, base: chance, limit: amt attacks, max: none
+	constexpr int AddPetCommand                   = 267; // implemented - sets command base2 to base1
+	constexpr int ReduceTradeskillFail            = 268; // implemented - reduces chance to fail with given tradeskill by a percent chance
+	constexpr int MaxBindWound                    = 269; // implemented[AA] - Increase max HP you can bind wound.
+	constexpr int BardSongRange                   = 270; // implemented, @Song, increase range of beneficial bard songs, base: mod%, limit: none, max: none , Note: example Sionachie's Crescendo
+	constexpr int BaseMovementSpeed               = 271; // implemented[AA] - mods basemove speed, doesn't stack with other move mods
+	constexpr int CastingLevel2                   = 272; // implemented
+	constexpr int CriticalDoTChance               = 273; // implemented
+	constexpr int CriticalHealChance              = 274; // implemented
+	constexpr int CriticalMend                    = 275; // implemented[AA] - chance to critical monk mend
+	constexpr int Ambidexterity                   = 276; // implemented[AA] - increase chance to duel weild by adding bonus 'skill'
+	constexpr int UnfailingDivinity               = 277; // implemented[AA] - ability grants your Death Pact-type spells a second chance to successfully heal their target, also can cause said spells to do a portion of their healing value even on a complete failure.
+	constexpr int FinishingBlow                   = 278; // implemented[AA] - chance to do massive damage under 10% HP (base1 = chance, base2 = damage)
+	constexpr int Flurry                          = 279; // implemented
+	constexpr int PetFlurry                       = 280; // implemented[AA]
+	constexpr int FeignedMinion                   = 281; // implemented, ability allows you to instruct your pet to feign death via the '/pet feign' command, base: succeed chance, limit: none, max: none, Note: Only implemented as an AA.
+	constexpr int ImprovedBindWound               = 282; // implemented[AA] - increase bind wound amount by percent.
+	constexpr int DoubleSpecialAttack             = 283; // implemented[AA] - Chance to perform second special attack as monk
+	constexpr int LoHSetHeal                      = 284; // not used
+	constexpr int NimbleEvasion                   = 285; // *not implemented - base1 = 100 for max
+	constexpr int FcDamageAmt                     = 286; // implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
+	constexpr int SpellDurationIncByTic           = 287; // implemented, @Fc, SPA: 287, SpellEffect::SpellDurationIncByTic, = On Caster, spell buff duration mod, base: tics
+	constexpr int SkillAttackProc                 = 288; // implemented, @Procs, chance to cast a spell when using a skill, base: chance, limit: skill, max: spellid, note: if used in AA the spell id is set in aa_ranks spell field, chance is calculated as 100% = value 1000.
+	constexpr int CastOnFadeEffect                = 289; // implemented - Triggers only if fades after natural duration.
+	constexpr int IncreaseRunSpeedCap             = 290; // implemented[AA] - increases run speed over the hard cap
+	constexpr int Purify                          = 291; // implemented, @Dispel, remove up specified amount of detiremental spells, base: amt removed, limit: none, max: none, Note: excluding charm, fear, resurrection, and revival sickness
+	constexpr int StrikeThrough2                  = 292; // implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
+	constexpr int FrontalStunResist               = 293; // implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
+	constexpr int CriticalSpellChance             = 294; // implemented - increase chance to critical hit and critical damage modifier.
+	constexpr int ReduceTimerSpecial              = 295; // not used
+	constexpr int FcSpellVulnerability            = 296; // implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
+	constexpr int FcDamageAmtIncoming             = 297; // implemetned, @Fc, On Target, damage taken flat amt, base: amt
+	constexpr int ChangeHeight                    = 298; // implemented
+	constexpr int WakeTheDead                     = 299; // implemented, @Pets, summon one temporary pet from nearby corpses that last a set duration, base: none, limit: none, max: duration (seconds). Note: max range of corpse is 250.
+	constexpr int Doppelganger                    = 300; // implemented
+	constexpr int ArcheryDamageModifier           = 301; // implemented[AA] - increase archery damage by percent
+	constexpr int FcDamagePctCrit                 = 302; // implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct, Note: applied after critical hits has been calculated.
+	constexpr int FcDamageAmtCrit                 = 303; // implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
+	constexpr int OffhandRiposteFail              = 304; // implemented as bonus - enemy cannot riposte offhand attacks
+	constexpr int MitigateDamageShield            = 305; // implemented - off hand attacks only (Shielding Resistance)
+	constexpr int ArmyOfTheDead                   = 306; // implemented, @Pets, summon multiple temporary pets from nearby corpses that last a set duration, base: amount of corpses that a pet can summon from, limit: none, max: duration (seconds). Note: max range of corpse is 250.
+	constexpr int Appraisal                       = 307; // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
+	constexpr int ZoneSuspendMinion               = 308; // implemented, @Pet, allow suspended pets to be resummoned upon zoning, base: 1, limit: none, max: none, Calc: Bool
+	constexpr int GateCastersBindpoint            = 309; // implemented - Gate to casters bind point
+	constexpr int ReduceReuseTimer                = 310; // implemented, @Fc, On Caster, spell and disc reuse time mod by amount, base: milliseconds
+	constexpr int LimitCombatSkills               = 311; // implemented, @Ff, Include or exclude combat skills or procs from being focused, base1: 0=Exclude if proc 1=Allow only if proc.
+	constexpr int Sanctuary                       = 312; // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
+	constexpr int ForageAdditionalItems           = 313; // implemented[AA] - chance to forage additional items
+	constexpr int Invisibility2                   = 314; // implemented - fixed duration invisible
+	constexpr int InvisVsUndead2                  = 315; // implemented - fixed duration ITU
+	constexpr int ImprovedInvisAnimals            = 316; // implemented
+	constexpr int ItemHPRegenCapIncrease          = 317; // implemented[AA] - increases amount of health regen gained via items
+	constexpr int ItemManaRegenCapIncrease        = 318; // implemented - increases amount of mana regen you can gain via items
+	constexpr int CriticalHealOverTime            = 319; // implemented
+	constexpr int ShieldBlock                     = 320; // implemented - Block attacks with shield
+	constexpr int ReduceHate                      = 321; // implemented
+	constexpr int GateToHomeCity                  = 322; // implemented
+	constexpr int DefensiveProc                   = 323; // implemented
+	constexpr int HPToMana                        = 324; // implemented
+	constexpr int NoBreakAESneak                  = 325; // implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
+	constexpr int SpellSlotIncrease               = 326; // *not implemented as bonus - increases your spell slot availability
+	constexpr int MysticalAttune                  = 327; // implemented - increases amount of buffs that a player can have
+	constexpr int DelayDeath                      = 328; // implemented - increases how far you can fall below 0 hp before you die
+	constexpr int ManaAbsorbPercentDamage         = 329; // implemented
+	constexpr int CriticalDamageMob               = 330; // implemented
+	constexpr int Salvage                         = 331; // implemented - chance to recover items that would be destroyed in failed tradeskill combine
+	constexpr int SummonToCorpse                  = 332; // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp) TOOD: implement this.
+	constexpr int CastOnRuneFadeEffect            = 333; // implemented
+	constexpr int BardAEDot                       = 334; // implemented
+	constexpr int BlockNextSpellFocus             = 335; // implemented, @Fc, On Caster, chance to block next spell, base: chance
+	constexpr int IllusionaryTarget               = 336; // not used
+	constexpr int PercentXPIncrease               = 337; // implemented
+	constexpr int SummonAndResAllCorpses          = 338; // implemented
+	constexpr int TriggerOnCast                   = 339; // implemented, @Fc, On Caster, cast on spell use, base: chance pct limit: spellid
+	constexpr int SpellTrigger                    = 340; // implemented - chance to trigger spell [Share rolls with 469] All base2 spells share roll chance, only 1 cast.
+	constexpr int ItemAttackCapIncrease           = 341; // implemented[AA] - increases the maximum amount of attack you can gain from items.
+	constexpr int ImmuneFleeing                   = 342; // implemented - stop mob from fleeing
+	constexpr int InterruptCasting                = 343; // implemented - % chance to interrupt spells being cast every tic. Cacophony (8272)
+	constexpr int ChannelChanceItems              = 344; // implemented[AA] - chance to not have ITEM effects interrupted when you take damage.
+	constexpr int AssassinateLevel                = 345; // implemented as bonus - AA Assisination max level to kill
+	constexpr int HeadShotLevel                   = 346; // implemented[AA] - HeadShot max level to kill
+	constexpr int DoubleRangedAttack              = 347; // implemented - chance at an additional archery attack (consumes arrow)
+	constexpr int LimitManaMin                    = 348; // implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
+	constexpr int ShieldEquipDmgMod               = 349; // implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
+	constexpr int ManaBurn                        = 350; // implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
+	constexpr int PersistentEffect                = 351; // *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
+	constexpr int IncreaseTrapCount               = 352; // *not implemented - looks to be some type of invulnerability? Test ITC (8755)
+	constexpr int AdditionalAura                  = 353; // *not implemented - allows use of more than 1 aura, aa effect
+	constexpr int DeactivateAllTraps              = 354; // *not implemented - looks to be some type of invulnerability? Test DAT (8757)
+	constexpr int LearnTrap                       = 355; // *not implemented - looks to be some type of invulnerability? Test LT (8758)
+	constexpr int ChangeTriggerType               = 356; // not used
+	constexpr int FcMute                          = 357; // implemented, @Fc, On Caster, prevents spell casting, base: chance pct
+	constexpr int CurrentManaOnce                 = 358; // implemented
+	constexpr int PassiveSenseTrap                = 359; // *not implemented - Invulnerability (Brell's Blessing)
+	constexpr int ProcOnKillShot                  = 360; // implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
+	constexpr int SpellOnDeath                    = 361; // implemented - casts spell on death of buffed
+	constexpr int PotionBeltSlots                 = 362; // *not implemented[AA] 'Quick Draw' expands the potion belt by one additional available item slot per rank.
+	constexpr int BandolierSlots                  = 363; // *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
+	constexpr int TripleAttackChance              = 364; // implemented
+	constexpr int ProcOnSpellKillShot             = 365; // implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
+	constexpr int GroupShielding                  = 366; // *not implemented[AA] This gives you /shieldgroup
+	constexpr int SetBodyType                     = 367; // implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
+	constexpr int FactionMod                      = 368; // *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
+	constexpr int CorruptionCounter               = 369; // implemented
+	constexpr int ResistCorruption                = 370; // implemented
+	constexpr int AttackSpeed4                    = 371; // implemented - stackable slow effect 'Inhibit Melee'
+	constexpr int ForageSkill                     = 372; // implemented[AA] Will increase the skill cap for those that have the Forage skill and grant the skill and raise the cap to those that do not.
+	constexpr int CastOnFadeEffectAlways          = 373; // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
+	constexpr int ApplyEffect                     = 374; // implemented
+	constexpr int DotCritDmgIncrease              = 375; // implemented - Increase damage of DoT critical amount
+	constexpr int Fling                           = 376; // *not implemented - used in 2 test spells (12945 | Movement Test Spell 1)
+	constexpr int CastOnFadeEffectNPC             = 377; // implemented - Triggers only if fades after natural duration (On live these are usually players spells that effect an NPC).
+	constexpr int SpellEffectResistChance         = 378; // implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
+	constexpr int ShadowStepDirectional           = 379; // implemented - handled by client
+	constexpr int Knockdown                       = 380; // implemented - small knock back(handled by client)
+	constexpr int KnockTowardCaster               = 381; // *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
+	constexpr int NegateSpellEffect               = 382; // implemented, @Debuff, negates specific spell effect benefits for the duration of the debuff and prevent non-duration spell effect from working, base: see NegateSpellEffecttype Enum, limit: SPA id, max: none
+	constexpr int SympatheticProc                 = 383; // implemented, @Fc, On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
+	constexpr int Leap                            = 384; // implemented - Leap effect, ie stomping leap
+	constexpr int LimitSpellGroup                 = 385; // implemented, @Ff, Spell group(s) that a spell focus can require or exclude, base1: spellgroup id, Include: Positive Exclude: Negative
+	constexpr int CastOnCurer                     = 386; // implemented - Casts a spell on the person curing
+	constexpr int CastOnCure                      = 387; // implemented - Casts a spell on the cured person
+	constexpr int SummonCorpseZone                = 388; // implemented - summons a corpse from any zone(nec AA)
+	constexpr int FcTimerRefresh                  = 389; // implemented, @Fc, On Caster, reset all recast timers, base: 1, Note: Applied from casted spells only
+	constexpr int FcTimerLockout                  = 390; // implemented, @Fc, On Caster, set a spell to be on recast timer, base: recast duration milliseconds, Note: Applied from casted spells only
+	constexpr int LimitManaMax                    = 391; // implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
+	constexpr int FcHealAmt                       = 392; // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
+	constexpr int FcHealPctIncoming               = 393; // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
+	constexpr int FcHealAmtIncoming               = 394; // implemented, @Fc, On Target, heal received mod flat amt, base: amt
+	constexpr int FcHealPctCritIncoming           = 395; // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
+	constexpr int FcHealAmtCrit                   = 396; // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
+	constexpr int PetMeleeMitigation              = 397; // implemented[AA] - additional mitigation to your pets. Adds AC
+	constexpr int SwarmPetDuration                = 398; // implemented - Affects the duration of swarm pets
+	constexpr int FcTwincast                      = 399; // implemented - cast 2 spells for every 1
+	constexpr int HealGroupFromMana               = 400; // implemented - Drains mana and heals for each point of mana drained
+	constexpr int ManaDrainWithDmg                = 401; // implemented - Deals damage based on the amount of mana drained
+	constexpr int EndDrainWithDmg                 = 402; // implemented - Deals damage for the amount of endurance drained
+	constexpr int LimitSpellClass                 = 403; // implemented, @Ff, 'Spell Category' using table field 'spell_class' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
+	constexpr int LimitSpellSubclass              = 404; // implemented, @Ff, 'Spell Category Subclass' using table field 'spell_subclass' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
+	constexpr int TwoHandBluntBlock               = 405; // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
+	constexpr int CastonNumHitFade                = 406; // implemented - casts a spell when a buff fades due to its numhits being depleted
+	constexpr int CastonFocusEffect               = 407; // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied)
+	constexpr int LimitHPPercent                  = 408; // implemented - limited to a certain percent of your hp(ie heals up to 50%)
+	constexpr int LimitManaPercent                = 409; // implemented - limited to a certain percent of your mana
+	constexpr int LimitEndPercent                 = 410; // implemented - limited to a certain percent of your end
+	constexpr int LimitClass                      = 411; // implemented, @Ff, Class(es) that can use the spell focus, base1: class(es), Note: The class value in dbase is +1 in relation to item class value, set as you would item for multiple classes
+	constexpr int LimitRace                       = 412; // implemented, @Ff, Race that can use the spell focus, base1: race, Note: not used in any known live spells. Use only single race at a time.
+	constexpr int FcBaseEffects                   = 413; // implemented, @Fc, On Caster, base spell effectiveness mod pct, base: pct
+	constexpr int LimitCastingSkill               = 414; // implemented, @Ff, Spell and singing skills(s) that a spell focus can require or exclude, base1: skill id, Include: Positive Exclude: Negative
+	constexpr int FFItemClass                     = 415; // implemented, @Ff, Limits focuses to be applied only from item click. base1: item ItemType (-1 to include for all ItemTypes,-1000 to exclude clicks from getting the focus, or exclude specific SubTypes or Slots if set), limit: item SubType (-1 for all SubTypes), max: item Slots (bitmask of valid slots, -1 ALL slots), Note: not used on live. See comments in Mob::CalcFocusEffect for more details.
+	constexpr int ACv2                            = 416; // implemented - New AC spell effect
+	constexpr int ManaRegen_v2                    = 417; // implemented - New mana regen effect
+	constexpr int SkillDamageAmount2              = 418; // implemented - adds skill damage directly to certain attacks
+	constexpr int AddMeleeProc                    = 419; // implemented - Adds a proc
+	constexpr int FcLimitUse                      = 420; // implemented, @Fc, On Caster, numhits mod pct, base: pct, Note: not used in any known live spells
+	constexpr int FcIncreaseNumHits               = 421; // implemented, @Fc, On Caster, numhits mod flat amt, base: amt
+	constexpr int LimitUseMin                     = 422; // implemented, @Ff Minium amount of numhits for a spell to be focused, base: numhit amt
+	constexpr int LimitUseType                    = 423; // implemented, = @Ff Focus will only affect if has this numhits type, base: numhit type
+	constexpr int GravityEffect                   = 424; // implemented - Pulls/pushes you toward/away the mob at a set pace
+	constexpr int Display                         = 425; // *not implemented - Illusion: Flying Dragon(21626)
+	constexpr int IncreaseExtTargetWindow         = 426; // *not implmented[AA] - increases the capacity of your extended target window
+	constexpr int SkillProcAttempt                = 427; // implemented - chance to proc when using a skill(ie taunt)
+	constexpr int LimitToSkill                    = 428; // implemented, @Procs, limits what combat skills will effect a skill proc, base: skill value, limit: none, max: none
+	constexpr int SkillProcSuccess                = 429; // implemented - chance to proc when tje skill in use successfully fires.
+	constexpr int PostEffect                      = 430; // *not implemented - Fear of the Dark(27641) - Alters vision
+	constexpr int PostEffectData                  = 431; // *not implemented - Fear of the Dark(27641) - Alters vision
+	constexpr int ExpandMaxActiveTrophyBen        = 432; // not used
+	constexpr int CriticalDotDecay                = 433; // implemented - increase critical dot chance, effect decays based on level of spell it effects. (12266)
+	constexpr int CriticalHealDecay               = 434; // implemented - increase critical heal chance, effect decays based on level of spell it effects.
+	constexpr int CriticalRegenDecay              = 435; // implemented - increase critical heal over time chance, effect decays based on level of spell it effects.
+	constexpr int BeneficialCountDownHold         = 436; // not used ( 23491 | ABTest Buff Hold)
+	constexpr int TeleporttoAnchor                = 437; // *not implemented - Teleport Guild Hall Anchor(33099)
+	constexpr int TranslocatetoAnchor             = 438; // *not implemented - Translocate Primary Anchor (27750)
+	constexpr int Assassinate                     = 439; // implemented[AA] - Assassinate damage
+	constexpr int FinishingBlowLvl                = 440; // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
+	constexpr int DistanceRemoval                 = 441; // implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
+	constexpr int TriggerOnReqTarget              = 442; // implemented, @SpellTrigger, triggers a spell when Target Requirement conditions are met (see enum SpellRestriction for IDs), base: spellid, limit: SpellRestriction ID, max: none, Note: Usually cast on a target
+	constexpr int TriggerOnReqCaster              = 443; // implemented, @SpellTrigger, triggers a spell when Caster Requirement conditions are met (see enum SpellRestriction for IDs), base: spellid, limit: SpellRestriction ID, max: none, Note: Usually self only
+	constexpr int ImprovedTaunt                   = 444; // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
+	constexpr int AddMercSlot                     = 445; // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
+	constexpr int AStacker                        = 446; // implementet - bufff stacking blocker (26219 | Qirik's Watch)
+	constexpr int BStacker                        = 447; // implemented
+	constexpr int CStacker                        = 448; // implemented
+	constexpr int DStacker                        = 449; // implemented
+	constexpr int MitigateDotDamage               = 450; // implemented, @Runes, mitigate incoming dot damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
+	constexpr int MeleeThresholdGuard             = 451; // implemented Partial Melee Rune that only is lowered if melee hits are over X amount of damage
+	constexpr int SpellThresholdGuard             = 452; // implemented Partial Spell Rune that only is lowered if spell hits are over X amount of damage
+	constexpr int TriggerMeleeThreshold           = 453; // implemented Trigger effect on X amount of melee damage taken in a single hit
+	constexpr int TriggerSpellThreshold           = 454; // implemented Trigger effect on X amount of spell damage taken in a single hit
+	constexpr int AddHatePct                      = 455; // implemented Modify total hate by %
+	constexpr int AddHateOverTimePct              = 456; // implemented Modify total hate by % over time.
+	constexpr int ResourceTap                     = 457; // implemented Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
+	constexpr int FactionModPct                   = 458; // implemented Modifies faction gains and losses by percent.
+	constexpr int DamageModifier2                 = 459; // implemented - Modifies melee damage by skill type
+	constexpr int Ff_Override_NotFocusable        = 460; // implemented, @Fc, Allow spell to be focused event if flagged with 'not_focusable' in spell table, base: 1
+	constexpr int ImprovedDamage2                 = 461; // implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct
+	constexpr int FcDamageAmt2                    = 462; // implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
+	constexpr int Shield_Target                   = 463; // implemented, Base1 % damage shielded on target
+	constexpr int PC_Pet_Rampage                  = 464; // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
+	constexpr int PC_Pet_AE_Rampage               = 465; // implemented - Base1 % chance to do AE rampage for base2 % of damage each melee round
+	constexpr int PC_Pet_Flurry_Chance            = 466; // implemented - Base1 % chance to do flurry from double attack hit.
+	constexpr int DS_Mitigation_Amount            = 467; // implemented - Modify incoming damage shield damage by a flat amount
+	constexpr int DS_Mitigation_Percentage        = 468; // implemented - Modify incoming damage shield damage by percentage
+	constexpr int Chance_Best_in_Spell_Grp        = 469; // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
+	constexpr int Trigger_Best_in_Spell_Grp       = 470; // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
+	constexpr int Double_Melee_Round              = 471; // implemented, @OffBonus, percent chance to repeat primary weapon round with a percent damage modifier, base: pct chance repeat, limit: pct dmg mod, max: none
+	constexpr int Buy_AA_Rank                     = 472; // implemented, @Special, Used in AA abilities that have Enable/Disable toggle. Spell on Disabled Rank has this effect in it, base: 1, limit: none, max: none, Note: This will not just buy an AA
+	constexpr int Double_Backstab_Front           = 473; // implemented - Chance to double backstab from front
+	constexpr int Pet_Crit_Melee_Damage_Pct_Owner = 474; // implemenetd - Critical damage mod applied to pets from owner
+	constexpr int Trigger_Spell_Non_Item          = 475; // implemented - Trigger spell on cast only if not from item click.
+	constexpr int Weapon_Stance                   = 476; // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Dual Wield is equipped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
+	constexpr int Hatelist_To_Top_Index           = 477; // Implemented - Chance to be set to top of rampage list
+	constexpr int Hatelist_To_Tail_Index          = 478; // Implemented - Chance to be set to bottom of rampage list
+	constexpr int Ff_Value_Min                    = 479; // implemented, @Ff, Minimum base value of a spell that can be focused, base: spells to be focused base1 value
+	constexpr int Ff_Value_Max                    = 480; // implemented, @Ff, Max base value of a spell that can be focused, base: spells to be focused base1 value
+	constexpr int Fc_Cast_Spell_On_Land           = 481; // implemented, @Fc, On Target, cast spell if hit by spell, base: chance pct, limit: spellid
+	constexpr int Skill_Base_Damage_Mod           = 482; // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
+	constexpr int Fc_Spell_Damage_Pct_IncomingPC  = 483; // implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
+	constexpr int Fc_Spell_Damage_Amt_IncomingPC  = 484; // implemented, @Fc, On Target, damage taken flat amt, base: amt
+	constexpr int Ff_CasterClass                  = 485; // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells must be specified class(es). base1: class(es), Note: Set multiple classes same as would for items
+	constexpr int Ff_Same_Caster                  = 486; // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells, base1: 0=Must be different caster 1=Must be same caster
+	constexpr int Extend_Tradeskill_Cap           = 487; //
+	constexpr int Defender_Melee_Force_Pct_PC     = 488; //
+	constexpr int Worn_Endurance_Regen_Cap        = 489; // implemented, modify worn regen cap, base: amt, limit: none, max: none
+	constexpr int Ff_ReuseTimeMin                 = 490; // implemented, @Ff, Minimum recast time of a spell that can be focused, base: recast time
+	constexpr int Ff_ReuseTimeMax                 = 491; // implemented, @Ff, Max recast time of a spell that can be focused, base: recast time
+	constexpr int Ff_Endurance_Min                = 492; // implemented, @Ff, Minimum endurance cost of a spell that can be focused, base: endurance cost
+	constexpr int Ff_Endurance_Max                = 493; // implemented, @Ff, Max endurance cost of a spell that can be focused, base: endurance cost
+	constexpr int Pet_Add_Atk                     = 494; // implemented - Bonus on pet owner which gives their pet increased attack stat
+	constexpr int Ff_DurationMax                  = 495; // implemented, @Ff, Max duration of spell that can be focused, base: tics
+	constexpr int Critical_Melee_Damage_Mod_Max   = 496; // implemented - increase or decrease by percent critical damage (not stackable)
+	constexpr int Ff_FocusCastProcNoBypass        = 497; //
+	constexpr int AddExtraAttackPct_1h_Primary    = 498; // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed primary weapon, base: chance, limit: amt attacks, max: none
+	constexpr int AddExtraAttackPct_1h_Secondary  = 499; //implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed secondary weapon, base: chance, limit: amt attacks, max: none
+	constexpr int Fc_CastTimeMod2                 = 500; // implemented, @Fc, On Caster, cast time mod pct, base: pct, Note: Can reduce to instant cast
+	constexpr int Fc_CastTimeAmt                  = 501; // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds, Note: Can reduce to instant cast
+	constexpr int Fearstun                        = 502; // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
+	constexpr int Melee_Damage_Position_Mod       = 503; // implemented, @OffBonus, modify melee damage by percent if done from Front or Behind opponent, base: pct, limit: 0=back 1=front, max: none
+	constexpr int Melee_Damage_Position_Amt       = 504; // implemented, @OffBonus, modify melee damage by flat amount if done from Front or Behind opponent, base: amt, limit: 0=back 1=front, max: none
+	constexpr int Damage_Taken_Position_Mod       = 505; // implemented, @DefBonus, modify melee damage by percent if dmg taken from Front or Behind, base: pct, limit: 0=back 1=front, max: none
+	constexpr int Damage_Taken_Position_Amt       = 506; // implemented -@DefBonus, modify melee damage by flat amount if dmg taken from your Front or Behind, base: amt, limit: 0=back 1=front, max: none
+	constexpr int Fc_Amplify_Mod                  = 507; // implemented, @Fc, On Caster, damage-heal-dot mod pct, base: pct
+	constexpr int Fc_Amplify_Amt                  = 508; // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
+	constexpr int Health_Transfer                 = 509; // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
+	constexpr int Fc_ResistIncoming               = 510; // implemented, @Fc, On Target, resist modifier, base: amt
+	constexpr int Ff_FocusTimerMin                = 511; // implemented, @Ff, sets a recast time until focus can be used again, base: 1, limit: time ms, Note: ie. limit to 1 trigger every 1.5 seconds
+	constexpr int Proc_Timer_Modifier             = 512; // implemented - limits procs per amount of a time based on timer value, base: 1, limit: time ms, Note:, ie limit to 1 proc every 55 seconds)
+	constexpr int Mana_Max_Percent                = 513; //
+	constexpr int Endurance_Max_Percent           = 514; //
+	constexpr int AC_Avoidance_Max_Percent        = 515; // implemented - stackable avoidance modifier
+	constexpr int AC_Mitigation_Max_Percent       = 516; // implemented - stackable defense modifier
+	constexpr int Attack_Offense_Max_Percent      = 517; //
+	constexpr int Attack_Accuracy_Max_Percent     = 518; // implemented - stackable accurary modifer
+	constexpr int Luck_Amount                     = 519; //
+	constexpr int Luck_Percent                    = 520; //
+	constexpr int Endurance_Absorb_Pct_Damage     = 521; // implemented - Reduces % of Damage using Endurance, drains endurance at a ratio (ie. 0.05 Endurance per Hit Point)
+	constexpr int Instant_Mana_Pct                = 522; // implemented - Increase/Decrease mana by percent of max mana
+	constexpr int Instant_Endurance_Pct           = 523; // implemented - Increase/Decrease mana by percent of max endurance
+	constexpr int Duration_HP_Pct                 = 524; // implemented - Decrease Current Hit Points by % of Total Hit Points per Tick, up to a MAX per tick
+	constexpr int Duration_Mana_Pct               = 525; // implemented - Decrease Current Mana by % of Total Mana per Tick, up to a MAX per tick
+	constexpr int Duration_Endurance_Pct          = 526; // implemented - Decrease Current Endurance by % of Total Hit Points per Tick, up to a MAX per tick
+}
 
 #define DF_Permanent				50
 #define DF_Aura						51
@@ -1698,7 +1697,7 @@ struct SPDat_Spell_Struct
 /* 181 */	int pvp_duration; // buffdurationformula for PvP -- PVP_DURATION
 /* 182 */	int pvp_duration_cap; // buffduration for PvP -- PVP_DURATION_CAP
 /* 183 */	int pcnpc_only_flag; // valid values are 0, 1 = PCs (and mercs), and 2 = NPCs (and not mercs) -- PCNPC_ONLY_FLAG
-/* 184 */	bool cast_not_standing; // this is checked in the client's EQ_Spell::IsCastWhileInvisSpell, this also blocks SE_InterruptCasting from affecting this spell -- CAST_NOT_STANDING (Allows casting if DA, stun, mezed, charm? fear?, damage to invul targets)
+/* 184 */	bool cast_not_standing; // this is checked in the client's EQ_Spell::IsCastWhileInvisSpell, this also blocks SpellEffect::InterruptCasting from affecting this spell -- CAST_NOT_STANDING (Allows casting if DA, stun, mezed, charm? fear?, damage to invul targets)
 /* 185 */	bool can_mgb; // 0=no, -1 or 1 = yes -- CAN_MGB
 /* 186 */	int dispel_flag; // -- NO_DISPELL
 /* 187 */	//int npc_category; // -- NPC_MEM_CATEGORY

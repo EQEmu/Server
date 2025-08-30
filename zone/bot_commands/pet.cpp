@@ -245,7 +245,7 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 
 		if (pet_type == 6 && RuleI(Bots, RequiredMagicianEpicPetItemID) > 0) {
 			bool has_item = bot_iter->HasBotItem(RuleI(Bots, RequiredMagicianEpicPetItemID)) != INVALID_INDEX;
-			
+
 			if (!has_item) {
 				c->Message(
 					Chat::Say,
@@ -257,7 +257,7 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 				);
 
 				continue;
-			}	
+			}
 		}
 
 		if (current_check) {
@@ -313,7 +313,7 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 				continue;
 			}
 
-			if (!IsEffectInSpell(s.SpellId, SE_SummonPet)) {
+			if (!IsEffectInSpell(s.SpellId, SpellEffect::SummonPet)) {
 				continue;
 			}
 
@@ -401,7 +401,7 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 
 		return;
 	}
-	
+
 	if (success_count == 1 && first_found) {
 		c->Message(
 			Chat::Green,

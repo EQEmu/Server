@@ -1377,132 +1377,132 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool is_proc)
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
 		switch (spells[spell_id].effect_id[o]) {
-			case SE_CurrentHPOnce:
-			case SE_CurrentHP: {
+			case SpellEffect::CurrentHPOnce:
+			case SpellEffect::CurrentHP: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if(val < 0) {
 					aggro_amount -= val;
 				}
 				break;
 			}
-			case SE_MovementSpeed: {
+			case SpellEffect::MovementSpeed: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 0) {
 					aggro_amount += default_aggro;
 				}
 				break;
 			}
-			case SE_AttackSpeed:
-			case SE_AttackSpeed2:
-			case SE_AttackSpeed3: {
+			case SpellEffect::AttackSpeed:
+			case SpellEffect::AttackSpeed2:
+			case SpellEffect::AttackSpeed3: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 100) {
 					aggro_amount += default_aggro;
 				}
 				break;
 			}
-			case SE_Stun:
-			case SE_Blind:
-			case SE_Mez:
-			case SE_Charm:
-			case SE_Fear:
-			case SE_Fearstun:
+			case SpellEffect::Stun:
+			case SpellEffect::Blind:
+			case SpellEffect::Mez:
+			case SpellEffect::Charm:
+			case SpellEffect::Fear:
+			case SpellEffect::Fearstun:
 				aggro_amount += default_aggro;
 				break;
-			case SE_Root:
+			case SpellEffect::Root:
 				aggro_amount += 10;
 				break;
-			case SE_ACv2:
-			case SE_ArmorClass: {
+			case SpellEffect::ACv2:
+			case SpellEffect::ArmorClass: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 0) {
 					aggro_amount += default_aggro;
 				}
 				break;
 			}
-			case SE_ATK:
-			case SE_ResistMagic:
-			case SE_ResistFire:
-			case SE_ResistCold:
-			case SE_ResistPoison:
-			case SE_ResistDisease:
-			case SE_STR:
-			case SE_STA:
-			case SE_DEX:
-			case SE_AGI:
-			case SE_INT:
-			case SE_WIS:
-			case SE_CHA: {
+			case SpellEffect::ATK:
+			case SpellEffect::ResistMagic:
+			case SpellEffect::ResistFire:
+			case SpellEffect::ResistCold:
+			case SpellEffect::ResistPoison:
+			case SpellEffect::ResistDisease:
+			case SpellEffect::STR:
+			case SpellEffect::STA:
+			case SpellEffect::DEX:
+			case SpellEffect::AGI:
+			case SpellEffect::INT:
+			case SpellEffect::WIS:
+			case SpellEffect::CHA: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 0) {
 					aggro_amount += 10;
 				}
 				break;
 			}
-			case SE_ResistAll: {
+			case SpellEffect::ResistAll: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 0) {
 					aggro_amount += 50;
 				}
 				break;
 			}
-			case SE_AllStats: {
+			case SpellEffect::AllStats: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 0) {
 					aggro_amount += 70;
 				}
 				break;
 			}
-			case SE_BardAEDot:
+			case SpellEffect::BardAEDot:
 				aggro_amount += 10;
 				break;
-			case SE_SpinTarget:
-			case SE_Amnesia:
-			case SE_Silence:
-			case SE_Destroy:
+			case SpellEffect::SpinTarget:
+			case SpellEffect::Amnesia:
+			case SpellEffect::Silence:
+			case SpellEffect::Destroy:
 				aggro_amount += default_aggro;
 				break;
 			// unsure -- leave them this for now
-			case SE_Harmony:
-			case SE_CastingLevel:
-			case SE_MeleeMitigation:
-			case SE_CriticalHitChance:
-			case SE_AvoidMeleeChance:
-			case SE_RiposteChance:
-			case SE_DodgeChance:
-			case SE_ParryChance:
-			case SE_DualWieldChance:
-			case SE_DoubleAttackChance:
-			case SE_MeleeSkillCheck:
-			case SE_HitChance:
-			case SE_DamageModifier:
-			case SE_MinDamageModifier:
-			case SE_IncreaseBlockChance:
-			case SE_Accuracy:
-			case SE_DamageShield:
-			case SE_SpellDamageShield:
-			case SE_ReverseDS: {
+			case SpellEffect::Harmony:
+			case SpellEffect::CastingLevel:
+			case SpellEffect::MeleeMitigation:
+			case SpellEffect::CriticalHitChance:
+			case SpellEffect::AvoidMeleeChance:
+			case SpellEffect::RiposteChance:
+			case SpellEffect::DodgeChance:
+			case SpellEffect::ParryChance:
+			case SpellEffect::DualWieldChance:
+			case SpellEffect::DoubleAttackChance:
+			case SpellEffect::MeleeSkillCheck:
+			case SpellEffect::HitChance:
+			case SpellEffect::DamageModifier:
+			case SpellEffect::MinDamageModifier:
+			case SpellEffect::IncreaseBlockChance:
+			case SpellEffect::Accuracy:
+			case SpellEffect::DamageShield:
+			case SpellEffect::SpellDamageShield:
+			case SpellEffect::ReverseDS: {
 				aggro_amount += mob_level * 2;
 				break;
 			}
 			// unsure -- leave them this for now
-			case SE_CurrentMana:
-			case SE_ManaRegen_v2:
-			case SE_ManaPool:
-			case SE_CurrentEndurance: {
+			case SpellEffect::CurrentMana:
+			case SpellEffect::ManaRegen_v2:
+			case SpellEffect::ManaPool:
+			case SpellEffect::CurrentEndurance: {
 				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				if (val < 0) {
 					aggro_amount -= val * 2;
 				}
 				break;
 			}
-			case SE_CancelMagic:
-			case SE_DispelDetrimental:
-			case SE_DispelBeneficial:
+			case SpellEffect::CancelMagic:
+			case SpellEffect::DispelDetrimental:
+			case SpellEffect::DispelBeneficial:
 				dispel = true;
 				break;
-			case SE_ReduceHate:
-			case SE_InstantHate:
+			case SpellEffect::ReduceHate:
+			case SpellEffect::InstantHate:
 				non_modified_aggro = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				break;
 		}
@@ -1549,8 +1549,8 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
 		switch (spells[spell_id].effect_id[o]) {
-			case SE_CurrentHP:
-			case SE_PercentalHeal:
+			case SpellEffect::CurrentHP:
+			case SpellEffect::PercentalHeal:
 			{
 			if (heal_possible == 0) {
 				AggroAmount += 1;
@@ -1572,12 +1572,12 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 			AggroAmount += std::max(val, (int64)1);
 			break;
 		}
-		case SE_Rune:
+		case SpellEffect::Rune:
 			AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o],
 							 spells[spell_id].base_value[o], spells[spell_id].max_value[o], GetLevel(), spell_id) * 2;
 			ignore_default_buff = true;
 			break;
-		case SE_HealOverTime:
+		case SpellEffect::HealOverTime:
 			AggroAmount += 10;
 			ignore_default_buff = true;
 			break;

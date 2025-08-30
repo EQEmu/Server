@@ -671,7 +671,7 @@ void Client::CompleteConnect()
 
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
 			switch (spell.effect_id[x1]) {
-			case SE_Illusion: {
+			case SpellEffect::Illusion: {
 				if (GetIllusionBlock()) {
 					break;
 				}
@@ -682,41 +682,41 @@ void Client::CompleteConnect()
 				}
 				break;
 			}
-			case SE_SummonHorse: {
+			case SpellEffect::SummonHorse: {
 				if (RuleB(Character, PreventMountsFromZoning) || !zone->CanCastOutdoor()) {
-					BuffFadeByEffect(SE_SummonHorse);
+					BuffFadeByEffect(SpellEffect::SummonHorse);
 				} else {
 					SummonHorse(buffs[j1].spellid);
 				}
 				break;
 			}
-			case SE_Silence:
+			case SpellEffect::Silence:
 			{
 				Silence(true);
 				break;
 			}
-			case SE_Amnesia:
+			case SpellEffect::Amnesia:
 			{
 				Amnesia(true);
 				break;
 			}
-			case SE_DivineAura:
+			case SpellEffect::DivineAura:
 			{
 				invulnerable = true;
 				break;
 			}
-			case SE_Invisibility2:
-			case SE_Invisibility:
+			case SpellEffect::Invisibility2:
+			case SpellEffect::Invisibility:
 			{
 				SendAppearancePacket(AppearanceType::Invisibility, Invisibility::Invisible);
 				break;
 			}
-			case SE_Levitate:
+			case SpellEffect::Levitate:
 			{
 				if (!zone->CanLevitate()) {
 					if (!GetGM()) {
 						SendAppearancePacket(AppearanceType::FlyMode, 0);
-						BuffFadeByEffect(SE_Levitate);
+						BuffFadeByEffect(SpellEffect::Levitate);
 						Message(Chat::Red, "You can't levitate in this zone.");
 						break;
 					}
@@ -737,18 +737,18 @@ void Client::CompleteConnect()
 
 				break;
 			}
-			case SE_AddMeleeProc:
-			case SE_WeaponProc:
+			case SpellEffect::AddMeleeProc:
+			case SpellEffect::WeaponProc:
 			{
 				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
 				break;
 			}
-			case SE_DefensiveProc:
+			case SpellEffect::DefensiveProc:
 			{
 				AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
 				break;
 			}
-			case SE_RangedProc:
+			case SpellEffect::RangedProc:
 			{
 				AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetSpellProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
 				break;
@@ -4259,7 +4259,7 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 	uint16 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
 
-	if (SpellID && (GetGM() || ((IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SE_BindSight)) && !spells[SpellID].no_remove))) {
+	if (SpellID && (GetGM() || ((IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SpellEffect::BindSight)) && !spells[SpellID].no_remove))) {
 		m->BuffFadeBySlot(brrs->SlotID, true);
 	}
 }
@@ -5078,7 +5078,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			// Dismount horses when entering water
 			if (GetHorseId() && RuleB(Character, DismountWater)) {
 				SetHorseId(0);
-				BuffFadeByEffect(SE_SummonHorse);
+				BuffFadeByEffect(SpellEffect::SummonHorse);
 			}
 		}
 		CheckRegionTypeChanges();
@@ -11312,7 +11312,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			parse->EventMob(EVENT_PET_COMMAND, CastToMob(), pet, f, s->command);
 
 			if (pet->GetPetType() == PetType::Charmed) {
-				pet->BuffFadeByEffect(SE_Charm);
+				pet->BuffFadeByEffect(SpellEffect::Charm);
 				break;
 			} else {
 				SetPet(nullptr);
@@ -14239,7 +14239,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		Recast is 3 minutes.
 
 		For custom use cases, Mob::ShieldAbility can be used in quests with all parameters being altered. This functional
-		is also used for SPA 201 SE_PetShield, which functions in a simalar manner with pet shielding owner.
+		is also used for SPA 201 SpellEffect::PetShield, which functions in a simalar manner with pet shielding owner.
 
 		Note: If either the shielder or the shield target die all variables are reset on both.
 
