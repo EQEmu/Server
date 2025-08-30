@@ -9,7 +9,7 @@ void ShowIPLookup(Client *c, const Seperator *sep)
 
 	auto pack = new ServerPacket(
 		ServerOP_IPLookup,
-		sizeof(ServerGenericWorldQuery_Struct) + ip_length + 1
+		sizeof(ServerGenericWorldQuery_Struct) + ip_length
 	);
 
 	auto s = (ServerGenericWorldQuery_Struct *) pack->pBuffer;
