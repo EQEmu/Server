@@ -2696,7 +2696,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			"Attack: {} Item and Spell Attack: {}/{} Server Side Attack: {}",
 			IsBot() ? Strings::Commify(CastToBot()->GetTotalATK()) : Strings::Commify(CastToClient()->GetTotalATK()),
 			Strings::Commify(GetATKBonus()),
-			Strings::Commify(attack_cap),
+			Strings::Commify(GetStatCap(StatCap::Attack)),
 			Strings::Commify(GetATK())
 		).c_str()
 	);
