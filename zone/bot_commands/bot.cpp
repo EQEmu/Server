@@ -455,13 +455,13 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 			fmt::format("- You must use a value between 1 and {}.", RuleI(Bots, MaxFollowDistance))
 		};
 		p.example_format = { fmt::format("{} [reset]/[set [value]] [actionable]", sep->arg[0]) };
-		p.examples_one = { 
-			"To set all bots to follow at a distance of 25:", 
-			fmt::format("{} set 25 spawned", sep->arg[0]) 
+		p.examples_one = {
+			"To set all bots to follow at a distance of 25:",
+			fmt::format("{} set 25 spawned", sep->arg[0])
 		};
-		p.examples_two = { 
-			"To check the curret following distance of all bots:", 
-			fmt::format("{} current spawned", sep->arg[0]) 
+		p.examples_two = {
+			"To check the curret following distance of all bots:",
+			fmt::format("{} current spawned", sep->arg[0])
 		};
 		p.examples_three =
 		{
@@ -470,10 +470,10 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 				"{} reset byclass {}",
 				sep->arg[0],
 				Class::Wizard
-			) 
+			)
 		};
 		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
-		
+
 		std::string popup_text = c->SendBotCommandHelpWindow(p);
 		popup_text = DialogueWindow::Table(popup_text);
 
@@ -483,7 +483,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 	}
 
 	const int ab_mask = ActionableBots::ABM_Type2;
-	
+
 	uint32 bfd = RuleI(Bots, DefaultFollowDistance);
 	bool set_flag = false;
 	bool current_check = false;
@@ -862,7 +862,7 @@ void bot_command_report(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
-	
+
 	const int ab_mask = ActionableBots::ABM_Type1;
 
 	std::string arg1 = sep->arg[1];
@@ -1057,7 +1057,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		BotCommandHelpParams p;
 
 		p.description = { "Change a bot's stance to control the way it behaves." };
-		p.notes = 
+		p.notes =
 		{
 			"- Changing a stance will reset all settings to match that stance type.",
 			"- Any changes made will only save to that stance for future use.",
@@ -1122,29 +1122,29 @@ void bot_command_stance(Client *c, const Seperator *sep)
 				Stance::AEBurn
 			)
 		};
-		p.example_format = 
+		p.example_format =
 		{ fmt::format( "{} [current | value]", sep->arg[0]) };
-		p.examples_one = 
-		{ 
-			"To set all bots to BurnAE:", 
+		p.examples_one =
+		{
+			"To set all bots to BurnAE:",
 			fmt::format("{} {} spawned {}",
 				sep->arg[0],
 				Stance::Aggressive,
 				Class::ShadowKnight
 			)
 		};
-		p.examples_two = 
-		{ 
-			"To set all Shadowknights to Aggressive:", 
+		p.examples_two =
+		{
+			"To set all Shadowknights to Aggressive:",
 			fmt::format("{} {} byclass {}",
 				sep->arg[0],
 				Stance::Aggressive,
 				Class::ShadowKnight
 			)
 		};
-		p.examples_three = { 
-			"To check the current stances of all bots:", 
-			fmt::format("{} current spawned", sep->arg[0]) 
+		p.examples_three = {
+			"To check the current stances of all bots:",
+			fmt::format("{} current spawned", sep->arg[0])
 		};
 
 		p.actionables = { "target, byname, ownergroup, ownerraid, targetgroup, namesgroup, healrotationtargets, mmr, byclass, byrace, spawned" };
@@ -1239,7 +1239,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		database.botdb.LoadBotSettings(bot_iter);
 
 		if (
-			(bot_iter->GetClass() == Class::Warrior || bot_iter->GetClass() == Class::Paladin || bot_iter->GetClass() == Class::ShadowKnight) && 
+			(bot_iter->GetClass() == Class::Warrior || bot_iter->GetClass() == Class::Paladin || bot_iter->GetClass() == Class::ShadowKnight) &&
 			(bot_iter->GetBotStance() == Stance::Aggressive)
 		) {
 			bot_iter->SetTaunting(true);
@@ -1255,7 +1255,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 				bot_iter->GetPet()->CastToNPC()->SetTaunting(false);
 			}
 		}
-	
+
 		bot_iter->Save();
 		++success_count;
 	}
@@ -1431,7 +1431,7 @@ void bot_command_summon(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
-	
+
 	const int ab_mask = ActionableBots::ABM_Type1;
 
 	std::string arg1 = sep->arg[1];
@@ -1550,7 +1550,7 @@ void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 
 		return;
 	}
-	
+
 	std::string arg1 = sep->arg[1];
 
 	int ab_arg = 1;
@@ -1712,7 +1712,7 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 
 		return;
 	}
-	
+
 	std::string arg1 = sep->arg[1];
 
 	int ab_arg = 1;

@@ -896,7 +896,7 @@ int Mob::GetClassRaceACBonus()
 			ac_bonus = 16;
 	}
 
-	if (GetRace() == IKSAR)
+	if (GetRace() == Race::Iksar)
 		ac_bonus += EQ::Clamp(static_cast<int>(level), 10, 35);
 
 	return ac_bonus;
@@ -3545,7 +3545,7 @@ int Mob::GetHandToHandDelay(void)
 		int iksar = 0;
 		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 46)
 			epic = 280;
-		else if (GetRace() == IKSAR)
+		else if (GetRace() == Race::Iksar)
 			iksar = 1;
 		// the delay bonus from the monk epic scales up to a skill of 280
 		if (epic >= skill)
@@ -3586,8 +3586,8 @@ int Mob::GetHandToHandDelay(void)
 			return 16;
 		int level = GetLevel();
 		if (level > 62)
-			return GetRace() == IKSAR ? 21 : 20;
-		return GetRace() == IKSAR ? mnk_iks_delay[level] : mnk_hum_delay[level];
+			return GetRace() == Race::Iksar ? 21 : 20;
+		return GetRace() == Race::Iksar ? mnk_iks_delay[level] : mnk_hum_delay[level];
 	}
 	else if (GetClass() == Class::Beastlord) {
 		int level = GetLevel();

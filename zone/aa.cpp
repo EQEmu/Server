@@ -1619,7 +1619,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 
 	auto race = GetPlayerRaceValue(GetBaseRace());
 
-	race = race > PLAYER_RACE_COUNT ? Race::Human : race;
+	race = race > RaceIndex::Drakkin ? Race::Human : race;
 
 	if (!(a->races & (1 << (race - 1)))) {
 		return false;

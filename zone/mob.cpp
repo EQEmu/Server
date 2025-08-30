@@ -3819,7 +3819,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 
 	// Adjust all settings based on the min and max for each feature of each race and gender
 	switch (GetRace()) {
-		case HUMAN:
+		case Race::Human:
 			new_hair_color = zone->random.Int(0, 19);
 
 			if (current_gender == Gender::Male) {
@@ -3831,7 +3831,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			new_hair_color  = zone->random.Int(0, 19);
 			new_luclin_face = zone->random.Int(0, 87);
 
@@ -3844,7 +3844,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case ERUDITE:
+		case Race::Erudite:
 			if (current_gender == Gender::Male) {
 				new_beard_color = zone->random.Int(0, 19);
 				new_beard       = zone->random.Int(0, 5);
@@ -3854,7 +3854,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case WOOD_ELF:
+		case Race::WoodElf:
 			new_hair_color = zone->random.Int(0, 19);
 
 			if (current_gender == Gender::Male) {
@@ -3864,7 +3864,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case HIGH_ELF:
+		case Race::HighElf:
 			new_hair_color = zone->random.Int(0, 14);
 
 			if (current_gender == Gender::Male) {
@@ -3876,7 +3876,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case DARK_ELF:
+		case Race::DarkElf:
 			new_hair_color = zone->random.Int(13, 18);
 
 			if (current_gender == Gender::Male) {
@@ -3888,7 +3888,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case HALF_ELF:
+		case Race::HalfElf:
 			new_hair_color = zone->random.Int(0, 19);
 
 			if (current_gender == Gender::Male) {
@@ -3900,7 +3900,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case DWARF:
+		case Race::Dwarf:
 			new_hair_color  = zone->random.Int(0, 19);
 			new_beard_color = new_hair_color;
 
@@ -3913,7 +3913,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case TROLL:
+		case Race::Troll:
 			new_eye_color_one = zone->random.Int(0, 10);
 			new_eye_color_two = zone->random.Int(0, 10);
 
@@ -3923,14 +3923,14 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case OGRE:
+		case Race::Ogre:
 			if (current_gender == Gender::Female) {
 				new_hair_style = zone->random.Int(0, 3);
 				new_hair_color = zone->random.Int(0, 23);
 			}
 
 			break;
-		case HALFLING:
+		case Race::Halfling:
 			new_hair_color = zone->random.Int(0, 19);
 
 			if (current_gender == Gender::Male) {
@@ -3942,7 +3942,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case GNOME:
+		case Race::Gnome:
 			new_hair_color = zone->random.Int(0, 24);
 
 			if (current_gender == Gender::Male) {
@@ -3954,14 +3954,14 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			}
 
 			break;
-		case IKSAR:
-		case VAHSHIR:
+		case Race::Iksar:
+		case Race::VahShir:
 			new_luclin_face = zone->random.Int(0, 7);
 			break;
-		case FROGLOK:
+		case Race::Froglok2:
 			new_luclin_face = zone->random.Int(0, 9);
 			break;
-		case DRAKKIN:
+		case Race::Drakkin:
 			new_hair_color       = zone->random.Int(0, 3);
 			new_beard_color      = new_hair_color;
 			new_eye_color_one    = zone->random.Int(0, 11);
@@ -4023,8 +4023,8 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 
 uint16 Mob::GetFactionRace() {
 	uint16 current_race = GetRace();
-	if (IsPlayerRace(current_race) || current_race == TREE ||
-		current_race == MINOR_ILL_OBJ) {
+	if (IsPlayerRace(current_race) || current_race == Race::Tree ||
+		current_race == Race::MinorIllusion) {
 		return current_race;
 	}
 	else {
@@ -7704,7 +7704,7 @@ bool Mob::CanRaceEquipItem(uint32 item_id)
 	}
 
 	auto item_races = itm->Races;
-	if(item_races == PLAYER_RACE_ALL_MASK) {
+	if(item_races == RaceBitmask::All) {
 		return true;
 	}
 

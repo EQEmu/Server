@@ -2901,7 +2901,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	// Mob Variables
 	Strings::FindReplace(processed, "$mname", GetCleanName());
 	Strings::FindReplace(processed, "$mracep", GetRacePlural());
-	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
+	Strings::FindReplace(processed, "$mrace", GetRaceIDName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
 	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
 
@@ -2909,7 +2909,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
 	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
 	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
-	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
+	Strings::FindReplace(processed, "$race", t ? GetRaceIDName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
 
 	if (emoteid == e->emoteid) {
@@ -3792,7 +3792,7 @@ bool NPC::IsGuard()
 	case Race::HalasCitizen:
 	case Race::NeriakCitizen:
 	case Race::GrobbCitizen:
-	case OGGOK_CITIZEN:
+	case Race::OggokCitizen:
 	case Race::KaladimCitizen:
 		return true;
 	default:

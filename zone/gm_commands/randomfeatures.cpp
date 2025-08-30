@@ -8,7 +8,7 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 	}
 
 	auto target = c->GetTarget();
-	
+
 	if (target->RandomizeFeatures()) {
 		c->Message(
 			Chat::White,
