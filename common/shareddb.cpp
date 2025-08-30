@@ -52,6 +52,7 @@
 #include "repositories/books_repository.h"
 #include "repositories/sharedbank_repository.h"
 #include "repositories/character_inspect_messages_repository.h"
+#include "repositories/spells_new_repository.h"
 
 namespace ItemField
 {
@@ -1694,16 +1695,9 @@ const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
 	return nullptr;	// nothing here for now... database and/or sharemem pulls later
 }
 
-int SharedDatabase::GetMaxSpellID() {
-	const std::string query = "SELECT MAX(id) FROM spells_new";
-	auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return -1;
-    }
-
-    auto& row = results.begin();
-
-	return Strings::ToInt(row[0]);
+int SharedDatabase::GetMaxSpellID()
+{
+	return SpellsNewRepository::GetMaxId(*this);
 }
 
 bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp) {
@@ -1735,173 +1729,247 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 	*static_cast<uint32*>(data) = max_spells;
 	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>(static_cast<char*>(data) + sizeof(uint32));
 
-	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	const auto& l = SpellsNewRepository::All(*this);
 
-    if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
-		LogSpells("Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT([{}])", SPELL_LOAD_FIELD_COUNT);
+	if (l.empty()) {
 		return;
-    }
+	}
 
-	int counter = 0;
-
-    for (auto& row = results.begin(); row != results.end(); ++row) {
-	    const int tempid = Strings::ToInt(row[0]);
-        if(tempid >= max_spells) {
+	for (const auto& e : l) {
+		if (e.id >= max_spells) {
 			LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
 			continue;
 		}
 
-        ++counter;
-        sp[tempid].id = tempid;
-        strn0cpy(sp[tempid].name, row[1], sizeof(sp[tempid].name));
-        strn0cpy(sp[tempid].player_1, row[2], sizeof(sp[tempid].player_1));
-		strn0cpy(sp[tempid].teleport_zone, row[3], sizeof(sp[tempid].teleport_zone));
-		strn0cpy(sp[tempid].you_cast, row[4], sizeof(sp[tempid].you_cast));
-		strn0cpy(sp[tempid].other_casts, row[5], sizeof(sp[tempid].other_casts));
-		strn0cpy(sp[tempid].cast_on_you, row[6], sizeof(sp[tempid].cast_on_you));
-		strn0cpy(sp[tempid].cast_on_other, row[7], sizeof(sp[tempid].cast_on_other));
-		strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
+		sp[e.id].id = e.id;
 
-		sp[tempid].range = Strings::ToFloat(row[9]);
-		sp[tempid].aoe_range = Strings::ToFloat(row[10]);
-		sp[tempid].push_back = Strings::ToFloat(row[11]);
-		sp[tempid].push_up = Strings::ToFloat(row[12]);
-		sp[tempid].cast_time=Strings::ToUnsignedInt(row[13]);
-		sp[tempid].recovery_time=Strings::ToUnsignedInt(row[14]);
-		sp[tempid].recast_time=Strings::ToUnsignedInt(row[15]);
-		sp[tempid].buff_duration_formula=Strings::ToUnsignedInt(row[16]);
-		sp[tempid].buff_duration=Strings::ToUnsignedInt(row[17]);
-		sp[tempid].aoe_duration=Strings::ToUnsignedInt(row[18]);
-		sp[tempid].mana=Strings::ToInt(row[19]);
+		strn0cpy(sp[e.id].name, e.name.c_str(), sizeof(sp[e.id].name));
+		strn0cpy(sp[e.id].player_1, e.player_1.c_str(), sizeof(sp[e.id].player_1));
+		strn0cpy(sp[e.id].teleport_zone, e.teleport_zone.c_str(), sizeof(sp[e.id].teleport_zone));
+		strn0cpy(sp[e.id].you_cast, e.you_cast.c_str(), sizeof(sp[e.id].you_cast));
+		strn0cpy(sp[e.id].other_casts, e.other_casts.c_str(), sizeof(sp[e.id].other_casts));
+		strn0cpy(sp[e.id].cast_on_you, e.cast_on_you.c_str(), sizeof(sp[e.id].cast_on_you));
+		strn0cpy(sp[e.id].cast_on_other, e.cast_on_other.c_str(), sizeof(sp[e.id].cast_on_other));
+		strn0cpy(sp[e.id].spell_fades, e.spell_fades.c_str(), sizeof(sp[e.id].spell_fades));
 
-		int y=0;
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].base_value[y]=Strings::ToInt(row[20+y]); // effect_base_value
+		sp[e.id].range                 = e.range_;
+		sp[e.id].aoe_range             = e.aoerange;
+		sp[e.id].push_back             = e.pushback;
+		sp[e.id].push_up               = e.pushup;
+		sp[e.id].cast_time             = e.cast_time;
+		sp[e.id].recovery_time         = e.recovery_time;
+		sp[e.id].recast_time           = e.recast_time;
+		sp[e.id].buff_duration_formula = e.buffdurationformula;
+		sp[e.id].buff_duration         = e.buffduration;
+		sp[e.id].aoe_duration          = e.AEDuration;
+		sp[e.id].mana                  = e.mana;
 
-		for(y=0; y < EFFECT_COUNT; y++)
-			sp[tempid].limit_value[y]=Strings::ToInt(row[32+y]); // effect_limit_value
+		sp[e.id].base_value[0]  = e.effect_base_value1;
+		sp[e.id].base_value[1]  = e.effect_base_value2;
+		sp[e.id].base_value[2]  = e.effect_base_value3;
+		sp[e.id].base_value[3]  = e.effect_base_value4;
+		sp[e.id].base_value[4]  = e.effect_base_value5;
+		sp[e.id].base_value[5]  = e.effect_base_value6;
+		sp[e.id].base_value[6]  = e.effect_base_value7;
+		sp[e.id].base_value[7]  = e.effect_base_value8;
+		sp[e.id].base_value[8]  = e.effect_base_value9;
+		sp[e.id].base_value[9]  = e.effect_base_value10;
+		sp[e.id].base_value[10] = e.effect_base_value11;
+		sp[e.id].base_value[11] = e.effect_base_value12;
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].max_value[y]=Strings::ToInt(row[44+y]);
+		sp[e.id].limit_value[0]  = e.effect_limit_value1;
+		sp[e.id].limit_value[1]  = e.effect_limit_value2;
+		sp[e.id].limit_value[2]  = e.effect_limit_value3;
+		sp[e.id].limit_value[3]  = e.effect_limit_value4;
+		sp[e.id].limit_value[4]  = e.effect_limit_value5;
+		sp[e.id].limit_value[5]  = e.effect_limit_value6;
+		sp[e.id].limit_value[6]  = e.effect_limit_value7;
+		sp[e.id].limit_value[7]  = e.effect_limit_value8;
+		sp[e.id].limit_value[8]  = e.effect_limit_value9;
+		sp[e.id].limit_value[9]  = e.effect_limit_value10;
+		sp[e.id].limit_value[10] = e.effect_limit_value11;
+		sp[e.id].limit_value[11] = e.effect_limit_value12;
 
-		for(y=0; y< 4;y++)
-			sp[tempid].component[y]=Strings::ToInt(row[58+y]);
+		sp[e.id].max_value[0]  = e.max1;
+		sp[e.id].max_value[1]  = e.max2;
+		sp[e.id].max_value[2]  = e.max3;
+		sp[e.id].max_value[3]  = e.max4;
+		sp[e.id].max_value[4]  = e.max5;
+		sp[e.id].max_value[5]  = e.max6;
+		sp[e.id].max_value[6]  = e.max7;
+		sp[e.id].max_value[7]  = e.max8;
+		sp[e.id].max_value[8]  = e.max9;
+		sp[e.id].max_value[9]  = e.max10;
+		sp[e.id].max_value[10] = e.max11;
+		sp[e.id].max_value[11] = e.max12;
 
-		for(y=0; y< 4;y++)
-			sp[tempid].component_count[y]=Strings::ToInt(row[62+y]);
+		sp[e.id].component[0] = e.components1;
+		sp[e.id].component[1] = e.components2;
+		sp[e.id].component[2] = e.components3;
+		sp[e.id].component[3] = e.components4;
 
-		for(y=0; y< 4;y++)
-			sp[tempid].no_expend_reagent[y]=Strings::ToInt(row[66+y]);
+		sp[e.id].component_count[0] = e.component_counts1;
+		sp[e.id].component_count[1] = e.component_counts2;
+		sp[e.id].component_count[2] = e.component_counts3;
+		sp[e.id].component_count[3] = e.component_counts4;
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].formula[y]=Strings::ToUnsignedInt(row[70+y]);
+		sp[e.id].no_expend_reagent[0] = e.NoexpendReagent1;
+		sp[e.id].no_expend_reagent[1] = e.NoexpendReagent2;
+		sp[e.id].no_expend_reagent[2] = e.NoexpendReagent3;
+		sp[e.id].no_expend_reagent[3] = e.NoexpendReagent4;
 
-		sp[tempid].good_effect=Strings::ToInt(row[83]);
-		sp[tempid].activated=Strings::ToInt(row[84]);
-		sp[tempid].resist_type=Strings::ToInt(row[85]);
+		sp[e.id].formula[0]  = e.formula1;
+		sp[e.id].formula[1]  = e.formula2;
+		sp[e.id].formula[2]  = e.formula3;
+		sp[e.id].formula[3]  = e.formula4;
+		sp[e.id].formula[4]  = e.formula5;
+		sp[e.id].formula[5]  = e.formula6;
+		sp[e.id].formula[6]  = e.formula7;
+		sp[e.id].formula[7]  = e.formula8;
+		sp[e.id].formula[8]  = e.formula9;
+		sp[e.id].formula[9]  = e.formula10;
+		sp[e.id].formula[10] = e.formula11;
+		sp[e.id].formula[11] = e.formula12;
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].effect_id[y]=Strings::ToInt(row[86+y]);
+		sp[e.id].good_effect = e.goodEffect;
+		sp[e.id].activated   = e.Activated;
+		sp[e.id].resist_type = e.resisttype;
 
-		sp[tempid].target_type = static_cast<SpellTargetType>(Strings::ToInt(row[98]));
-		sp[tempid].base_difficulty=Strings::ToInt(row[99]);
+		sp[e.id].effect_id[0]  = e.effectid1;
+		sp[e.id].effect_id[1]  = e.effectid2;
+		sp[e.id].effect_id[2]  = e.effectid3;
+		sp[e.id].effect_id[3]  = e.effectid4;
+		sp[e.id].effect_id[4]  = e.effectid5;
+		sp[e.id].effect_id[5]  = e.effectid6;
+		sp[e.id].effect_id[6]  = e.effectid7;
+		sp[e.id].effect_id[7]  = e.effectid8;
+		sp[e.id].effect_id[8]  = e.effectid9;
+		sp[e.id].effect_id[9]  = e.effectid10;
+		sp[e.id].effect_id[10] = e.effectid11;
+		sp[e.id].effect_id[11] = e.effectid12;
 
-		int tmp_skill = Strings::ToInt(row[100]);
+		sp[e.id].target_type = static_cast<SpellTargetType>(e.targettype);
 
-		if (tmp_skill < 0 || tmp_skill > EQ::skills::HIGHEST_SKILL)
-			sp[tempid].skill = EQ::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
-        else
-			sp[tempid].skill = static_cast<EQ::skills::SkillType>(tmp_skill);
+		sp[e.id].base_difficulty  = e.basediff;
 
-		sp[tempid].zone_type=Strings::ToInt(row[101]);
-		sp[tempid].environment_type=Strings::ToInt(row[102]);
-		sp[tempid].time_of_day=Strings::ToInt(row[103]);
+		sp[e.id].skill = (
+			EQ::ValueWithin(e.skill, 0, EQ::skills::HIGHEST_SKILL) ?
+			static_cast<EQ::skills::SkillType>(e.skill) :
+			EQ::skills::SkillBegging
+		);
 
-		for(y=0; y < Class::PLAYER_CLASS_COUNT;y++)
-			sp[tempid].classes[y]=Strings::ToInt(row[104+y]);
+		sp[e.id].zone_type        = e.zonetype;
+		sp[e.id].environment_type = e.EnvironmentType;
+		sp[e.id].time_of_day      = e.TimeOfDay;
 
-		sp[tempid].casting_animation=Strings::ToInt(row[120]);
-		sp[tempid].spell_affect_index=Strings::ToInt(row[123]);
-		sp[tempid].disallow_sit=Strings::ToInt(row[124]);
-		sp[tempid].deity_agnostic=Strings::ToInt(row[125]);
+		sp[e.id].classes[0]  = e.classes1;
+		sp[e.id].classes[1]  = e.classes2;
+		sp[e.id].classes[2]  = e.classes3;
+		sp[e.id].classes[3]  = e.classes4;
+		sp[e.id].classes[4]  = e.classes5;
+		sp[e.id].classes[5]  = e.classes6;
+		sp[e.id].classes[6]  = e.classes7;
+		sp[e.id].classes[7]  = e.classes8;
+		sp[e.id].classes[8]  = e.classes9;
+		sp[e.id].classes[9]  = e.classes10;
+		sp[e.id].classes[10] = e.classes11;
+		sp[e.id].classes[11] = e.classes12;
+		sp[e.id].classes[12] = e.classes13;
+		sp[e.id].classes[13] = e.classes14;
+		sp[e.id].classes[14] = e.classes15;
+		sp[e.id].classes[15] = e.classes16;
 
-		for (y = 0; y < 16; y++)
-			sp[tempid].deities[y]=Strings::ToInt(row[126+y]);
+		sp[e.id].casting_animation  = e.CastingAnim;
+		sp[e.id].spell_affect_index = e.SpellAffectIndex;
+		sp[e.id].disallow_sit       = e.disallow_sit;
 
-		sp[tempid].new_icon=Strings::ToInt(row[144]);
-		sp[tempid].uninterruptable=Strings::ToBool(row[146]);
-		sp[tempid].resist_difficulty=Strings::ToInt(row[147]);
-		sp[tempid].unstackable_dot = Strings::ToBool(row[148]);
-		sp[tempid].recourse_link = Strings::ToUnsignedInt(row[150]);
-		sp[tempid].no_partial_resist = Strings::ToBool(row[151]);
+		sp[e.id].deity_agnostic = e.deities0; // Agnostic
+		sp[e.id].deities[0]  = e.deities1; // Bertoxxulous
+		sp[e.id].deities[1]  = e.deities2; // Brell Serilis
+		sp[e.id].deities[2]  = e.deities3; // Cazic Thule
+		sp[e.id].deities[3]  = e.deities4; // Erollsi Marr
+		sp[e.id].deities[4]  = e.deities5; // Bristlebane
+		sp[e.id].deities[5]  = e.deities6; // Innoruuk
+		sp[e.id].deities[6]  = e.deities7; // Karana
+		sp[e.id].deities[7]  = e.deities8; // Mithaniel Marr
+		sp[e.id].deities[8]  = e.deities9; // Prexius
+		sp[e.id].deities[9]  = e.deities10; // Quellious
+		sp[e.id].deities[10] = e.deities11; // Rallos Zek
+		sp[e.id].deities[11] = e.deities12; // Rodcet Nife
+		sp[e.id].deities[12] = e.deities13; // Solusek Ro
+		sp[e.id].deities[13] = e.deities14; // The Tribunal
+		sp[e.id].deities[14] = e.deities15; // Tunare
+		sp[e.id].deities[15] = e.deities16; // Veeshan
 
-		sp[tempid].short_buff_box = Strings::ToInt(row[154]);
-		sp[tempid].description_id = Strings::ToInt(row[155]);
-		sp[tempid].type_description_id = Strings::ToInt(row[156]);
-		sp[tempid].effect_description_id = Strings::ToInt(row[157]);
+		sp[e.id].new_icon              = e.new_icon;
+		sp[e.id].uninterruptable       = e.uninterruptable;
+		sp[e.id].resist_difficulty     = e.ResistDiff;
+		sp[e.id].unstackable_dot       = e.dot_stacking_exempt;
+		sp[e.id].recourse_link         = e.RecourseLink;
+		sp[e.id].no_partial_resist     = e.no_partial_resist;
+		sp[e.id].short_buff_box        = e.short_buff_box;
+		sp[e.id].description_id        = e.descnum;
+		sp[e.id].type_description_id   = e.typedescnum;
+		sp[e.id].effect_description_id = e.effectdescnum;
+		sp[e.id].npc_no_los            = e.npc_no_los;
+		sp[e.id].feedbackable          = e.feedbackable;
+		sp[e.id].reflectable           = e.reflectable;
+		sp[e.id].bonus_hate            = e.bonushate;
+		sp[e.id].ldon_trap             = e.ldon_trap;
+		sp[e.id].endurance_cost        = e.EndurCost;
+		sp[e.id].timer_id              = e.EndurTimerIndex;
+		sp[e.id].is_discipline         = e.IsDiscipline;
+		sp[e.id].hate_added            = e.HateAdded;
+		sp[e.id].endurance_upkeep      = e.EndurUpkeep;
+		sp[e.id].hit_number_type       = e.numhits;
+		sp[e.id].hit_number            = e.numhitstype;
+		sp[e.id].pvp_resist_base       = e.pvpresistbase;
+		sp[e.id].pvp_resist_per_level  = e.pvpresistcalc;
+		sp[e.id].pvp_resist_cap        = e.pvpresistcap;
+		sp[e.id].spell_category        = e.spell_category;
+		sp[e.id].pvp_duration          = e.pvp_duration;
+		sp[e.id].pvp_duration_cap      = e.pvp_duration_cap;
+		sp[e.id].pcnpc_only_flag       = e.pcnpc_only_flag;
+		sp[e.id].cast_not_standing     = e.cast_not_standing;
+		sp[e.id].can_mgb               = e.can_mgb;
+		sp[e.id].dispel_flag           = e.nodispell;
+		sp[e.id].min_resist            = e.MinResist;
+		sp[e.id].max_resist            = e.MaxResist;
+		sp[e.id].viral_targets         = e.viral_targets;
+		sp[e.id].viral_timer           = e.viral_timer;
+		sp[e.id].nimbus_effect         = e.nimbuseffect;
+		sp[e.id].directional_start     = e.ConeStartAngle;
+		sp[e.id].directional_end       = e.ConeStopAngle;
+		sp[e.id].sneak                 = e.sneaking;
+		sp[e.id].not_focusable         = e.not_extendable;
 
-		sp[tempid].npc_no_los = Strings::ToBool(row[159]);
-		sp[tempid].feedbackable = Strings::ToBool(row[160]);
-		sp[tempid].reflectable = Strings::ToBool(row[161]);
-		sp[tempid].bonus_hate=Strings::ToInt(row[162]);
+		sp[e.id].no_detrimental_spell_aggro = e.no_detrimental_spell_aggro;
 
-		sp[tempid].ldon_trap = Strings::ToBool(row[165]);
-		sp[tempid].endurance_cost= Strings::ToInt(row[166]);
-		sp[tempid].timer_id= Strings::ToInt(row[167]);
-		sp[tempid].is_discipline = Strings::ToBool(row[168]);
-		sp[tempid].hate_added= Strings::ToInt(row[173]);
-		sp[tempid].endurance_upkeep=Strings::ToInt(row[174]);
-		sp[tempid].hit_number_type = Strings::ToInt(row[175]);
-		sp[tempid].hit_number = Strings::ToInt(row[176]);
-		sp[tempid].pvp_resist_base= Strings::ToInt(row[177]);
-		sp[tempid].pvp_resist_per_level= Strings::ToInt(row[178]);
-		sp[tempid].pvp_resist_cap= Strings::ToInt(row[179]);
-		sp[tempid].spell_category= Strings::ToInt(row[180]);
-		sp[tempid].pvp_duration = Strings::ToInt(row[181]);
-		sp[tempid].pvp_duration_cap = Strings::ToInt(row[182]);
-		sp[tempid].pcnpc_only_flag= Strings::ToInt(row[183]);
-		sp[tempid].cast_not_standing = Strings::ToInt(row[184]) != 0;
-		sp[tempid].can_mgb= Strings::ToBool(row[185]);
-		sp[tempid].dispel_flag = Strings::ToInt(row[186]);
-		sp[tempid].min_resist = Strings::ToInt(row[189]);
-		sp[tempid].max_resist = Strings::ToInt(row[190]);
-		sp[tempid].viral_targets = Strings::ToInt(row[191]);
-		sp[tempid].viral_timer = Strings::ToInt(row[192]);
-		sp[tempid].nimbus_effect = Strings::ToInt(row[193]);
-		sp[tempid].directional_start = Strings::ToFloat(row[194]);
-		sp[tempid].directional_end = Strings::ToFloat(row[195]);
-		sp[tempid].sneak = Strings::ToBool(row[196]);
-		sp[tempid].not_focusable = Strings::ToBool(row[197]);
-		sp[tempid].no_detrimental_spell_aggro = Strings::ToBool(row[198]);
-		sp[tempid].suspendable = Strings::ToBool(row[200]);
-		sp[tempid].viral_range = Strings::ToInt(row[201]);
-		sp[tempid].song_cap = Strings::ToInt(row[202]);
-		sp[tempid].no_block = Strings::ToInt(row[205]);
-		sp[tempid].spell_group=Strings::ToInt(row[207]);
-		sp[tempid].rank = Strings::ToInt(row[208]);
-		sp[tempid].no_resist=Strings::ToInt(row[209]);
-		sp[tempid].cast_restriction = Strings::ToInt(row[211]);
-		sp[tempid].allow_rest = Strings::ToBool(row[212]);
-		sp[tempid].can_cast_in_combat = Strings::ToBool(row[213]);
-		sp[tempid].can_cast_out_of_combat = Strings::ToBool(row[214]);
-		sp[tempid].override_crit_chance = Strings::ToInt(row[217]);
-		sp[tempid].aoe_max_targets = Strings::ToInt(row[218]);
-		sp[tempid].no_heal_damage_item_mod = Strings::ToInt(row[219]);
-		sp[tempid].caster_requirement_id = Strings::ToInt(row[220]);
-		sp[tempid].spell_class = Strings::ToInt(row[221]);
-		sp[tempid].spell_subclass = Strings::ToInt(row[222]);
-		sp[tempid].persist_death = Strings::ToBool(row[224]);
-		sp[tempid].min_distance = Strings::ToFloat(row[227]);
-		sp[tempid].min_distance_mod = Strings::ToFloat(row[228]);
-		sp[tempid].max_distance = Strings::ToFloat(row[229]);
-		sp[tempid].max_distance_mod = Strings::ToFloat(row[230]);
-		sp[tempid].min_range = Strings::ToFloat(row[231]);
-		sp[tempid].no_remove = Strings::ToBool(row[232]);
-		sp[tempid].damage_shield_type = 0;
+		sp[e.id].suspendable             = e.suspendable;
+		sp[e.id].viral_range             = e.viral_range;
+		sp[e.id].song_cap                = e.songcap;
+		sp[e.id].no_block                = e.no_block;
+		sp[e.id].spell_group             = e.spellgroup;
+		sp[e.id].rank                    = e.rank_;
+		sp[e.id].no_resist               = e.no_resist;
+		sp[e.id].cast_restriction        = e.CastRestriction;
+		sp[e.id].allow_rest              = e.allowrest;
+		sp[e.id].can_cast_in_combat      = e.InCombat;
+		sp[e.id].can_cast_out_of_combat  = e.OutofCombat;
+		sp[e.id].override_crit_chance    = e.override_crit_chance;
+		sp[e.id].aoe_max_targets         = e.aemaxtargets;
+		sp[e.id].no_heal_damage_item_mod = e.no_heal_damage_item_mod;
+		sp[e.id].caster_requirement_id   = e.caster_requirement_id;
+		sp[e.id].spell_class             = e.spell_class;
+		sp[e.id].spell_subclass          = e.spell_subclass;
+		sp[e.id].persist_death           = e.persistdeath;
+		sp[e.id].min_distance            = e.min_dist;
+		sp[e.id].min_distance_mod        = e.min_dist_mod;
+		sp[e.id].max_distance            = e.max_dist;
+		sp[e.id].max_distance_mod        = e.max_dist_mod;
+		sp[e.id].min_range               = e.min_range;
+		sp[e.id].no_remove               = e.no_remove;
+		sp[e.id].damage_shield_type      = 0;
 	}
 
 	LoadDamageShieldTypes(sp, max_spells);
@@ -1934,18 +2002,7 @@ void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const Insp
 
 uint32 SharedDatabase::GetSpellsCount()
 {
-	auto results = QueryDatabase("SELECT count(*) FROM spells_new");
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
-
-	auto& row = results.begin();
-
-	if (row[0]) {
-		return Strings::ToUnsignedInt(row[0]);
-	}
-
-	return 0;
+	return SpellsNewRepository::Count(*this);
 }
 
 uint32 SharedDatabase::GetItemsCount()
