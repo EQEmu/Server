@@ -1676,7 +1676,7 @@ bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsReposit
 	return true;
 }
 
-void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* s, int32 max_spell_id)
+void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* s)
 {
 	const auto& l = DamageshieldtypesRepository::All(*this);
 
@@ -1970,7 +1970,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[e.id].damage_shield_type      = 0;
 	}
 
-	LoadDamageShieldTypes(sp, max_spells);
+	LoadDamageShieldTypes(sp);
 }
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* s)

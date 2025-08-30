@@ -173,7 +173,7 @@ public:
 	int GetMaxSpellID();
 	bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
 	void LoadSpells(void *data, int max_spells);
-	void LoadDamageShieldTypes(SPDat_Spell_Struct *s, int32 max_spell_id);
+	void LoadDamageShieldTypes(SPDat_Spell_Struct* s);
 	uint32 GetSharedSpellsCount() { return m_shared_spells_count; }
 	uint32 GetSpellsCount();
 
