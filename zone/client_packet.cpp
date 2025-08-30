@@ -16001,7 +16001,7 @@ void Client::Handle_OP_TradeSkillRecipeInspect(const EQApplicationPacket* app)
 	const auto& v = TradeskillRecipeEntriesRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"`recipe_id` = {} AND `componentcount` = 0 AND `successcount` > 0 LIMIT 1",
+			"`recipe_id` = {} AND `componentcount` = 0 AND `successcount` > 0 ORDER BY `id` ASC LIMIT 1",
 			s->recipe_id
 		)
 	);
