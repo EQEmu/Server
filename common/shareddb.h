@@ -158,7 +158,7 @@ public:
 	);
 	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
 
-	void GetItemsCount(int32 &item_count, uint32 &max_id);
+	void GetItemsCount(int32& item_count, uint32& max_id);
 	void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 	bool LoadItems(const std::string &prefix);
 	const EQ::ItemData *IterateItems(uint32 *id) const;
