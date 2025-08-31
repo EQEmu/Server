@@ -1713,7 +1713,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (zone->IsPVPZone())
 		m_pp.pvp = 1;
 	/* Time entitled on Account: Move to account */
-	m_pp.timeentitledonaccount = database.GetTotalTimeEntitledOnAccount(AccountID()) / 1440;
+	m_pp.timeentitledonaccount = CharacterDataRepository::GetTotalTimePlayed(database, AccountID()) / 1440;
 	/* Reset rest timer if the durations have been lowered in the database */
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
@@ -7988,7 +7988,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	if ((Admin() < RuleI(Guild, PlayerCreationRequiredStatus)) ||
 		(GetLevel() < RuleI(Guild, PlayerCreationRequiredLevel)) ||
-		(database.GetTotalTimeEntitledOnAccount(AccountID()) < (unsigned int)RuleI(Guild, PlayerCreationRequiredTime)))
+		(CharacterDataRepository::GetTotalTimePlayed(database, AccountID()) < (unsigned int)RuleI(Guild, PlayerCreationRequiredTime)))
 	{
 		Message(Chat::Red, "Your status, level or time playing on this account are insufficient to use this feature.");
 		return;
