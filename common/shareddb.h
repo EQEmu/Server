@@ -104,7 +104,7 @@ public:
 	bool VerifyInventory(uint32 account_id, int16 slot_id, const EQ::ItemInstance *inst);
 	bool GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is_charid);
 	int32 GetSharedPlatinum(uint32 account_id);
-	bool SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
+	bool AddSharedPlatinum(uint32 account_id, int amount);
 	bool GetInventory(Client* c);
 	bool GetInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv); // deprecated
 	std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
