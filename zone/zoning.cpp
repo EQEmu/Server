@@ -737,7 +737,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case SummonPC:
-			MessageString(Chat::Yellow, PLAYER_SUMMONED);
+			MessageString(Chat::Yellow, ClientString::PLAYER_SUMMONED);
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case Rewind:
@@ -1098,7 +1098,7 @@ void Client::Gate(uint8 bind_number) {
 }
 
 void NPC::Gate(uint8 bind_number) {
-	entity_list.MessageCloseString(this, true, RuleI(Range, SpellMessages), Chat::Spells, GATES, GetCleanName());
+	entity_list.MessageCloseString(this, true, RuleI(Range, SpellMessages), Chat::Spells, ClientString::GATES, GetCleanName());
 
 	Mob::Gate(bind_number);
 }

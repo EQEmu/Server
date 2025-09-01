@@ -866,7 +866,7 @@ int ClientTaskState::IncrementDoneCount(
 		}
 
 		for (int i = 0; i < msg_count; ++i) {
-			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_data->title.c_str());
+			client->MessageString(Chat::DefaultText, ClientString::TASK_UPDATED, task_data->title.c_str());
 		}
 	}
 
@@ -886,7 +886,7 @@ int ClientTaskState::IncrementDoneCount(
 		LogTasks("task_complete is [{}]", task_complete);
 		// shared tasks only send update messages on activity completion
 		if (task_data->type == TaskType::Shared) {
-			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_data->title.c_str());
+			client->MessageString(Chat::DefaultText, ClientString::TASK_UPDATED, task_data->title.c_str());
 		}
 		// and by the 'Task Stage Completed' message
 		client->SendTaskActivityComplete(info->task_id, activity_id, task_index, task_data->type);
@@ -1024,7 +1024,7 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 						int16_t slot = c->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);
 						c->SummonItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, slot);
 					}
-					c->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
+					c->MessageString(Chat::Yellow, ClientString::YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
 				}
 			}
 		}
@@ -2041,7 +2041,7 @@ void ClientTaskState::AcceptNewTask(
 	}
 
 	if (max_tasks) {
-		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, ".", ".", client->GetName());
+		client->MessageString(Chat::Yellow, ClientString::MAX_ACTIVE_TASKS, ".", ".", client->GetName());
 		return;
 	}
 
@@ -2057,7 +2057,7 @@ void ClientTaskState::AcceptNewTask(
 	}
 
 	if (enforce_level_requirement && !TaskManager::Instance()->ValidateLevel(task_id, client->GetLevel())) {
-		client->MessageString(Chat::Yellow, TASK_NOT_RIGHT_LEVEL);
+		client->MessageString(Chat::Yellow, ClientString::TASK_NOT_RIGHT_LEVEL);
 		return;
 	}
 
@@ -2140,7 +2140,7 @@ void ClientTaskState::AcceptNewTask(
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if (active_slot == nullptr) {
-		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, ".", ".", client->GetName());
+		client->MessageString(Chat::Yellow, ClientString::MAX_ACTIVE_TASKS, ".", ".", client->GetName());
 		return;
 	}
 
@@ -2194,7 +2194,7 @@ void ClientTaskState::AcceptNewTask(
 
 	TaskManager::Instance()->SendSingleActiveTaskToClient(client, *active_slot, false, true);
 	client->StartTaskRequestCooldownTimer();
-	client->MessageString(Chat::DefaultText, YOU_ASSIGNED_TASK, task->title.c_str());
+	client->MessageString(Chat::DefaultText, ClientString::YOU_ASSIGNED_TASK, task->title.c_str());
 
 	TaskManager::Instance()->SaveClientState(client, this);
 

@@ -1210,7 +1210,7 @@ void Merc::AI_Process() {
 					{
 						if(zone->random.Roll(flurrychance))
 						{
-							MessageString(Chat::NPCFlurry, YOU_FLURRY);
+							MessageString(Chat::NPCFlurry, ClientString::YOU_FLURRY);
 							Attack(GetTarget(), EQ::invslot::slotPrimary, false);
 							Attack(GetTarget(), EQ::invslot::slotPrimary, false);
 						}
@@ -2208,7 +2208,7 @@ int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) 
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 
 		if (realTotal != 0 && UsedItem)
-			MessageString(Chat::FocusEffect, BEGINS_TO_GLOW, UsedItem->Name);
+			MessageString(Chat::FocusEffect, ClientString::BEGINS_TO_GLOW, UsedItem->Name);
 	}
 
 	//Check if spell focus effect exists for the client.

@@ -979,7 +979,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 
 			m.member->MessageString(
 				Chat::MoneySplit,
-				YOU_RECEIVE_AS_SPLIT,
+				ClientString::YOU_RECEIVE_AS_SPLIT,
 				Strings::Money(
 					platinum_split,
 					gold_split,
@@ -2317,13 +2317,13 @@ void Raid::DelegateAbilityAssist(Mob* delegator, const char* delegatee)
 {
 	auto raid_delegatee = entity_list.GetRaidByName(delegatee);
 	if (!raid_delegatee) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
+		delegator->CastToClient()->MessageString(Chat::Cyan, ClientString::NOT_IN_YOUR_RAID, delegatee);
 		return;
 	}
 	uint32 raid_delegatee_id = raid_delegatee->GetID();
 	uint32 raid_delegator_id = GetID();
 	if (raid_delegatee_id != raid_delegator_id) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
+		delegator->CastToClient()->MessageString(Chat::Cyan, ClientString::NOT_IN_YOUR_RAID, delegatee);
 		return;
 	}
 
@@ -2339,7 +2339,7 @@ void Raid::DelegateAbilityAssist(Mob* delegator, const char* delegatee)
 	auto slot = FindNextRaidDelegateSlot(FindNextAssisterSlot);
 	auto ma = rm->main_assister;
 	if (slot == -1 && !ma) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, MAX_MAIN_RAID_ASSISTERS);
+		delegator->CastToClient()->MessageString(Chat::Cyan, ClientString::MAX_MAIN_RAID_ASSISTERS);
 		return;
 	}
 
@@ -2454,13 +2454,13 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 {
 	auto raid_delegatee = entity_list.GetRaidByName(delegatee);
 	if (!raid_delegatee) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
+		delegator->CastToClient()->MessageString(Chat::Cyan, ClientString::NOT_IN_YOUR_RAID, delegatee);
 		return;
 	}
 	uint32 raid_delegatee_id = raid_delegatee->GetID();
 	uint32 raid_delegator_id = GetID();
 	if (raid_delegatee_id != raid_delegator_id) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
+		delegator->CastToClient()->MessageString(Chat::Cyan, ClientString::NOT_IN_YOUR_RAID, delegatee);
 		return;
 	}
 
@@ -2477,7 +2477,7 @@ void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
 	auto mm = rm->main_marker;
 
 	if (slot == -1 && !mm) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, MAX_MAIN_RAID_MARKERS);
+		delegator->CastToClient()->MessageString(Chat::Cyan, ClientString::MAX_MAIN_RAID_MARKERS);
 		return;
 	}
 
@@ -2609,7 +2609,7 @@ void Raid::RaidMarkNPC(Mob* mob, uint32 parameter)
 		}
 	}
 		//client is not delegated the mark ability
-		c->MessageString(Chat::Cyan, NOT_DELEGATED_MARKER);
+		c->MessageString(Chat::Cyan, ClientString::NOT_DELEGATED_MARKER);
 		return;
 }
 
@@ -2638,7 +2638,7 @@ void Raid::RaidClearNPCMarks(Client* c)
 				&& marked_npcs[i].instance_id == c->GetInstanceID())
 			{
 				auto npc_name = entity_list.GetNPCByID(marked_npcs[i].entity_id)->GetCleanName();
-				RaidMessageString(nullptr, Chat::Cyan, RAID_NO_LONGER_MARKED, npc_name);
+				RaidMessageString(nullptr, Chat::Cyan, ClientString::RAID_NO_LONGER_MARKED, npc_name);
 				marked_npcs[i].entity_id = 0;
 				marked_npcs[i].zone_id = 0;
 				marked_npcs[i].instance_id = 0;
@@ -2665,7 +2665,7 @@ void Raid::RaidClearNPCMarks(Client* c)
 		UpdateXtargetMarkedNPC();
 	}
 	else {
-		c->MessageString(Chat::Cyan, NOT_DELEGATED_MARKER);
+		c->MessageString(Chat::Cyan, ClientString::NOT_DELEGATED_MARKER);
 	}
 }
 

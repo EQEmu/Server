@@ -396,7 +396,7 @@ bool Client::DoEvolveCheckProgression(EQ::ItemInstance &inst)
 	e.status = "Evolved Item due to obtaining progression - New Evolve Item placed in inventory.";
 	RecordPlayerEventLog(PlayerEvent::EVOLVE_ITEM, e);
 
-	MessageString(Chat::Yellow, EVOLVE_ITEM_EVOLVED, inst.GetItem()->Name);
+	MessageString(Chat::Yellow, ClientString::EVOLVE_ITEM_EVOLVED, inst.GetItem()->Name);
 
 	LogEvolveItem(
 		"Evolved item id <red>[{}] into item id <green>[{}] for Character ID <green>[{}]",

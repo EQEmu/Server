@@ -1027,11 +1027,11 @@ void Mob::AddTrap(Aura *aura, AuraRecord &record)
 bool Mob::CanSpawnAura(bool trap)
 {
 	if (trap && !HasFreeTrapSlots()) {
-		MessageString(Chat::SpellFailure, NO_MORE_TRAPS);
+		MessageString(Chat::SpellFailure, ClientString::NO_MORE_TRAPS);
 		return false;
 	}
 	else if (!trap && !HasFreeAuraSlots()) {
-		MessageString(Chat::SpellFailure, NO_MORE_AURAS);
+		MessageString(Chat::SpellFailure, ClientString::NO_MORE_AURAS);
 		return false;
 	}
 

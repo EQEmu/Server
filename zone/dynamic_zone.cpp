@@ -85,7 +85,7 @@ DynamicZone* DynamicZone::TryCreate(Client& client, DynamicZone& dzinfo, bool si
 	{
 		// live uses this message when trying to enter an instance that isn't ready
 		// for now we can use it as a client error message if instance creation fails
-		client.MessageString(Chat::Red, DZ_PREVENT_ENTERING);
+		client.MessageString(Chat::Red, ClientString::DZ_PREVENT_ENTERING);
 		LogDynamicZones("Failed to create dynamic zone for zone [{}]", dzinfo.GetZoneID());
 		return nullptr;
 	}
@@ -96,7 +96,7 @@ DynamicZone* DynamicZone::TryCreate(Client& client, DynamicZone& dzinfo, bool si
 	dz->SaveMembers(request.GetMembers());
 	dz->SaveLockouts(request.GetLockouts());
 
-	dz->SendLeaderMessage(request.GetLeaderClient(), Chat::System, DZ_AVAILABLE, { dz->GetName() });
+	dz->SendLeaderMessage(request.GetLeaderClient(), Chat::System, ClientString::DZ_AVAILABLE, { dz->GetName() });
 	if (dz->GetMemberCount() < request.GetMembers().size())
 	{
 		dz->SendLeaderMessage(request.GetLeaderClient(), Chat::System, fmt::format(DzNotAllAdded,
@@ -276,7 +276,7 @@ void DynamicZone::SendClientInvite(Client* client, const std::string& inviter, c
 	LogExpeditions("Invite [{}] to [{}] by [{}] swap [{}]", client->GetName(), GetID(), inviter, swap_name);
 
 	client->SetPendingDzInvite({ GetID(), inviter, swap_name });
-	client->MessageString(Chat::System, DZ_INVITED, GetLeaderName().c_str(), GetName().c_str());
+	client->MessageString(Chat::System, ClientString::DZ_INVITED, GetLeaderName().c_str(), GetName().c_str());
 
 	// live (as of March 11 2020 patch) warns for lockouts added during current
 	// expedition that client would receive upon entering (sent in invite packet)
@@ -311,13 +311,13 @@ bool DynamicZone::ConfirmLeaderCommand(Client* client)
 
 	if (!GetLeader().IsValid())
 	{
-		client->MessageString(Chat::Red, DZ_NO_LEADER_INFO); // unconfirmed message
+		client->MessageString(Chat::Red, ClientString::DZ_NO_LEADER_INFO); // unconfirmed message
 		return false;
 	}
 
 	if (GetLeaderID() != client->CharacterID())
 	{
-		client->MessageString(Chat::System, DZ_NOT_LEADER, GetLeaderName().c_str());
+		client->MessageString(Chat::System, ClientString::DZ_NOT_LEADER, GetLeaderName().c_str());
 		return false;
 	}
 
@@ -345,14 +345,14 @@ bool DynamicZone::ProcessAddConflicts(Client* leader, Client* client, bool swapp
 
 	if (IsCurrentZoneDz())
 	{
-		SendLeaderMessage(leader, Chat::Red, DZADD_LEAVE_ZONE, { client->GetName() });
+		SendLeaderMessage(leader, Chat::Red, ClientString::DZADD_LEAVE_ZONE, { client->GetName() });
 		has_conflict = true;
 	}
 
 	auto dz_id = client->GetExpeditionID();
 	if (dz_id)
 	{
-		int string_id = dz_id == GetID() ? DZADD_ALREADY_PART : DZADD_ALREADY_OTHER;
+		int string_id = dz_id == GetID() ? ClientString::DZADD_ALREADY_PART : ClientString::DZADD_ALREADY_OTHER;
 		SendLeaderMessage(leader, Chat::Red, string_id, { client->GetName() });
 		has_conflict = true;
 	}
@@ -367,14 +367,14 @@ bool DynamicZone::ProcessAddConflicts(Client* leader, Client* client, bool swapp
 			has_conflict = true;
 
 			auto time = lockout.GetTimeRemainingStrs();
-			SendLeaderMessage(leader, Chat::Red, DZADD_REPLAY_TIMER, { client->GetName(), time.days, time.hours, time.mins });
+			SendLeaderMessage(leader, Chat::Red, ClientString::DZADD_REPLAY_TIMER, { client->GetName(), time.days, time.hours, time.mins });
 		}
 		else if (!lockout.IsReplay() && !HasLockout(lockout.Event()))
 		{
 			has_conflict = true;
 
 			auto time = lockout.GetTimeRemainingStrs();
-			SendLeaderMessage(leader, Chat::Red, DZADD_EVENT_TIMER, { client->GetName(), lockout.Event(), time.days, time.hours, time.mins });
+			SendLeaderMessage(leader, Chat::Red, ClientString::DZADD_EVENT_TIMER, { client->GetName(), lockout.Event(), time.days, time.hours, time.mins });
 		}
 	}
 
@@ -388,7 +388,7 @@ bool DynamicZone::ProcessAddConflicts(Client* leader, Client* client, bool swapp
 		}
 		else if (member_count >= GetMaxPlayers())
 		{
-			SendLeaderMessage(leader, Chat::Red, DZADD_EXCEED_MAX, { fmt::format_int(GetMaxPlayers()).str() });
+			SendLeaderMessage(leader, Chat::Red, ClientString::DZADD_EXCEED_MAX, { fmt::format_int(GetMaxPlayers()).str() });
 			has_conflict = true;
 		}
 	}
@@ -396,7 +396,7 @@ bool DynamicZone::ProcessAddConflicts(Client* leader, Client* client, bool swapp
 	auto invite_id = client->GetPendingDzInviteID();
 	if (invite_id)
 	{
-		int string_id = invite_id == GetID() ? DZADD_PENDING : DZADD_PENDING_OTHER;
+		int string_id = invite_id == GetID() ? ClientString::DZADD_PENDING : ClientString::DZADD_PENDING_OTHER;
 		SendLeaderMessage(leader, Chat::Red, string_id, { client->GetName() });
 		has_conflict = true;
 	}
@@ -423,13 +423,13 @@ void DynamicZone::TryAddClient(Client* client, const std::string& inviter, const
 	if (!has_conflicts)
 	{
 		// live uses the original unsanitized input string in invite messages
-		uint32_t string_id = swap_name.empty() ? DZADD_INVITE : DZSWAP_INVITE;
+		uint32_t string_id = swap_name.empty() ? ClientString::DZADD_INVITE : ClientString::DZSWAP_INVITE;
 		SendLeaderMessage(leader, Chat::Yellow, string_id, { client->GetName() });
 		SendClientInvite(client, inviter, swap_name);
 	}
 	else if (swap_name.empty()) // swap command doesn't result in this message
 	{
-		SendLeaderMessage(leader, Chat::Red, DZADD_INVITE_FAIL, { client->GetName() });
+		SendLeaderMessage(leader, Chat::Red, ClientString::DZADD_INVITE_FAIL, { client->GetName() });
 	}
 }
 
@@ -444,12 +444,12 @@ void DynamicZone::DzAddPlayer(Client* client, const std::string& add_name, const
 
 	if (IsLocked())
 	{
-		client->MessageString(Chat::Red, DZADD_NOT_ALLOWING);
+		client->MessageString(Chat::Red, ClientString::DZADD_NOT_ALLOWING);
 		invite_failed = true;
 	}
 	else if (add_name.empty())
 	{
-		client->MessageString(Chat::Red, DZADD_NOT_ONLINE, add_name.c_str());
+		client->MessageString(Chat::Red, ClientString::DZADD_NOT_ONLINE, add_name.c_str());
 		invite_failed = true;
 	}
 	else
@@ -460,11 +460,11 @@ void DynamicZone::DzAddPlayer(Client* client, const std::string& add_name, const
 			// live prioritizes offline message before already a member message
 			if (member_data.status == DynamicZoneMemberStatus::Offline)
 			{
-				client->MessageString(Chat::Red, DZADD_NOT_ONLINE, add_name.c_str());
+				client->MessageString(Chat::Red, ClientString::DZADD_NOT_ONLINE, add_name.c_str());
 			}
 			else
 			{
-				client->MessageString(Chat::Red, DZADD_ALREADY_PART, add_name.c_str());
+				client->MessageString(Chat::Red, ClientString::DZADD_ALREADY_PART, add_name.c_str());
 			}
 			invite_failed = true;
 		}
@@ -472,7 +472,7 @@ void DynamicZone::DzAddPlayer(Client* client, const std::string& add_name, const
 
 	if (invite_failed)
 	{
-		client->MessageString(Chat::Red, DZADD_INVITE_FAIL, FormatName(add_name).c_str());
+		client->MessageString(Chat::Red, ClientString::DZADD_INVITE_FAIL, FormatName(add_name).c_str());
 		return;
 	}
 
@@ -512,7 +512,7 @@ void DynamicZone::DzInviteResponse(Client* client, bool accepted, const std::str
 
 	if (!accepted)
 	{
-		SendLeaderMessage(leader, Chat::Red, DZ_INVITE_DECLINED, { client->GetName() });
+		SendLeaderMessage(leader, Chat::Red, ClientString::DZ_INVITE_DECLINED, { client->GetName() });
 		return;
 	}
 
@@ -521,7 +521,7 @@ void DynamicZone::DzInviteResponse(Client* client, bool accepted, const std::str
 
 	if (IsLocked())
 	{
-		SendLeaderMessage(leader, Chat::Red, DZADD_NOT_ALLOWING);
+		SendLeaderMessage(leader, Chat::Red, ClientString::DZADD_NOT_ALLOWING);
 	}
 	else
 	{
@@ -540,11 +540,11 @@ void DynamicZone::DzInviteResponse(Client* client, bool accepted, const std::str
 
 	if (has_conflicts)
 	{
-		SendLeaderMessage(leader, Chat::Red, DZ_INVITE_ERROR, { client->GetName() });
+		SendLeaderMessage(leader, Chat::Red, ClientString::DZ_INVITE_ERROR, { client->GetName() });
 	}
 	else
 	{
-		SendLeaderMessage(leader, Chat::Yellow, DZ_INVITE_ACCEPTED, { client->GetName() });
+		SendLeaderMessage(leader, Chat::Yellow, ClientString::DZ_INVITE_ACCEPTED, { client->GetName() });
 
 		// replay timers are optionally added to new members on join with fresh expire time
 		if (m_add_replay)
@@ -563,7 +563,7 @@ void DynamicZone::DzInviteResponse(Client* client, bool accepted, const std::str
 		bool success = is_swap ? SwapMember(add_member, swap_name) : AddMember(add_member);
 		if (success)
 		{
-			SendLeaderMessage(leader, Chat::Yellow, DZ_ADDED, { client->GetName(), GetName() });
+			SendLeaderMessage(leader, Chat::Yellow, ClientString::DZ_ADDED, { client->GetName(), GetName() });
 		}
 	}
 }
@@ -577,7 +577,7 @@ void DynamicZone::DzMakeLeader(Client* client, std::string leader_name)
 
 	if (leader_name.empty())
 	{
-		client->MessageString(Chat::Red, DZ_LEADER_OFFLINE, leader_name.c_str());
+		client->MessageString(Chat::Red, ClientString::DZ_LEADER_OFFLINE, leader_name.c_str());
 		return;
 	}
 
@@ -598,11 +598,11 @@ void DynamicZone::DzRemovePlayer(Client* client, std::string name)
 	bool removed = RemoveMember(name);
 	if (!removed)
 	{
-		client->MessageString(Chat::Red, DZ_NOT_MEMBER, FormatName(name).c_str());
+		client->MessageString(Chat::Red, ClientString::DZ_NOT_MEMBER, FormatName(name).c_str());
 	}
 	else
 	{
-		client->MessageString(Chat::Yellow, DZ_REMOVED, FormatName(name).c_str(), m_name.c_str());
+		client->MessageString(Chat::Yellow, ClientString::DZ_REMOVED, FormatName(name).c_str(), m_name.c_str());
 	}
 }
 
@@ -623,7 +623,7 @@ void DynamicZone::DzSwapPlayer(Client* client, std::string rem_name, std::string
 
 	if (rem_name.empty() || !HasMember(rem_name))
 	{
-		client->MessageString(Chat::Red, DZSWAP_CANNOT_REMOVE, FormatName(rem_name).c_str());
+		client->MessageString(Chat::Red, ClientString::DZSWAP_CANNOT_REMOVE, FormatName(rem_name).c_str());
 		return;
 	}
 
@@ -634,7 +634,7 @@ void DynamicZone::DzPlayerList(Client* client)
 {
 	if (client)
 	{
-		client->MessageString(Chat::Yellow, DZ_LEADER, GetLeaderName().c_str());
+		client->MessageString(Chat::Yellow, ClientString::DZ_LEADER, GetLeaderName().c_str());
 
 		std::vector<std::string> names;
 		for (const auto& member : m_members)
@@ -642,7 +642,7 @@ void DynamicZone::DzPlayerList(Client* client)
 			names.push_back(member.name);
 		}
 
-		client->MessageString(Chat::Yellow, DZ_MEMBERS, fmt::format("{}", fmt::join(names, ", ")).c_str());
+		client->MessageString(Chat::Yellow, ClientString::DZ_MEMBERS, fmt::format("{}", fmt::join(names, ", ")).c_str());
 	}
 }
 
@@ -654,7 +654,7 @@ void DynamicZone::DzKickPlayers(Client* client)
 	}
 
 	RemoveAllMembers();
-	client->MessageString(Chat::Red, DZ_REMOVED, "Everyone", m_name.c_str());
+	client->MessageString(Chat::Red, ClientString::DZ_REMOVED, "Everyone", m_name.c_str());
 }
 
 void DynamicZone::HandleWorldMessage(ServerPacket* pack)
@@ -697,8 +697,8 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		else if (Client* leader = entity_list.GetClientByName(buf->requester_name))
 		{
 			std::string target_name = FormatName(buf->target_name);
-			leader->MessageString(Chat::Red, DZADD_NOT_ONLINE, target_name.c_str());
-			leader->MessageString(Chat::Red, DZADD_INVITE_FAIL, target_name.c_str());
+			leader->MessageString(Chat::Red, ClientString::DZADD_NOT_ONLINE, target_name.c_str());
+			leader->MessageString(Chat::Red, ClientString::DZADD_INVITE_FAIL, target_name.c_str());
 		}
 		break;
 	}
@@ -710,11 +710,11 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		// success flag is set by world to indicate new leader set to an online member
 		if (old_leader && buf->is_success)
 		{
-			old_leader->MessageString(Chat::Yellow, DZ_LEADER_NAME, buf->new_leader_name);
+			old_leader->MessageString(Chat::Yellow, ClientString::DZ_LEADER_NAME, buf->new_leader_name);
 		}
 		else if (old_leader)
 		{
-			uint32_t str_id = buf->is_online ? DZ_NOT_MEMBER : DZ_LEADER_OFFLINE;
+			uint32_t str_id = buf->is_online ? ClientString::DZ_NOT_MEMBER : ClientString::DZ_LEADER_OFFLINE;
 			old_leader->MessageString(Chat::Red, str_id, buf->new_leader_name);
 		}
 
@@ -722,7 +722,7 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		{
 			if (auto new_leader = entity_list.GetClientByName(buf->new_leader_name))
 			{
-				new_leader->MessageString(Chat::Yellow, DZ_LEADER_YOU);
+				new_leader->MessageString(Chat::Yellow, ClientString::DZ_LEADER_YOU);
 			}
 		}
 		break;
@@ -1127,7 +1127,7 @@ void DynamicZone::SendLeaderNameToZoneMembers()
 
 			if (member.id == m_leader.id && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
 			{
-				member_client->MessageString(Chat::Yellow, DZ_LEADER_YOU);
+				member_client->MessageString(Chat::Yellow, ClientString::DZ_LEADER_YOU);
 			}
 		}
 	}
@@ -1145,7 +1145,7 @@ void DynamicZone::SendMembersExpireWarning(uint32_t minutes)
 			client->QueuePacket(outapp.get());
 
 			// live doesn't actually send the chat message with it
-			client->MessageString(Chat::Yellow, DZ_MINUTES_REMAIN, fmt::format_int(minutes).c_str());
+			client->MessageString(Chat::Yellow, ClientString::DZ_MINUTES_REMAIN, fmt::format_int(minutes).c_str());
 		}
 	}
 }
@@ -1247,7 +1247,7 @@ void DynamicZone::SendUpdatesToZoneMembers(bool removing_all, bool silent)
 
 			if (m_type == DynamicZoneType::Expedition && removing_all && !silent)
 			{
-				client->MessageString(Chat::Yellow, DZ_REMOVED, client->GetCleanName(), GetName().c_str());
+				client->MessageString(Chat::Yellow, ClientString::DZ_REMOVED, client->GetCleanName(), GetName().c_str());
 			}
 		}
 	}
@@ -1274,7 +1274,7 @@ void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool r
 		{
 			// sending clear info also clears member list for removed members
 			client->QueuePacket(CreateInfoPacket(removed).get());
-			client->MessageString(Chat::Yellow, removed ? DZ_REMOVED : DZ_ADDED, client->GetCleanName(), GetName().c_str());
+			client->MessageString(Chat::Yellow, removed ? ClientString::DZ_REMOVED : ClientString::DZ_ADDED, client->GetCleanName(), GetName().c_str());
 		}
 	}
 

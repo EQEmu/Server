@@ -1195,21 +1195,21 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 		if (send_message_and_save) {
 			MessageString(
 				Chat::Yellow,
-				AA_IMPROVE,
+				ClientString::AA_IMPROVE,
 				std::to_string(rank->title_sid).c_str(),
 				std::to_string(rank->prev->current_value).c_str(),
 				std::to_string(cost).c_str(),
-				cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+				cost == 1 ? std::to_string(ClientString::AA_POINT).c_str() : std::to_string(ClientString::AA_POINTS).c_str()
 			);
 		}
 	} else {
 		if (send_message_and_save) {
 			MessageString(
 				Chat::Yellow,
-				AA_GAIN_ABILITY,
+				ClientString::AA_GAIN_ABILITY,
 				std::to_string(rank->title_sid).c_str(),
 				std::to_string(cost).c_str(),
-				cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+				cost == 1 ? std::to_string(ClientString::AA_POINT).c_str() : std::to_string(ClientString::AA_POINTS).c_str()
 			);
 		}
 	}
@@ -1313,7 +1313,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		CommonBreakInvisible();
 
 	if (spells[rank->spell].sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
-		MessageString(Chat::SpellFailure, SNEAK_RESTRICT);
+		MessageString(Chat::SpellFailure, ClientString::SNEAK_RESTRICT);
 		return;
 	}
 	//
@@ -1327,7 +1327,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			SetAppearance(eaStanding, false);
 
 		if (GetAppearance() != eaStanding) {
-			MessageString(Chat::SpellFailure, STAND_TO_CAST);
+			MessageString(Chat::SpellFailure, ClientString::STAND_TO_CAST);
 			return;
 		}
 	}
@@ -2125,20 +2125,20 @@ void Client::AutoGrantAAPoints() {
 					if (rank->prev) {
 						MessageString(
 							Chat::Yellow,
-							AA_IMPROVE,
+							ClientString::AA_IMPROVE,
 							std::to_string(rank->title_sid).c_str(),
 							std::to_string(rank->prev->current_value).c_str(),
 							"0",
-							std::to_string(AA_POINTS).c_str()
+							std::to_string(ClientString::AA_POINTS).c_str()
 						);
 					}
 					else {
 						MessageString(
 							Chat::Yellow,
-							AA_GAIN_ABILITY,
+							ClientString::AA_GAIN_ABILITY,
 							std::to_string(rank->title_sid).c_str(),
 							"0",
-							std::to_string(AA_POINTS).c_str()
+							std::to_string(ClientString::AA_POINTS).c_str()
 						);
 					}
 				}

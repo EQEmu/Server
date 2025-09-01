@@ -196,14 +196,14 @@ bool Client::CanFish() {
 
 	if (!Pole || !Pole->IsClassCommon() || Pole->GetItem()->ItemType != EQ::item::ItemTypeFishingPole) {
 		if (m_inv.HasItemByUse(EQ::item::ItemTypeFishingPole, 1, invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor))	//We have a fishing pole somewhere, just not equipped
-			MessageString(Chat::Skills, FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
+			MessageString(Chat::Skills, ClientString::FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
 		else	//We don't have a fishing pole anywhere
-			MessageString(Chat::Skills, FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.
+			MessageString(Chat::Skills, ClientString::FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.
 		return false;
 	}
 
 	if (!Bait || !Bait->IsClassCommon() || Bait->GetItem()->ItemType != EQ::item::ItemTypeFishingBait) {
-		MessageString(Chat::Skills, FISHING_NO_BAIT);	//You can't fish without fishing bait, go buy some.
+		MessageString(Chat::Skills, ClientString::FISHING_NO_BAIT);	//You can't fish without fishing bait, go buy some.
 		return false;
 	}
 
@@ -225,7 +225,7 @@ bool Client::CanFish() {
 		float bestz = zone->zonemap->FindBestZ(rodPosition, nullptr);
 		float len = m_Position.z - bestz;
 		if(len > LineLength || len < 0.0f) {
-			MessageString(Chat::Skills, FISHING_LAND);
+			MessageString(Chat::Skills, ClientString::FISHING_LAND);
 			return false;
 		}
 
@@ -238,7 +238,7 @@ bool Client::CanFish() {
 			bool in_water = zone->watermap->InWater(dest) || zone->watermap->InVWater(dest);
 
 			if (in_lava) {
-				MessageString(Chat::Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
+				MessageString(Chat::Skills, ClientString::FISHING_LAVA);	//Trying to catch a fire elemental or something?
 				return false;
 			}
 
@@ -247,7 +247,7 @@ bool Client::CanFish() {
 			}
 		}
 
-		MessageString(Chat::Skills, FISHING_LAND);
+		MessageString(Chat::Skills, ClientString::FISHING_LAND);
 		return false;
 	}
 	return true;
@@ -354,17 +354,17 @@ void Client::GoFish(bool guarantee, bool use_bait)
 		if (food_item) {
 
 			if (food_item->ItemType != EQ::item::ItemTypeFood) {
-				MessageString(Chat::Skills, FISHING_SUCCESS);
+				MessageString(Chat::Skills, ClientString::FISHING_SUCCESS);
 			}
 			else {
-				MessageString(Chat::Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
+				MessageString(Chat::Skills, ClientString::FISHING_SUCCESS_FISH_NAME, food_item->Name);
 			}
 
 			EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
 			if (inst != nullptr) {
 				if (CheckLoreConflict(inst->GetItem()))
 				{
-					MessageString(Chat::White, DUP_LORE);
+					MessageString(Chat::White, ClientString::DUP_LORE);
 					safe_delete(inst);
 				}
 				else
@@ -408,13 +408,13 @@ void Client::GoFish(bool guarantee, bool use_bait)
 		//chance to use bait when you dont catch anything...
 		if (zone->random.Int(0, 4) == 1) {
 			DeleteItemInInventory(bslot, 1, true);	//do we need client update?
-			MessageString(Chat::Skills, FISHING_LOST_BAIT);	//You lost your bait!
+			MessageString(Chat::Skills, ClientString::FISHING_LOST_BAIT);	//You lost your bait!
 		} else {
 			if (zone->random.Int(0, 15) == 1)	//give about a 1 in 15 chance to spill your beer. we could make this a rule, but it doesn't really seem worth it
 				//TODO: check for & consume an alcoholic beverage from inventory when this triggers, and set it as a rule that's disabled by default
-				MessageString(Chat::Skills, FISHING_SPILL_BEER);	//You spill your beer while bringing in your line.
+				MessageString(Chat::Skills, ClientString::FISHING_SPILL_BEER);	//You spill your beer while bringing in your line.
 			else
-				MessageString(Chat::Skills, FISHING_FAILED);	//You didn't catch anything.
+				MessageString(Chat::Skills, ClientString::FISHING_FAILED);	//You didn't catch anything.
 		}
 
 		RecordPlayerEventLog(PlayerEvent::FISH_FAILURE, PlayerEvent::EmptyEvent{});
@@ -431,7 +431,7 @@ void Client::GoFish(bool guarantee, bool use_bait)
 	if (Pole) {
 		const EQ::ItemData* fishing_item = Pole->GetItem();
 		if (fishing_item && fishing_item->SubType == 0 && zone->random.Int(0, 49) == 1) {
-			MessageString(Chat::Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
+			MessageString(Chat::Skills, ClientString::FISHING_POLE_BROKE);	//Your fishing pole broke!
 			DeleteItemInInventory(EQ::invslot::slotPrimary, 0, true);
 		}
 	}
@@ -461,7 +461,7 @@ void Client::ForageItem(bool guarantee) {
 	// these may need to be fine tuned, I am just guessing here
 	if (guarantee || zone->random.Int(0,199) < skill_level) {
 		uint32 foragedfood = 0;
-		uint32 stringid = FORAGE_NOEAT;
+		uint32 stringid = ClientString::FORAGE_NOEAT;
 
 		if (zone->random.Roll(RuleI(Zone, ForageChance))) {
 			foragedfood = content_db.LoadForage(m_pp.zone_id, skill_level);
@@ -482,17 +482,17 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		if (foragedfood == 13106) {
-			stringid = FORAGE_GRUBS;
+			stringid = ClientString::FORAGE_GRUBS;
 		} else {
 			switch(food_item->ItemType) {
 			case EQ::item::ItemTypeFood:
-				stringid = FORAGE_FOOD;
+				stringid = ClientString::FORAGE_FOOD;
 				break;
 			case EQ::item::ItemTypeDrink:
 				if (strstr(food_item->Name, "ater")) {
-					stringid = FORAGE_WATER;
+					stringid = ClientString::FORAGE_WATER;
 				} else {
-					stringid = FORAGE_DRINK;
+					stringid = ClientString::FORAGE_DRINK;
 				}
 				break;
 			default:
@@ -505,7 +505,7 @@ void Client::ForageItem(bool guarantee) {
 		if (inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if (CheckLoreConflict(inst->GetItem())) {
-				MessageString(Chat::White, DUP_LORE);
+				MessageString(Chat::White, ClientString::DUP_LORE);
 				safe_delete(inst);
 			} else {
 				PushItemOnCursor(*inst);
@@ -544,11 +544,11 @@ void Client::ForageItem(bool guarantee) {
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
 		if (!guarantee && zone->random.Roll(ChanceSecondForage)) {
-			MessageString(Chat::Skills, FORAGE_MASTERY);
+			MessageString(Chat::Skills, ClientString::FORAGE_MASTERY);
 			ForageItem(true);
 		}
 	} else {
-		MessageString(Chat::Skills, FORAGE_FAILED);
+		MessageString(Chat::Skills, ClientString::FORAGE_FAILED);
 		RecordPlayerEventLog(PlayerEvent::FORAGE_FAILURE, PlayerEvent::EmptyEvent{});
 
 		if (parse->PlayerHasQuestSub(EVENT_FORAGE_FAILURE)) {

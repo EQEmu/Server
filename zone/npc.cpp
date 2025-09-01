@@ -1852,17 +1852,17 @@ void NPC::Disarm(Client* client, int chance) {
 				SendWearChange(matslot);
 			if ((CastToMob()->GetBodyType() == BodyType::Humanoid || CastToMob()->GetBodyType() == BodyType::Summoned) && eslot == EQ::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
-			client->MessageString(Chat::Skills, DISARM_SUCCESS, GetCleanName());
+			client->MessageString(Chat::Skills, ClientString::DISARM_SUCCESS, GetCleanName());
 			if (chance != 1000)
 				client->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 4);
 			return;
 		}
-		client->MessageString(Chat::Skills, DISARM_FAILED);
+		client->MessageString(Chat::Skills, ClientString::DISARM_FAILED);
 		if (chance != 1000)
 			client->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 2);
 		return;
 	}
-	client->MessageString(Chat::Skills, DISARM_FAILED);
+	client->MessageString(Chat::Skills, ClientString::DISARM_FAILED);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {
@@ -2929,7 +2929,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 				true,
 				200,
 				Chat::NPCQuestSay,
-				GENERIC_STRING,
+				ClientString::GENERIC_STRING,
 				processed.c_str()
 			);
 		}

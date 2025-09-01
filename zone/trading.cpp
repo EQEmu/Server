@@ -914,7 +914,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	MessageString(Chat::Yellow, TRADER_MODE_ON);
+	MessageString(Chat::Yellow, ClientString::TRADER_MODE_ON);
 	SetTrader(true);
 	SendTraderMode(TraderOn);
 	SendBecomeTraderToWorld(this, TraderOn);
@@ -1571,7 +1571,7 @@ void Client::SendBazaarWelcome()
 void Client::SendBarterWelcome()
 {
 	const auto results = BuyerBuyLinesRepository::GetWelcomeData(database);
-	MessageString(Chat::White, BUYER_WELCOME, std::to_string(results.count_of_buyers).c_str());
+	MessageString(Chat::White, ClientString::BUYER_WELCOME, std::to_string(results.count_of_buyers).c_str());
 }
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
@@ -1823,7 +1823,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app)
 	if (!buyer || buyer->GetCustomerID()) {
 		bir->approval = 0; // Tell the client that the Buyer is unavailable
 		QueuePacket(app);
-		MessageString(Chat::Yellow, TRADER_BUSY);
+		MessageString(Chat::Yellow, ClientString::TRADER_BUSY);
 		return;
 	}
 
@@ -1839,7 +1839,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app)
 			greeting = "Welcome!";
 		}
 
-		MessageString(Chat::NPCQuestSay, BUYER_GREETING, buyer->GetName(), greeting.c_str());
+		MessageString(Chat::NPCQuestSay, ClientString::BUYER_GREETING, buyer->GetName(), greeting.c_str());
 		const std::string name(GetName());
 		buyer->SendSellerBrowsing(name);
 

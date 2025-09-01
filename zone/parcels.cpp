@@ -242,7 +242,7 @@ void Client::SendParcelStatus()
 		else if (num_over_limit == 1) {
 			MessageString(
 				Chat::Red,
-				PARCEL_STATUS_1,
+				ClientString::PARCEL_STATUS_1,
 				std::to_string(num_of_parcels).c_str(),
 				std::to_string(RuleI(Parcel, ParcelMaxItems)).c_str()
 			);
@@ -250,7 +250,7 @@ void Client::SendParcelStatus()
 		else if (num_over_limit > 1) {
 			MessageString(
 				Chat::Red,
-				PARCEL_STATUS_2,
+				ClientString::PARCEL_STATUS_2,
 				std::to_string(num_of_parcels).c_str(),
 				std::to_string(num_over_limit).c_str(),
 				std::to_string(RuleI(Parcel, ParcelMaxItems)).c_str()
@@ -331,7 +331,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 	}
 
 	if (!GetParcelEnabled()) {
-		MessageString(Chat::Yellow, PARCEL_DELAY, merchant->GetCleanName());
+		MessageString(Chat::Yellow, ClientString::PARCEL_DELAY, merchant->GetCleanName());
 		DoParcelCancel();
 		SendParcelAck();
 		return;
@@ -371,7 +371,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			if (send_to_client.at(0).character_name.empty()) {
 				MessageString(
 					Chat::Yellow,
-					PARCEL_UNKNOWN_NAME,
+					ClientString::PARCEL_UNKNOWN_NAME,
 					merchant->GetCleanName(),
 					parcel_in->send_to,
 					inst->GetItem()->Name
@@ -462,7 +462,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 
 			MessageString(
 				Chat::Yellow,
-				PARCEL_DELIVERY,
+				ClientString::PARCEL_DELIVERY,
 				merchant->GetCleanName(),
 				inst->GetItem()->Name,
 				send_to_client.at(0).character_name.c_str()
@@ -528,7 +528,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			if (send_to_client.at(0).character_name.empty()) {
 				MessageString(
 					Chat::Yellow,
-					PARCEL_UNKNOWN_NAME,
+					ClientString::PARCEL_UNKNOWN_NAME,
 					merchant->GetCleanName(),
 					parcel_in->send_to,
 					"Money"
@@ -566,7 +566,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 
 			MessageString(
 				Chat::Yellow,
-				PARCEL_DELIVERY,
+				ClientString::PARCEL_DELIVERY,
 				merchant->GetCleanName(),
 				"Money",
 				send_to_client.at(0).character_name.c_str()
@@ -687,7 +687,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 			case PARCEL_MONEY_ITEM_ID: {
 				AddMoneyToPP(p->second.quantity, true);
 				MessageString(
-					Chat::Yellow, PARCEL_DELIVERED, merchant->GetCleanName(), "Money", p->second.from_name.c_str()
+					Chat::Yellow, ClientString::PARCEL_DELIVERED, merchant->GetCleanName(), "Money", p->second.from_name.c_str()
 				);
 				break;
 			}
@@ -717,11 +717,11 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 
 						if (CheckLoreConflict(item->GetItem())) {
 							if (RuleB(Parcel, DeleteOnDuplicate)) {
-								MessageString(Chat::Yellow, PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
+								MessageString(Chat::Yellow, ClientString::PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
 								continue;
 							}
 
-							MessageString(Chat::Yellow, DUP_LORE);
+							MessageString(Chat::Yellow, ClientString::DUP_LORE);
 							SendParcelRetrieveAck();
 							return;
 						}
@@ -733,16 +733,16 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 				auto const free_id = GetInv().FindFirstFreeSlotThatFitsItemWithStacking(inst.get());
 				if (free_id == INVALID_INDEX) {
 					SendParcelRetrieveAck();
-					MessageString(Chat::White, PARCEL_INV_FULL, merchant->GetCleanName());
+					MessageString(Chat::White, ClientString::PARCEL_INV_FULL, merchant->GetCleanName());
 					return;
 				}
 
 				if (CheckLoreConflict(inst->GetItem())) {
 					if (RuleB(Parcel, DeleteOnDuplicate)) {
-						MessageString(Chat::Yellow, PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
+						MessageString(Chat::Yellow, ClientString::PARCEL_DUPLICATE_DELETE, inst->GetItem()->Name);
 					}
 					else {
-						MessageString(Chat::Yellow, DUP_LORE);
+						MessageString(Chat::Yellow, ClientString::DUP_LORE);
 						SendParcelRetrieveAck();
 						return;
 					}
@@ -751,7 +751,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 				if (AutoPutLootInInventory(*inst.get(), false, true)) {
 					MessageString(
 						Chat::Yellow,
-						PARCEL_DELIVERED_2,
+						ClientString::PARCEL_DELIVERED_2,
 						merchant->GetCleanName(),
 						std::to_string(item_quantity).c_str(),
 						inst->GetItem()->Name,

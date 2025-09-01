@@ -190,7 +190,7 @@ void bot_command_inventory_remove(Client* c, const Seperator* sep)
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	if (c->GetTradeskillObject() || (c->trade->state == Trading)) {
-		c->MessageString(Chat::Tell, MERCHANT_BUSY);
+		c->MessageString(Chat::Tell, ClientString::MERCHANT_BUSY);
 		return;
 	}
 

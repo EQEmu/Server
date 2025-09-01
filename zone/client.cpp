@@ -1361,9 +1361,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	{
 	case ChatChannel_Guild: { /* Guild Chat */
 		if (!IsInAGuild()) {
-			MessageString(Chat::DefaultText, GUILD_NOT_MEMBER2);	//You are not a member of any guild.
+			MessageString(Chat::DefaultText, ClientString::GUILD_NOT_MEMBER2);	//You are not a member of any guild.
 		} else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_GUILD_CHAT_SPEAK_IN)) {
-			MessageString(Chat::EchoGuild, NO_PROPER_ACCESS);
+			MessageString(Chat::EchoGuild, ClientString::NO_PROPER_ACCESS);
 		} else if (!worldserver.SendChannelMessage(this, targetname, chan_num, GuildID(), language, lang_skill, message)) {
 			Message(Chat::White, "Error: World server disconnected");
 		}
@@ -2090,7 +2090,7 @@ void Client::IncreaseLanguageSkill(uint8 language_id, uint8 increase)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	MessageString(Chat::Skills, LANG_SKILL_IMPROVED);
+	MessageString(Chat::Skills, ClientString::LANG_SKILL_IMPROVED);
 }
 
 void Client::AddSkill(EQ::skills::SkillType skillid, uint16 value) {
@@ -3323,7 +3323,7 @@ void Client::SetPVP(bool toggle, bool message) {
 
 	if (message) {
 		if(GetPVP()) {
-			MessageString(Chat::Shout, PVP_ON);
+			MessageString(Chat::Shout, ClientString::PVP_ON);
 		} else {
 			Message(Chat::Shout, "You now follow the ways of Order.");
 		}
@@ -3454,22 +3454,22 @@ void Client::Disarm(Client* disarmer, int chance) {
 					if (matslot != EQ::textures::materialInvalid)
 						SendWearChange(matslot);
 				}
-				MessageString(Chat::Skills, DISARMED);
+				MessageString(Chat::Skills, ClientString::DISARMED);
 				if (disarmer != this)
-					disarmer->MessageString(Chat::Skills, DISARM_SUCCESS, GetCleanName());
+					disarmer->MessageString(Chat::Skills, ClientString::DISARM_SUCCESS, GetCleanName());
 				if (chance != 1000)
 					disarmer->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 4);
 				CalcBonuses();
 				// CalcEnduranceWeightFactor();
 				return;
 			}
-			disarmer->MessageString(Chat::Skills, DISARM_FAILED);
+			disarmer->MessageString(Chat::Skills, ClientString::DISARM_FAILED);
 			if (chance != 1000)
 				disarmer->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 2);
 			return;
 		}
 	}
-	disarmer->MessageString(Chat::Skills, DISARM_FAILED);
+	disarmer->MessageString(Chat::Skills, ClientString::DISARM_FAILED);
 }
 
 bool Client::BindWound(Mob *bindmob, bool start, bool fail)
@@ -3512,7 +3512,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 				// send bindmob "stand still"
 				if (!bindmob->IsAIControlled() && bindmob != this) {
 					bindmob->CastToClient()->MessageString(Chat::Yellow,
-										  YOU_ARE_BEING_BANDAGED);
+						ClientString::YOU_ARE_BEING_BANDAGED);
 				} else if (bindmob->IsAIControlled() && bindmob != this) {
 					; // Tell IPC to stand still?
 				} else {
@@ -4010,7 +4010,7 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 	char string_id_str[10];
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	MessageString(Chat::EchoTell, TELL_QUEUED_MESSAGE, who, string_id_str, message);
+	MessageString(Chat::EchoTell, ClientString::TELL_QUEUED_MESSAGE, who, string_id_str, message);
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
@@ -4080,7 +4080,7 @@ void Client::SetLanguageSkill(uint8 language_id, uint8 language_skill)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	MessageString(Chat::Skills, LANG_SKILL_IMPROVED);
+	MessageString(Chat::Skills, ClientString::LANG_SKILL_IMPROVED);
 }
 
 void Client::LinkDead()
@@ -4170,7 +4170,7 @@ void Client::Escape()
 {
 	entity_list.RemoveFromTargets(this, true);
 	SetInvisible(Invisibility::Invisible);
-	MessageString(Chat::Skills, ESCAPE);
+	MessageString(Chat::Skills, ClientString::ESCAPE);
 }
 
 float Client::CalcClassicPriceMod(Mob* other, bool reverse) {
@@ -4383,13 +4383,13 @@ void Client::SacrificeConfirm(Mob *caster)
 	}
 
 	if (GetLevel() < RuleI(Spells, SacrificeMinLevel)) {
-		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		caster->MessageString(Chat::Red, ClientString::SAC_TOO_LOW); // This being is not a worthy sacrifice.
 		safe_delete(outapp);
 		return;
 	}
 
 	if (GetLevel() > RuleI(Spells, SacrificeMaxLevel)) {
-		caster->MessageString(Chat::Red, SAC_TOO_HIGH);
+		caster->MessageString(Chat::Red, ClientString::SAC_TOO_HIGH);
 		safe_delete(outapp);
 		return;
 	}
@@ -4461,7 +4461,7 @@ void Client::Sacrifice(Mob *caster)
 			}
 		}
 	} else {
-		caster->MessageString(Chat::Red, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		caster->MessageString(Chat::Red, ClientString::SAC_TOO_LOW); // This being is not a worthy sacrifice.
 	}
 }
 
@@ -5679,7 +5679,7 @@ void Client::HandleLDoNOpen(NPC *target)
 		{
 			if(target->GetLDoNTrapSpellID() != 0)
 			{
-				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, ClientString::LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].resist_difficulty);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5695,7 +5695,7 @@ void Client::HandleLDoNOpen(NPC *target)
 
 		if(target->IsLDoNLocked())
 		{
-			MessageString(Chat::Skills, LDON_STILL_LOCKED, target->GetCleanName());
+			MessageString(Chat::Skills, ClientString::LDON_STILL_LOCKED, target->GetCleanName());
 			return;
 		}
 		else
@@ -5729,13 +5729,13 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 		{
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				MessageString(Chat::Skills, LDON_CANT_DETERMINE_TRAP, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_CANT_DETERMINE_TRAP, target->GetCleanName());
 				return;
 			}
 
 			if(target->IsLDoNTrapDetected())
 			{
-				MessageString(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_CERTAIN_TRAP, target->GetCleanName());
 			}
 			else
 			{
@@ -5744,10 +5744,10 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 				{
 				case -1:
 				case 0:
-					MessageString(Chat::Skills, LDON_DONT_KNOW_TRAPPED, target->GetCleanName());
+					MessageString(Chat::Skills, ClientString::LDON_DONT_KNOW_TRAPPED, target->GetCleanName());
 					break;
 				case 1:
-					MessageString(Chat::Skills, LDON_CERTAIN_TRAP, target->GetCleanName());
+					MessageString(Chat::Skills, ClientString::LDON_CERTAIN_TRAP, target->GetCleanName());
 					target->SetLDoNTrapDetected(true);
 					break;
 				default:
@@ -5757,7 +5757,7 @@ void Client::HandleLDoNSenseTraps(NPC *target, uint16 skill, uint8 type)
 		}
 		else
 		{
-			MessageString(Chat::Skills, LDON_CERTAIN_NOT_TRAP, target->GetCleanName());
+			MessageString(Chat::Skills, ClientString::LDON_CERTAIN_NOT_TRAP, target->GetCleanName());
 		}
 	}
 }
@@ -5770,13 +5770,13 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 		{
 			if(!target->IsLDoNTrapped())
 			{
-				MessageString(Chat::Skills, LDON_WAS_NOT_TRAPPED, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_WAS_NOT_TRAPPED, target->GetCleanName());
 				return;
 			}
 
 			if((target->GetLDoNTrapType() == LDoNTypeCursed || target->GetLDoNTrapType() == LDoNTypeMagical) && type != target->GetLDoNTrapType())
 			{
-				MessageString(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_HAVE_NOT_DISARMED, target->GetCleanName());
 				return;
 			}
 
@@ -5795,13 +5795,13 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 				target->SetLDoNTrapDetected(false);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapSpellID(0);
-				MessageString(Chat::Skills, LDON_HAVE_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_HAVE_DISARMED, target->GetCleanName());
 				break;
 			case 0:
-				MessageString(Chat::Skills, LDON_HAVE_NOT_DISARMED, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_HAVE_NOT_DISARMED, target->GetCleanName());
 				break;
 			case -1:
-				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, ClientString::LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].resist_difficulty);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5820,7 +5820,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 		{
 			if(target->IsLDoNTrapped())
 			{
-				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, ClientString::LDON_ACCIDENT_SETOFF2);
 				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].resist_difficulty);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
@@ -5829,7 +5829,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 
 			if(!target->IsLDoNLocked())
 			{
-				MessageString(Chat::Skills, LDON_WAS_NOT_LOCKED, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_WAS_NOT_LOCKED, target->GetCleanName());
 				return;
 			}
 
@@ -5845,11 +5845,11 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 			{
 			case 0:
 			case -1:
-				MessageString(Chat::Skills, LDON_PICKLOCK_FAILURE, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_PICKLOCK_FAILURE, target->GetCleanName());
 				break;
 			case 1:
 				target->SetLDoNLocked(false);
-				MessageString(Chat::Skills, LDON_PICKLOCK_SUCCESS, target->GetCleanName());
+				MessageString(Chat::Skills, ClientString::LDON_PICKLOCK_SUCCESS, target->GetCleanName());
 				break;
 			}
 		}
@@ -6409,7 +6409,7 @@ void Client::SuspendMinion(int value)
 
 			CurrentPet->SetTaunting(m_suspendedminion.taunting);
 
-			MessageString(Chat::Magenta, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
+			MessageString(Chat::Magenta, ClientString::SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
 			// TODO: These pet command states need to be synced ...
@@ -6440,19 +6440,19 @@ void Client::SuspendMinion(int value)
 		{
 			if(m_suspendedminion.SpellID > 0)
 			{
-				MessageString(Chat::Red,ONLY_ONE_PET);
+				MessageString(Chat::Red, ClientString::ONLY_ONE_PET);
 
 				return;
 			}
 			else if(CurrentPet->IsEngaged())
 			{
-				MessageString(Chat::Red,SUSPEND_MINION_FIGHTING);
+				MessageString(Chat::Red, ClientString::SUSPEND_MINION_FIGHTING);
 
 				return;
 			}
 			else if(entity_list.Fighting(CurrentPet))
 			{
-				MessageString(Chat::Blue,SUSPEND_MINION_HAS_AGGRO);
+				MessageString(Chat::Blue, ClientString::SUSPEND_MINION_HAS_AGGRO);
 			}
 			else
 			{
@@ -6469,7 +6469,7 @@ void Client::SuspendMinion(int value)
 				else
 					strn0cpy(m_suspendedminion.Name, CurrentPet->GetName(), 64); // Name stays even at rank 1
 
-				MessageString(Chat::Magenta, SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
+				MessageString(Chat::Magenta, ClientString::SUSPEND_MINION_SUSPEND, CurrentPet->GetCleanName());
 
 				CurrentPet->Depop(false);
 
@@ -6478,7 +6478,7 @@ void Client::SuspendMinion(int value)
 		}
 		else
 		{
-			MessageString(Chat::Red, ONLY_SUMMONED_PETS);
+			MessageString(Chat::Red, ClientString::ONLY_SUMMONED_PETS);
 
 			return;
 		}
@@ -6504,7 +6504,7 @@ void Client::AddEbonCrystals(uint32 amount, bool is_reclaim) {
 
 	MessageString(
 		Chat::Yellow,
-		YOU_RECEIVE,
+		ClientString::YOU_RECEIVE,
 		fmt::format(
 			"{} {}",
 			amount,
@@ -6531,7 +6531,7 @@ void Client::AddRadiantCrystals(uint32 amount, bool is_reclaim) {
 
 	MessageString(
 		Chat::Yellow,
-		YOU_RECEIVE,
+		ClientString::YOU_RECEIVE,
 		fmt::format(
 			"{} {}",
 			amount,
@@ -7034,16 +7034,16 @@ void Client::LocateCorpse()
 
 	if(ClosestCorpse)
 	{
-		MessageString(Chat::Spells, SENSE_CORPSE_DIRECTION);
+		MessageString(Chat::Spells, ClientString::SENSE_CORPSE_DIRECTION);
 		SetHeading(CalculateHeadingToTarget(ClosestCorpse->GetX(), ClosestCorpse->GetY()));
 		SetTarget(ClosestCorpse);
 		SendTargetCommand(ClosestCorpse->GetID());
 		SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0, true);
 	}
 	else if(!GetTarget())
-		MessageString(Chat::Red, SENSE_CORPSE_NONE);
+		MessageString(Chat::Red, ClientString::SENSE_CORPSE_NONE);
 	else
-		MessageString(Chat::Red, SENSE_CORPSE_NOT_NAME);
+		MessageString(Chat::Red, ClientString::SENSE_CORPSE_NOT_NAME);
 }
 
 void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
@@ -7121,7 +7121,7 @@ void Client::DragCorpses()
 		if (!corpse || !corpse->IsPlayerCorpse() ||
 				corpse->CastToCorpse()->IsBeingLooted() ||
 				!corpse->CastToCorpse()->Summon(this, false, false)) {
-			MessageString(Chat::DefaultText, CORPSEDRAG_STOP);
+			MessageString(Chat::DefaultText, ClientString::CORPSEDRAG_STOP);
 			It = DraggedCorpses.erase(It);
 			if (It == DraggedCorpses.end())
 				break;
@@ -7132,10 +7132,10 @@ void Client::DragCorpses()
 void Client::ConsentCorpses(std::string consent_name, bool deny)
 {
 	if (strcasecmp(consent_name.c_str(), GetName()) == 0) {
-		MessageString(Chat::Red, CONSENT_YOURSELF);
+		MessageString(Chat::Red, ClientString::CONSENT_YOURSELF);
 	}
 	else if (!consent_throttle_timer.Check()) {
-		MessageString(Chat::Red, CONSENT_WAIT);
+		MessageString(Chat::Red, ClientString::CONSENT_WAIT);
 	}
 	else {
 		auto pack = new ServerPacket(ServerOP_Consent, sizeof(ServerOP_Consent_Struct));
@@ -8076,7 +8076,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 {
 	if (!(m_ClientVersionBit & EQ::versions::maskRoFAndLater))
 	{
-		MessageString(Chat::White, PICK_LORE);
+		MessageString(Chat::White, ClientString::PICK_LORE);
 		return;
 	}
 
@@ -8085,7 +8085,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 	if(!item)
 		return;
 
-	MessageString(Chat::White, PICK_LORE, item->Name);
+	MessageString(Chat::White, ClientString::PICK_LORE, item->Name);
 }
 
 void Client::GarbleMessage(char *message, uint8 variance)
@@ -8442,23 +8442,23 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 	}
 	// If no primary faction or biggest influence is your faction hit
 	if (primaryfaction <= 0 || lowestvalue == tmpFactionValue) {
-		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
+		merchant->SayString(zone->random.Int(ClientString::WONT_SELL_DEEDS1, ClientString::WONT_SELL_DEEDS6));
 	} else if (lowestvalue == fmod.race_mod) { // race biggest
 		// Non-standard race (ex. illusioned to wolf)
 		if (!IsPlayerRace(GetRace())) {
 			messageid = zone->random.Int(1, 3); // these aren't sequential StringIDs :(
 			switch (messageid) {
 			case 1:
-				messageid = WONT_SELL_NONSTDRACE1;
+				messageid = ClientString::WONT_SELL_NONSTDRACE1;
 				break;
 			case 2:
-				messageid = WONT_SELL_NONSTDRACE2;
+				messageid = ClientString::WONT_SELL_NONSTDRACE2;
 				break;
 			case 3:
-				messageid = WONT_SELL_NONSTDRACE3;
+				messageid = ClientString::WONT_SELL_NONSTDRACE3;
 				break;
 			default: // w/e should never happen
-				messageid = WONT_SELL_NONSTDRACE1;
+				messageid = ClientString::WONT_SELL_NONSTDRACE1;
 				break;
 			}
 			merchant->SayString(messageid);
@@ -8466,30 +8466,30 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 			messageid = zone->random.Int(1, 4);
 			switch (messageid) {
 			case 1:
-				messageid = WONT_SELL_RACE1;
+				messageid = ClientString::WONT_SELL_RACE1;
 				break;
 			case 2:
-				messageid = WONT_SELL_RACE2;
+				messageid = ClientString::WONT_SELL_RACE2;
 				break;
 			case 3:
-				messageid = WONT_SELL_RACE3;
+				messageid = ClientString::WONT_SELL_RACE3;
 				break;
 			case 4:
-				messageid = WONT_SELL_RACE4;
+				messageid = ClientString::WONT_SELL_RACE4;
 				break;
 			default: // w/e should never happen
-				messageid = WONT_SELL_RACE1;
+				messageid = ClientString::WONT_SELL_RACE1;
 				break;
 			}
 			merchant->SayString(messageid, itoa(GetRace()));
 		}
 	} else if (lowestvalue == fmod.class_mod) {
-		merchant->SayString(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
+		merchant->SayString(zone->random.Int(ClientString::WONT_SELL_CLASS1, ClientString::WONT_SELL_CLASS5), itoa(GetClass()));
 	} else {
 		// Must be deity - these two sound the best for that.
 		// Can't use a message with a field, GUI wants class/race names.
 		// for those message IDs.  These are straight text.
-		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS2));
+		merchant->SayString(zone->random.Int(ClientString::WONT_SELL_DEEDS1, ClientString::WONT_SELL_DEEDS2));
 	}
 	return;
 }
@@ -8526,13 +8526,13 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	if (tmpvalue == 0 || temp == 1 || temp == 2) {
 		return;
 	} else if (faction_value >= this_faction_max) {
-		MessageString(Chat::Yellow, FACTION_BEST, name);
+		MessageString(Chat::Yellow, ClientString::FACTION_BEST, name);
 	} else if (faction_value <= this_faction_min) {
-		MessageString(Chat::Yellow, FACTION_WORST, name);
+		MessageString(Chat::Yellow, ClientString::FACTION_WORST, name);
 	} else if (tmpvalue > 0 && !RuleB(Client, UseLiveFactionMessage)) {
-		MessageString(Chat::Yellow, FACTION_BETTER, name);
+		MessageString(Chat::Yellow, ClientString::FACTION_BETTER, name);
 	} else if (tmpvalue < 0 && !RuleB(Client, UseLiveFactionMessage)) {
-		MessageString(Chat::Yellow, FACTION_WORSE, name);
+		MessageString(Chat::Yellow, ClientString::FACTION_WORSE, name);
 	} else if (RuleB(Client, UseLiveFactionMessage)) {
 		Message(
 			Chat::Yellow,
@@ -8834,7 +8834,7 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 		DeleteItemInInventory(slot, 1);
 
 		if (!auto_consume) // no message if the client consumed for us
-			entity_list.MessageCloseString(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
+			entity_list.MessageCloseString(this, true, 50, 0, ClientString::EATING_MESSAGE, GetName(), item->Name);
 
 		LogFood("Eating from slot: [{}]", (int)slot);
 
@@ -8846,7 +8846,7 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 		LogFood("Consuming drink, points added to thirst_level: [{}] current_thirst: [{}]", increase, m_pp.thirst_level);
 
 		if (!auto_consume) // no message if the client consumed for us
-			entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
+			entity_list.MessageCloseString(this, true, 50, 0, ClientString::DRINKING_MESSAGE, GetName(), item->Name);
 
 		LogFood("Drinking from slot: [{}]", (int)slot);
 	}
@@ -10388,13 +10388,13 @@ void Client::DzListTimers()
 		{
 			found = true;
 			auto time = lockout.GetTimeRemainingStrs();
-			MessageString(Chat::Yellow, DZ_TIMER, time.days.c_str(), time.hours.c_str(), time.mins.c_str(), lockout.DzName().c_str());
+			MessageString(Chat::Yellow, ClientString::DZ_TIMER, time.days.c_str(), time.hours.c_str(), time.mins.c_str(), lockout.DzName().c_str());
 		}
 	}
 
 	if (!found)
 	{
-		MessageString(Chat::Yellow, DZ_NO_TIMERS);
+		MessageString(Chat::Yellow, ClientString::DZ_NO_TIMERS);
 	}
 }
 
@@ -10590,7 +10590,7 @@ void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_inv
 	{
 		if (msg_if_invalid)
 		{
-			MessageString(Chat::Red, DZ_WAY_IS_BLOCKED); // unconfirmed message
+			MessageString(Chat::Red, ClientString::DZ_WAY_IS_BLOCKED); // unconfirmed message
 		}
 	}
 	else if (client_dzs.size() == 1)
@@ -11909,11 +11909,11 @@ void Client::AddAAPoints(uint32 points)
 	}
 
 	if (points == 1 && m_pp.aapoints == 1) {
-		MessageString(Chat::Yellow, GAIN_SINGLE_AA_SINGLE_AA, fmt::format_int(m_pp.aapoints).c_str());
+		MessageString(Chat::Yellow, ClientString::GAIN_SINGLE_AA_SINGLE_AA, fmt::format_int(m_pp.aapoints).c_str());
 	} else if (points == 1 && m_pp.aapoints > 1) {
-		MessageString(Chat::Yellow, GAIN_SINGLE_AA_MULTI_AA, fmt::format_int(m_pp.aapoints).c_str());
+		MessageString(Chat::Yellow, ClientString::GAIN_SINGLE_AA_MULTI_AA, fmt::format_int(m_pp.aapoints).c_str());
 	} else {
-		MessageString(Chat::Yellow, GAIN_MULTI_AA_MULTI_AA, fmt::format_int(points).c_str(), fmt::format_int(m_pp.aapoints).c_str());
+		MessageString(Chat::Yellow, ClientString::GAIN_MULTI_AA_MULTI_AA, fmt::format_int(points).c_str(), fmt::format_int(m_pp.aapoints).c_str());
 	}
 
 	SendAlternateAdvancementStats();
@@ -13102,10 +13102,10 @@ void Client::SetAAEXPPercentage(uint8 percentage)
 	const uint32 before_percentage = m_epp.perAA;
 
 	if (before_percentage > 0 && percentage == 0) {
-		MessageString(Chat::White, AA_OFF);
+		MessageString(Chat::White, ClientString::AA_OFF);
 	}
 	else if (before_percentage == 0 && percentage > 0) {
-		MessageString(Chat::White, AA_ON);
+		MessageString(Chat::White, ClientString::AA_ON);
 	}
 
 	m_epp.perAA = EQ::Clamp(static_cast<int>(percentage), 0, 100);

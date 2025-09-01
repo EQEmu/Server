@@ -245,11 +245,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (client && client->Connected()) {
 				if (scm->chan_num == ChatChannel_TellEcho) {
 					if (scm->queued == 1) // tell was queued
-						client->Tell_StringID(QUEUED_TELL, scm->to, scm->message);
+						client->Tell_StringID(ClientString::QUEUED_TELL, scm->to, scm->message);
 					else if (scm->queued == 2) // tell queue was full
-						client->Tell_StringID(QUEUE_TELL_FULL, scm->to, scm->message);
+						client->Tell_StringID(ClientString::QUEUE_TELL_FULL, scm->to, scm->message);
 					else if (scm->queued == 3) // person was offline
-						client->MessageString(Chat::EchoTell, TOLD_NOT_ONLINE, scm->to);
+						client->MessageString(Chat::EchoTell, ClientString::TOLD_NOT_ONLINE, scm->to);
 					else // normal tell echo "You told Soanso, 'something'"
 							// tell echo doesn't use language, so it looks normal to you even if nobody can understand your tells
 						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, Language::CommonTongue, Language::MaxValue, scm->message);
@@ -487,7 +487,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			Client* client = entity_list.GetClientByID(wars->id);
 			if (client) {
 				if (pack->size == 64)//no results
-					client->MessageString(Chat::White, WHOALL_NO_RESULTS);
+					client->MessageString(Chat::White, ClientString::WHOALL_NO_RESULTS);
 				else {
 					auto outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
 					memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
@@ -973,7 +973,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* c = entity_list.GetClientByName(Rezzer);
 
 		if (c)
-			c->MessageString(Chat::SpellWornOff, REZZ_ALREADY_PENDING);
+			c->MessageString(Chat::SpellWornOff, ClientString::REZZ_ALREADY_PENDING);
 
 		break;
 	}
@@ -3674,7 +3674,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				if (strcasecmp(c.second->GetCleanName(), in->send_to) == 0) {
 					c.second->MessageString(
 						Chat::Yellow,
-						PARCEL_DELIVERY_ARRIVED
+						ClientString::PARCEL_DELIVERY_ARRIVED
 					);
 					c.second->SendParcelStatus();
 					if (c.second->GetEngagedWithParcelMerchant()) {

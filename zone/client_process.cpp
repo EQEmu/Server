@@ -237,11 +237,11 @@ bool Client::Process() {
 			}
 
 			if (song_target == nullptr) {
-				InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
+				InterruptSpell(ClientString::SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 			}
 			else {
 				if (!ApplyBardPulse(bardsong, song_target, bardsong_slot)) {
-					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
+					InterruptSpell(ClientString::SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 				}
 			}
 		}
@@ -357,7 +357,7 @@ bool Client::Process() {
 
 		if (AutoFireEnabled()) {
 			if (GetTarget() == this) {
-				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+				MessageString(Chat::TooFarAway, ClientString::TRY_ATTACKING_SOMEONE);
 				auto_fire = false;
 			}
 			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
@@ -436,10 +436,10 @@ bool Client::Process() {
 			}
 
 			if (!CombatRange(auto_attack_target)) {
-				MessageString(Chat::TooFarAway, TARGET_TOO_FAR);
+				MessageString(Chat::TooFarAway, ClientString::TARGET_TOO_FAR);
 			}
 			else if (auto_attack_target == this) {
-				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+				MessageString(Chat::TooFarAway, ClientString::TRY_ATTACKING_SOMEONE);
 			}
 			else if (!los_status || !los_status_facing) {
 				//you can't see your target
@@ -464,11 +464,11 @@ bool Client::Process() {
 
 		if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
 			if (!dead && !IsBerserk() && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
-				entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
+				entity_list.MessageCloseString(this, false, 200, 0, ClientString::BERSERK_START, GetName());
 				berserk = true;
 			}
 			if (IsBerserk() && GetHPRatio() > RuleI(Combat, BerserkerFrenzyEnd)) {
-				entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
+				entity_list.MessageCloseString(this, false, 200, 0, ClientString::BERSERK_END, GetName());
 				berserk = false;
 			}
 		}
@@ -1004,12 +1004,12 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = temporary_merchant_list;
 	if (npc && handy_item) {
-		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);
+		int greet_id = zone->random.Int(ClientString::MERCHANT_GREETING, ClientString::MERCHANT_HANDY_ITEM4);
 		auto handy_id = std::to_string(greet_id);
-		if (greet_id != MERCHANT_GREETING) {
-			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName(), handy_item->Name);
+		if (greet_id != ClientString::MERCHANT_GREETING) {
+			MessageString(Chat::NPCQuestSay, ClientString::GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName(), handy_item->Name);
 		} else {
-			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName());
+			MessageString(Chat::NPCQuestSay, ClientString::GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName());
 		}
 	}
 }
@@ -1145,7 +1145,7 @@ void Client::OPTGB(const EQApplicationPacket *app)
 
 	uint32 tgb_flag = *(uint32 *)app->pBuffer;
 	if(tgb_flag == 2)
-		MessageString(Chat::White, TGB() ? TGB_ON : TGB_OFF);
+		MessageString(Chat::White, TGB() ? ClientString::TGB_ON : ClientString::TGB_OFF);
 	else
 		tgb = tgb_flag;
 }
@@ -1184,7 +1184,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	) {
 		MessageString(
 			Chat::Red,
-			SPELL_LEVEL_TO_LOW,
+			ClientString::SPELL_LEVEL_TO_LOW,
 			std::to_string(spells[m->spell_id].classes[GetClass() - 1]).c_str(),
 			spells[m->spell_id].name
 		);
@@ -1203,7 +1203,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 					RuleB(Character, RestrictSpellScribing) &&
 					!item->IsEquipable(GetRace(), GetClass())
 				) {
-					MessageString(Chat::Red, CANNOT_USE_ITEM);
+					MessageString(Chat::Red, ClientString::CANNOT_USE_ITEM);
 					break;
 				}
 
@@ -1792,14 +1792,14 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case EQ::skills::SkillJewelryMaking:
 			case EQ::skills::SkillPottery:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					MessageString(Chat::Red, ClientString::MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}
 				break;
 			case EQ::skills::SkillResearch:
 				if(skilllevel >= RuleI(Skills, MaxTrainResearch)) {
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					MessageString(Chat::Red, ClientString::MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}
@@ -1810,7 +1810,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case EQ::skills::SkillSpecializeDivination:
 			case EQ::skills::SkillSpecializeEvocation:
 				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					MessageString(Chat::Red, ClientString::MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}
@@ -1822,7 +1822,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			if (skilllevel >= MaxSkillValue)
 			{
 				// Don't allow training over max skill level
-				MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+				MessageString(Chat::Red, ClientString::MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 				SetSkill(skill, skilllevel);
 				return;
 			}
@@ -1833,7 +1833,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 				if (skilllevel >= MaxSpecSkill)
 				{
 					// Restrict specialization training to follow the rules
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					MessageString(Chat::Red, ClientString::MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					SetSkill(skill, skilllevel);
 					return;
 				}
@@ -2087,7 +2087,7 @@ void Client::DoTracking()
 	auto *m = entity_list.GetMob(TrackingID);
 
 	if (!m || m->IsCorpse()) {
-		MessageString(Chat::Skills, TRACK_LOST_TARGET);
+		MessageString(Chat::Skills, ClientString::TRACK_LOST_TARGET);
 		TrackingID = 0;
 		return;
 	}
@@ -2111,23 +2111,23 @@ void Client::DoTracking()
 	}
 
 	if (relative_heading > 480) {
-		MessageString(Chat::Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
+		MessageString(Chat::Skills, ClientString::TRACK_STRAIGHT_AHEAD, m->GetCleanName());
 	} else if (relative_heading > 416) {
-		MessageString(Chat::Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
+		MessageString(Chat::Skills, ClientString::TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
 	} else if (relative_heading > 352) {
-		MessageString(Chat::Skills, TRACK_TO_THE, m->GetCleanName(), "left");
+		MessageString(Chat::Skills, ClientString::TRACK_TO_THE, m->GetCleanName(), "left");
 	} else if (relative_heading > 288) {
-		MessageString(Chat::Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
+		MessageString(Chat::Skills, ClientString::TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
 	} else if (relative_heading > 224) {
-		MessageString(Chat::Skills, TRACK_BEHIND_YOU, m->GetCleanName());
+		MessageString(Chat::Skills, ClientString::TRACK_BEHIND_YOU, m->GetCleanName());
 	} else if (relative_heading > 160) {
-		MessageString(Chat::Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
+		MessageString(Chat::Skills, ClientString::TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
 	} else if (relative_heading > 96) {
-		MessageString(Chat::Skills, TRACK_TO_THE, m->GetCleanName(), "right");
+		MessageString(Chat::Skills, ClientString::TRACK_TO_THE, m->GetCleanName(), "right");
 	} else if (relative_heading > 32) {
-		MessageString(Chat::Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
+		MessageString(Chat::Skills, ClientString::TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
 	} else if (relative_heading >= 0) {
-		MessageString(Chat::Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
+		MessageString(Chat::Skills, ClientString::TRACK_STRAIGHT_AHEAD, m->GetCleanName());
 	}
 }
 

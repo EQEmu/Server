@@ -1525,7 +1525,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 
 	if (c && inst) {
 		if (c->CheckLoreConflict(item)) {
-			c->MessageString(Chat::White, LOOT_LORE_ERROR);
+			c->MessageString(Chat::White, ClientString::LOOT_LORE_ERROR);
 			c->QueuePacket(app);
 			SendEndLootErrorPacket(c);
 			ResetLooter();
@@ -1538,7 +1538,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 				EQ::ItemInstance *itm = inst->GetAugment(i);
 				if (itm) {
 					if (c->CheckLoreConflict(itm->GetItem())) {
-						c->MessageString(Chat::White, LOOT_LORE_ERROR);
+						c->MessageString(Chat::White, ClientString::LOOT_LORE_ERROR);
 						c->QueuePacket(app);
 						SendEndLootErrorPacket(c);
 						ResetLooter();
@@ -1625,7 +1625,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 			if (dz && !dz->CanClientLootCorpse(c, GetNPCTypeID(), GetID())) {
 				prevent_loot = true;
 				// note on live this message is only sent once on the first loot attempt of an open corpse
-				c->MessageString(Chat::Loot, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+				c->MessageString(Chat::Loot, ClientString::LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			}
 		}
 
@@ -1737,14 +1737,14 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 
 		linker.GenerateLink();
 
-		c->MessageString(Chat::Loot, LOOTED_MESSAGE, linker.Link().c_str());
+		c->MessageString(Chat::Loot, ClientString::LOOTED_MESSAGE, linker.Link().c_str());
 
 		if (!IsPlayerCorpse()) {
 			Group *g = c->GetGroup();
 			if (g != nullptr) {
 				g->GroupMessageString(
 					c, Chat::Loot,
-					OTHER_LOOTED_MESSAGE,
+					ClientString::OTHER_LOOTED_MESSAGE,
 					c->GetName(),
 					linker.Link().c_str()
 				);
@@ -1755,7 +1755,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 					r->RaidMessageString(
 						c,
 						Chat::Loot,
-						OTHER_LOOTED_MESSAGE,
+						ClientString::OTHER_LOOTED_MESSAGE,
 						c->GetName(),
 						linker.Link().c_str()
 					);
@@ -1961,7 +1961,7 @@ bool Corpse::Summon(Client *c, bool spell, bool CheckDistance)
 				m_is_corpse_changed = true;
 			}
 			else {
-				c->MessageString(Chat::Red, CORPSE_TOO_FAR);
+				c->MessageString(Chat::Red, ClientString::CORPSE_TOO_FAR);
 				return false;
 			}
 		}
@@ -1998,12 +1998,12 @@ bool Corpse::Summon(Client *c, bool spell, bool CheckDistance)
 					m_is_corpse_changed = true;
 				}
 				else {
-					c->MessageString(Chat::Red, CORPSE_TOO_FAR);
+					c->MessageString(Chat::Red, ClientString::CORPSE_TOO_FAR);
 					return false;
 				}
 			}
 			else {
-				c->MessageString(Chat::Red, CONSENT_DENIED);
+				c->MessageString(Chat::Red, ClientString::CONSENT_DENIED);
 				return false;
 			}
 		}
@@ -2312,7 +2312,7 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 	// refresh rezzed state from database
 	const auto &e = CharacterCorpsesRepository::FindOne(database, m_corpse_db_id);
 	if (!e.id) {
-		caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
+		caster->MessageString(Chat::White, ClientString::REZZ_ALREADY_PENDING);
 		return;
 	}
 
@@ -2325,8 +2325,8 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 	if (!IsRezzable()) {
 		if (caster && caster->IsClient()) {
 			if (!caster->CastToClient()->GetGM()) {
-				caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
-				caster->MessageString(Chat::White, CORPSE_TOO_OLD);
+				caster->MessageString(Chat::White, ClientString::REZZ_ALREADY_PENDING);
+				caster->MessageString(Chat::White, ClientString::CORPSE_TOO_OLD);
 				return;
 			}
 

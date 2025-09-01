@@ -200,7 +200,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 			if (RuleI(Adventure, ItemIDToEnablePorts) != 0) {
 				if (!sender->KeyRingCheck(RuleI(Adventure, ItemIDToEnablePorts))) {
 					if (sender->GetInv().HasItem(RuleI(Adventure, ItemIDToEnablePorts)) == INVALID_INDEX) {
-						sender->MessageString(Chat::Red, DUNGEON_SEALED);
+						sender->MessageString(Chat::Red, ClientString::DUNGEON_SEALED);
 						safe_delete(outapp);
 						return;
 					}
@@ -297,7 +297,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 					sender->GetCleanName(),
 					z->flag_needed
 				);
-				sender->MessageString(Chat::LightBlue, DOORS_LOCKED);
+				sender->MessageString(Chat::LightBlue, ClientString::DOORS_LOCKED);
 			} else {
 				sender->Message(Chat::White, "Your GM flag allows you to use this door.");
 			}
@@ -374,7 +374,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		 * GM can always open locks
 		 */
 		if (sender->GetGM()) {
-			sender->MessageString(Chat::LightBlue, DOORS_GM);
+			sender->MessageString(Chat::LightBlue, ClientString::DOORS_GM);
 
 			if (!IsDoorOpen() || (m_open_type == 58)) {
 				move_door_packet->action = static_cast<uint8>(m_invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
@@ -437,7 +437,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 							sender->CheckIncreaseSkill(EQ::skills::SkillPickLock, nullptr, 1);
 							move_door_packet->action = static_cast<uint8>(m_invert_state == 0 ? OPEN_DOOR
 								: OPEN_INVDOOR);
-							sender->MessageString(Chat::LightBlue, DOORS_SUCCESSFUL_PICK);
+							sender->MessageString(Chat::LightBlue, ClientString::DOORS_SUCCESSFUL_PICK);
 						}
 						else {
 							move_door_packet->action = static_cast<uint8>(m_invert_state == 0 ? CLOSE_DOOR
@@ -445,19 +445,19 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 						}
 					}
 					else {
-						sender->MessageString(Chat::LightBlue, DOORS_INSUFFICIENT_SKILL);
+						sender->MessageString(Chat::LightBlue, ClientString::DOORS_INSUFFICIENT_SKILL);
 						safe_delete(outapp);
 						return;
 					}
 				}
 				else {
-					sender->MessageString(Chat::LightBlue, DOORS_NO_PICK);
+					sender->MessageString(Chat::LightBlue, ClientString::DOORS_NO_PICK);
 					safe_delete(outapp);
 					return;
 				}
 			}
 			else {
-				sender->MessageString(Chat::LightBlue, DOORS_CANT_PICK);
+				sender->MessageString(Chat::LightBlue, ClientString::DOORS_CANT_PICK);
 				safe_delete(outapp);
 				return;
 			}
@@ -482,7 +482,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 				}
 			}
 			else {
-				sender->MessageString(Chat::LightBlue, DOORS_LOCKED);
+				sender->MessageString(Chat::LightBlue, ClientString::DOORS_LOCKED);
 				safe_delete(outapp);
 				return;
 			}

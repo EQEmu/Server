@@ -594,7 +594,7 @@ void TaskManager::TaskSetSelector(Client* client, Mob* mob, int task_set_id, boo
 	}
 
 	if (m_task_sets[task_set_id].empty()) {
-		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
+		client->MessageString(Chat::Yellow, ClientString::NO_TASK_OFFERS, ".", ".", client->GetName());
 		return;
 	}
 
@@ -632,7 +632,7 @@ void TaskManager::TaskSetSelector(Client* client, Mob* mob, int task_set_id, boo
 		SendTaskSelector(client, mob, task_list);
 	}
 	else {
-		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
+		client->MessageString(Chat::Yellow, ClientString::NO_TASK_OFFERS, ".", ".", client->GetName());
 	}
 }
 
@@ -684,7 +684,7 @@ void TaskManager::TaskQuestSetSelector(Client* client, Mob* mob, const std::vect
 		SendTaskSelector(client, mob, task_list);
 	}
 	else {
-		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
+		client->MessageString(Chat::Yellow, ClientString::NO_TASK_OFFERS, ".", ".", client->GetName());
 	}
 }
 

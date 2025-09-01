@@ -2932,7 +2932,7 @@ void Bot::DoAttackRounds(Mob* target, int hand) {
 						if (GetOwner()) {
 							GetOwner()->MessageString(
 								Chat::NPCFlurry,
-								NPC_FLURRY,
+								ClientString::NPC_FLURRY,
 								GetCleanName(),
 								target->GetCleanName()
 							);
@@ -3454,11 +3454,11 @@ bool Bot::CheckIfIncapacitated() {
 void Bot::SetBerserkState() {// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
 		if (!berserk && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
-			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
+			entity_list.MessageCloseString(this, false, 200, 0, ClientString::BERSERK_START, GetName());
 			berserk = true;
 		}
 		if (berserk && GetHPRatio() > RuleI(Combat, BerserkerFrenzyEnd)) {
-			entity_list.MessageCloseString(this, false, 200, 0, BERSERK_END, GetName());
+			entity_list.MessageCloseString(this, false, 200, 0, ClientString::BERSERK_END, GetName());
 			berserk = false;
 		}
 	}
@@ -5101,7 +5101,7 @@ bool Bot::TryFinishingBlow(Mob *defender, int64 &damage)
 		if (defender->GetLevel() <= levelreq && (chance >= zone->random.Int(1, 1000))) {
 			LogCombat("Landed a finishing blow: levelreq at [{}] other level [{}]",
 				levelreq, defender->GetLevel());
-			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, FINISHING_BLOW, GetName());
+			entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, ClientString::FINISHING_BLOW, GetName());
 			damage = fb_damage;
 			return true;
 		} else {
@@ -5362,7 +5362,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 					if (bo && bo->IsClient() && bo->CastToClient()->GetBotOption(Client::booMonkWuMessage)) {
 
 						bo->Message(
-							GENERIC_EMOTE,
+							ClientString::GENERIC_EMOTE,
 							"The spirit of Master Wu fills %s!  %s gains %d additional attack(s).",
 							GetCleanName(),
 							GetCleanName(),
@@ -5563,7 +5563,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 			if (bo && bo->IsClient() && bo->CastToClient()->GetBotOption(Client::booMonkWuMessage)) {
 
 				bo->Message(
-					GENERIC_EMOTE,
+					ClientString::GENERIC_EMOTE,
 					"The spirit of Master Wu fills %s!  %s gains %d additional attack(s).",
 					GetCleanName(),
 					GetCleanName(),
@@ -5920,12 +5920,12 @@ bool Bot::CastSpell(
 
 		if (DivineAura()) {
 			LogSpellsDetail("Spell casting canceled: cannot cast while Divine Aura is in effect");
-			InterruptSpell(SPELL_FIZZLE, 0x121, false);
+			InterruptSpell(ClientString::SPELL_FIZZLE, 0x121, false);
 			return false;
 		}
 
 		if (slot < EQ::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
-			int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
+			int fizzle_msg = IsBardSong(spell_id) ? ClientString::MISS_NOTE : ClientString::SPELL_FIZZLE;
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
 			uint32 use_mana = ((spells[spell_id].mana) / 4);
@@ -7191,7 +7191,7 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 				}
 			}
 		} else if (invitedBot->HasGroup()) {
-			c->MessageString(Chat::LightGray, TARGET_ALREADY_IN_GROUP, invitedBot->GetCleanName());
+			c->MessageString(Chat::LightGray, ClientString::TARGET_ALREADY_IN_GROUP, invitedBot->GetCleanName());
 		}
 	}
 }
@@ -7931,7 +7931,7 @@ void Bot::RaidGroupSay(const char* msg, ...) {
 		if (r) {
 			for (const auto& m : r->members) {
 				if (m.member && m.member->IsClient()) {
-					m.member->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
+					m.member->FilteredMessageString(this,Chat::PetResponse,FilterSocials, ClientString::GENERIC_SAY,GetCleanName(),buf);
 				}
 			}
 		}
@@ -7939,12 +7939,12 @@ void Bot::RaidGroupSay(const char* msg, ...) {
 	else if (HasGroup()) {
 			for (auto& m : GetGroup()->members) {
 				if (m && m->IsClient()) {
-					m->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
+					m->FilteredMessageString(this,Chat::PetResponse,FilterSocials, ClientString::GENERIC_SAY,GetCleanName(),buf);
 				}
 			}
 	}
 	else if (GetOwner()) {
-		GetOwner()->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
+		GetOwner()->FilteredMessageString(this,Chat::PetResponse,FilterSocials, ClientString::GENERIC_SAY,GetCleanName(),buf);
 	}
 }
 
@@ -13369,7 +13369,7 @@ bool Bot::IsImmuneToBotSpell(uint16 spell_id, Mob* caster) {
 
 		if (IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false)) {
 			LogSpells("Clients cannot fear eachother!");
-			caster->MessageString(Chat::Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
+			caster->MessageString(Chat::Red, ClientString::IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			return true;
 		}
 		else if (GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0) {

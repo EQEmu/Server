@@ -254,7 +254,7 @@ void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& name, bo
 
 	if (is_solo)
 	{
-		SendLeaderMessage(Chat::Red, DZ_YOU_BELONG);
+		SendLeaderMessage(Chat::Red, ClientString::DZ_YOU_BELONG);
 	}
 	else if (m_requester)
 	{
@@ -274,11 +274,11 @@ void ExpeditionRequest::SendLeaderMemberReplayLockout(const std::string& name, c
 	auto time = lockout.GetTimeRemainingStrs();
 	if (is_solo)
 	{
-		SendLeaderMessage(Chat::Red, DZ_REPLAY_YOU, { time.days, time.hours, time.mins });
+		SendLeaderMessage(Chat::Red, ClientString::DZ_REPLAY_YOU, { time.days, time.hours, time.mins });
 	}
 	else
 	{
-		SendLeaderMessage(Chat::Red, DZ_REPLAY_OTHER, { name, time.days, time.hours, time.mins });
+		SendLeaderMessage(Chat::Red, ClientString::DZ_REPLAY_OTHER, { name, time.days, time.hours, time.mins });
 	}
 }
 
@@ -290,7 +290,7 @@ void ExpeditionRequest::SendLeaderMemberEventLockout(const std::string& name, co
 	}
 
 	auto time = lockout.GetTimeRemainingStrs();
-	SendLeaderMessage(Chat::Red, DZ_EVENT_TIMER, { name, lockout.Event(), time.days, time.hours, time.mins });
+	SendLeaderMessage(Chat::Red, ClientString::DZ_EVENT_TIMER, { name, lockout.Event(), time.days, time.hours, time.mins });
 }
 
 bool ExpeditionRequest::IsPlayerCountValidated()
@@ -305,7 +305,7 @@ bool ExpeditionRequest::IsPlayerCountValidated()
 	{
 		requirements_met = false;
 
-		SendLeaderMessage(Chat::System, DZ_PLAYER_COUNT, {
+		SendLeaderMessage(Chat::System, ClientString::DZ_PLAYER_COUNT, {
 			fmt::format_int(m_members.size()).str(),
 			fmt::format_int(m_dz->GetMinPlayers()).str(),
 			fmt::format_int(m_dz->GetMaxPlayers()).str()

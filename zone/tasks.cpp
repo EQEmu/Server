@@ -136,7 +136,7 @@ void Client::SendTaskRequestCooldownTimerMessage()
 	if (HasTaskRequestCooldownTimer())
 	{
 		uint32_t seconds = task_request_timer.GetRemainingTime() / 1000;
-		MessageString(Chat::Yellow, TASK_REQUEST_COOLDOWN_TIMER,
+		MessageString(Chat::Yellow, ClientString::TASK_REQUEST_COOLDOWN_TIMER,
 			".", ".", // args start at %3 for this eqstr
 			GetName(),
 			fmt::format_int(seconds / 60).c_str(), // minutes

@@ -51,7 +51,7 @@ void command_parcels(Client *c, const Seperator *sep)
 
 		auto player_id = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, player_name);
 		if (!player_id.at(0).char_id) {
-			c->MessageString(Chat::Yellow, CANT_FIND_PLAYER, player_name.c_str());
+			c->MessageString(Chat::Yellow, ClientString::CANT_FIND_PLAYER, player_name.c_str());
 			return;
 		}
 
@@ -138,7 +138,7 @@ void command_parcels(Client *c, const Seperator *sep)
 			to_name
 		);
 		if (send_to_client.at(0).character_name.empty()) {
-			c->MessageString(Chat::Yellow, CANT_FIND_PLAYER, to_name.c_str());
+			c->MessageString(Chat::Yellow, ClientString::CANT_FIND_PLAYER, to_name.c_str());
 			return;
 		}
 
@@ -205,7 +205,7 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			c->MessageString(
 				Chat::Yellow,
-				PARCEL_DELIVERY,
+				ClientString::PARCEL_DELIVERY,
 				c->GetCleanName(),
 				"Money",
 				send_to_client.at(0).character_name.c_str()
@@ -289,7 +289,7 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			c->MessageString(
 				Chat::Yellow,
-				PARCEL_DELIVERY,
+				ClientString::PARCEL_DELIVERY,
 				c->GetCleanName(),
 				inst->GetItem()->Name,
 				send_to_client.at(0).character_name.c_str()

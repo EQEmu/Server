@@ -125,7 +125,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id)
 void Client::SummonHorse(uint16 spell_id)
 {
 	if (GetHorseId()) {
-		MessageString(Chat::Red, ALREADY_ON_A_MOUNT);
+		MessageString(Chat::Red, ClientString::ALREADY_ON_A_MOUNT);
 		return;
 	}
 

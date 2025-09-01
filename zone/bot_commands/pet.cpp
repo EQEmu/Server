@@ -34,7 +34,7 @@ void bot_command_pet_get_lost(Client *c, const Seperator *sep)
 		if (!bot_iter->GetPet() || bot_iter->GetPet()->IsCharmed())
 			continue;
 
-		bot_iter->GetPet()->SayString(PET_GETLOST_STRING);
+		bot_iter->GetPet()->SayString(ClientString::PET_GETLOST_STRING);
 		bot_iter->GetPet()->Depop(false);
 		bot_iter->SetPetID(0);
 		database.botdb.DeletePetItems(bot_iter->GetBotID());
@@ -80,7 +80,7 @@ void bot_command_pet_remove(Client *c, const Seperator *sep)
 		}
 
 		if (bot_iter->GetPet()) {
-			bot_iter->GetPet()->SayString(PET_GETLOST_STRING);
+			bot_iter->GetPet()->SayString(ClientString::PET_GETLOST_STRING);
 			bot_iter->GetPet()->Depop(false);
 			bot_iter->SetPetID(0);
 		}

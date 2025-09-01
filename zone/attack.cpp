@@ -1503,7 +1503,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 				this, /* Sender */
 				Chat::StrikeThrough, /* Type: 339 */
 				FilterStrikethrough, /* FilterType: 12 */
-				STRIKETHROUGH_STRING /* You strike through your opponent's defenses! */
+				ClientString::STRIKETHROUGH_STRING /* You strike through your opponent's defenses! */
 			);
 
 			hit.damage_done = 1;			// set to one, we will check this to continue
@@ -1529,14 +1529,14 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 							this,
 							Chat::Stun,
 							FilterStuns,
-							AVOID_STUNNING_BLOW
+							ClientString::AVOID_STUNNING_BLOW
 						);
 					} else if (zone->random.Roll(stun_resist)) {
 						other->FilteredMessageString(
 							this,
 							Chat::Stun,
 							FilterStuns,
-							SHAKE_OFF_STUN
+							ClientString::SHAKE_OFF_STUN
 						);
 					} else {
 						other->Stun(3000); // yuck -- 3 seconds
@@ -1598,7 +1598,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if (DivineAura() && !CastToClient()->GetGM()) { //cant attack while invulnerable unless your a gm
 		LogCombat("Attack cancelled, Divine Aura is in effect");
-		MessageString(Chat::DefaultText, DIVINE_AURA_NO_ATK);
+		MessageString(Chat::DefaultText, ClientString::DIVINE_AURA_NO_ATK);
 		return false;
 	}
 
@@ -1856,7 +1856,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 			false, /* Skip Sender */
 			RuleI(Range, DamageMessages),
 			Chat::NonMelee, /* 283 */
-			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+			ClientString::HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
 			killer_mob->GetCleanName(), /* Message1 */
 			GetCleanName(), /* Message2 */
 			ConvertArray(damage, val1)/* Message3 */
@@ -2224,7 +2224,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//Check that we can attack before we calc heading and face our target
 	if (!IsAttackAllowed(other)) {
 		if (GetOwnerID()) {
-			SayString(NOT_LEGAL_TARGET);
+			SayString(ClientString::NOT_LEGAL_TARGET);
 		}
 
 		if (other->IsClient()) {
@@ -2464,7 +2464,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 		{
 			if (IsLDoNTrapped())
 			{
-				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
+				MessageString(Chat::Red, ClientString::LDON_ACCIDENT_SETOFF2);
 				SpellFinished(GetLDoNTrapSpellID(), other, EQ::spells::CastingSlot::Item, 0, -1, spells[GetLDoNTrapSpellID()].resist_difficulty, false);
 				SetLDoNTrapSpellID(0);
 				SetLDoNTrapped(false);
@@ -2532,7 +2532,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			false, /* Skip Sender */
 			RuleI(Range, DamageMessages),
 			Chat::NonMelee, /* 283 */
-			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+			ClientString::HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
 			killer_mob->GetCleanName(), /* Message1 */
 			GetCleanName(), /* Message2 */
 			ConvertArray(damage, val1) /* Message3 */
@@ -4158,7 +4158,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 			pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
 			pet->SetTarget(attacker);
-			MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
+			MessageString(Chat::NPCQuestSay, ClientString::PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 		}
 
 		if (GetTempPetCount()) {
@@ -4310,7 +4310,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				true,  /* Skip Sender */
 				RuleI(Range, SpellMessages),
 				Chat::SpellWornOff, /* 284 */
-				HAS_BEEN_AWAKENED, // %1 has been awakened by %2.
+				ClientString::HAS_BEEN_AWAKENED, // %1 has been awakened by %2.
 				GetCleanName(), /* Message1 */
 				attacker->GetCleanName() /* Message2 */
 			);
@@ -4442,7 +4442,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 								this,
 								Chat::Stun,
 								FilterStuns,
-								SHAKE_OFF_STUN
+								ClientString::SHAKE_OFF_STUN
 							);
 						}
 					}
@@ -4453,7 +4453,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							this,
 							Chat::Stun,
 							FilterStuns,
-							AVOID_STUNNING_BLOW
+							ClientString::AVOID_STUNNING_BLOW
 						);
 					}
 				}
@@ -4568,7 +4568,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				if (FromDamageShield && damage > 0) {
 					//special crap for spell damage, looks hackish to me
 					char val1[20] = { 0 };
-					owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
+					owner->MessageString(Chat::NonMelee, ClientString::OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 				}
 				else {
 					if (damage > 0) {
@@ -4613,7 +4613,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							if (owner && owner->CastToClient()->GetFilter(FilterDamageShields) != FilterHide) {
 								owner->MessageString(
 									Chat::DamageShield,
-									OTHER_HIT_NONMELEE,
+									ClientString::OTHER_HIT_NONMELEE,
 									GetCleanName(),
 									ConvertArray(damage, val1)
 								);
@@ -4622,7 +4622,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							if (attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide) {
 								attacker->MessageString(
 									Chat::DamageShield,
-									OTHER_HIT_NONMELEE,
+									ClientString::OTHER_HIT_NONMELEE,
 									GetCleanName(),
 									ConvertArray(damage, val1)
 								);
@@ -4636,7 +4636,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							RuleI(Range, SpellMessages),
 							Chat::NonMelee, /* 283 */
 							FilterSpellDamage, /* FilterType: 13 */
-							HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+							ClientString::HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
 							0,
 							attacker->GetCleanName(), /* Message1 */
 							GetCleanName(), /* Message2 */
@@ -4758,13 +4758,13 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
 			if (!attacker->IsCorpse() && attacker->IsClient()) {
 				attacker->FilteredMessageString(attacker, Chat::DotDamage,
-					FilterDOT, YOUR_HIT_DOT, GetCleanName(), itoa(damage),
+					FilterDOT, ClientString::YOUR_HIT_DOT, GetCleanName(), itoa(damage),
 					spells[spell_id].name);
 			}
 
 			if (IsClient()) {
 				FilteredMessageString(this, Chat::DotDamage, FilterDOT,
-					YOU_TAKE_DOT, itoa(damage), attacker->GetCleanName(),
+					ClientString::YOU_TAKE_DOT, itoa(damage), attacker->GetCleanName(),
 					spells[spell_id].name);
 			}
 
@@ -4775,7 +4775,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				RuleI(Range, SpellMessages),
 				Chat::DotDamage, /* Type: 325 */
 				FilterDOT, /* FilterType: 19 */
-				OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
+				ClientString::OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
 				attacker,		/* sent above */
 				GetCleanName(), /* Message1 */
 				itoa(damage), /* Message2 */
@@ -4813,45 +4813,45 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 				if ((caster->IsClient() && caster == this)) {
 					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater) {
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
+							ClientString::HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
 					}
 					else
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							YOU_HEALED, GetCleanName(), itoa(acthealed));
+							ClientString::YOU_HEALED, GetCleanName(), itoa(acthealed));
 				}
 				else if ((caster->IsClient() && caster != this)) {
 					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
 						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
+							ClientString::HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
 							spells[spell_id].name);
 					else
 						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							YOU_HEAL, GetCleanName(), itoa(acthealed));
+							ClientString::YOU_HEAL, GetCleanName(), itoa(acthealed));
 				}
 
 				// message to target
 				if (IsClient() && caster != this) {
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
-							HOT_HEALED_OTHER, caster->GetCleanName(),
+							ClientString::HOT_HEALED_OTHER, caster->GetCleanName(),
 							itoa(acthealed), spells[spell_id].name);
 					else
 						FilteredMessageString(this, Chat::NonMelee, FilterHealOverTime,
-							YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+							ClientString::YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
 				}
 			}
 			else { // normal heals
 				// Message to caster
 				if (caster->IsClient()) {
 					caster->FilteredMessageString(caster, Chat::NonMelee,
-						FilterSpellDamage, YOU_HEAL, GetCleanName(),
+						FilterSpellDamage, ClientString::YOU_HEAL, GetCleanName(),
 						itoa(acthealed));
 					}
 
 				// Message to target
 				if (IsClient() && caster != this) {
 					FilteredMessageString(caster, Chat::NonMelee,
-					FilterSpellDamage, YOU_HEALED, caster->GetCleanName(),
+					FilterSpellDamage, ClientString::YOU_HEALED, caster->GetCleanName(),
 					itoa(acthealed));
 				}
 			}
@@ -5067,10 +5067,10 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 				if (IsPet()) {
 					Mob *own = GetOwner();
 					if (own)
-						own->MessageString(Chat::Red, PROC_PETTOOLOW);
+						own->MessageString(Chat::Red, ClientString::PROC_PETTOOLOW);
 				}
 				else {
-					MessageString(Chat::Red, PROC_TOOLOW);
+					MessageString(Chat::Red, ClientString::PROC_TOOLOW);
 				}
 			}
 			else {
@@ -5102,10 +5102,10 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 						if (IsPet()) {
 							Mob *own = GetOwner();
 							if (own)
-								own->MessageString(Chat::Red, PROC_PETTOOLOW);
+								own->MessageString(Chat::Red, ClientString::PROC_PETTOOLOW);
 						}
 						else {
-							MessageString(Chat::Red, PROC_TOOLOW);
+							MessageString(Chat::Red, ClientString::PROC_TOOLOW);
 						}
 					}
 					else {
@@ -5344,7 +5344,7 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 				RuleI(Range, CriticalDamage),
 				Chat::MeleeCrit, /* Type: 301 */
 				FilterMeleeCrits, /* FilterType: 12 */
-				CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
+				ClientString::CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
 				0,
 				GetCleanName(), /* Message1 */
 				itoa(hit.damage_done + hit.min_damage) /* Message2 */
@@ -5414,7 +5414,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 
 				LogCombatDetail("Final Slayundead damage [{}]", hit.damage_done);
 
-				int slay_sex = GetGender() == Gender::Female ? FEMALE_SLAYUNDEAD : MALE_SLAYUNDEAD;
+				int slay_sex = GetGender() == Gender::Female ? ClientString::FEMALE_SLAYUNDEAD : ClientString::MALE_SLAYUNDEAD;
 
 				entity_list.FilteredMessageCloseString(
 					this, /* Sender */
@@ -5514,7 +5514,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 							RuleI(Range, CriticalDamage),
 							Chat::MeleeCrit, /* Type: 301 */
 							FilterMeleeCrits, /* FilterType: 12 */
-							DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
+							ClientString::DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
 							0,
 							GetCleanName(), /* Message1 */
 							itoa(hit.damage_done + hit.min_damage) /* Message2 */
@@ -5543,7 +5543,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 					RuleI(Range, CriticalDamage),
 					Chat::MeleeCrit, /* Type: 301 */
 					FilterMeleeCrits, /* FilterType: 12 */
-					CRIPPLING_BLOW, /* MessageFormat: %1 lands a Crippling Blow!(%2) */
+					ClientString::CRIPPLING_BLOW, /* MessageFormat: %1 lands a Crippling Blow!(%2) */
 					0,
 					GetCleanName(), /* Message1 */
 					itoa(hit.damage_done + hit.min_damage) /* Message2 */
@@ -5558,7 +5558,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 						true,
 						RuleI(Range, Emote),
 						Chat::Emote,
-						STAGGERS,
+						ClientString::STAGGERS,
 						GetName()
 					);
 					defender->Stun(RuleI(Combat, StunDuration));
@@ -5573,7 +5573,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				RuleI(Range, CriticalDamage),
 				Chat::MeleeCrit, /* Type: 301 */
 				FilterMeleeCrits, /* FilterType: 12 */
-				CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
+				ClientString::CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
 				0,
 				GetCleanName(), /* Message1 */
 				itoa(hit.damage_done + hit.min_damage) /* Message2 */
@@ -5633,7 +5633,7 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 				RuleI(Range, CriticalDamage),
 				Chat::MeleeCrit, /* Type: 301 */
 				FilterMeleeCrits, /* FilterType: 12 */
-				FINISHING_BLOW, /* MessageFormat: %1 scores a Finishing Blow!!) */
+				ClientString::FINISHING_BLOW, /* MessageFormat: %1 scores a Finishing Blow!!) */
 				0,
 				GetCleanName() /* Message1 */
 			);
@@ -5654,7 +5654,7 @@ void Mob::DoRiposte(Mob *defender)
 
 	// so ahhh the angle you can riposte is larger than the angle you can hit :P
 	if (!defender->IsFacingMob(this)) {
-		defender->MessageString(Chat::TooFarAway, CANT_SEE_TARGET);
+		defender->MessageString(Chat::TooFarAway, ClientString::CANT_SEE_TARGET);
 		return;
 	}
 
@@ -6382,7 +6382,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		else if (GetClass() == Class::Ranger && GetLevel() >= RuleI(Combat, ArcheryBonusLevelRequirement)) { // no double dmg on headshot
 			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
-				MessageString(Chat::MeleeCrit, BOW_DOUBLE_DAMAGE);
+				MessageString(Chat::MeleeCrit, ClientString::BOW_DOUBLE_DAMAGE);
 			}
 		}
 
@@ -6848,7 +6848,7 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 						if (zone->random.Roll(flurry_chance)) {
 							Attack(target, hand, false, false, IsFromSpell);
 						}
-						MessageString(Chat::NPCFlurry, YOU_FLURRY);
+						MessageString(Chat::NPCFlurry, ClientString::YOU_FLURRY);
 					}
 				}
 			}

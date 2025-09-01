@@ -971,7 +971,7 @@ void Mob::TuneDoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts,
 		int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 		if (strike_through && zone->random.Roll(strike_through)) {
 			MessageString(Chat::StrikeThrough,
-				STRIKETHROUGH_STRING); // You strike through your opponents defenses!
+				ClientString::STRIKETHROUGH_STRING); // You strike through your opponents defenses!
 			hit.damage_done = 1;			// set to one, we will check this to continue
 		}
 		// I'm pretty sure you can riposte a riposte
@@ -1494,7 +1494,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 		else if (GetClass() == Class::Ranger && GetLevel() > 50) { // no double dmg on headshot
 			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
-				MessageString(Chat::MeleeCrit, BOW_DOUBLE_DAMAGE);
+				MessageString(Chat::MeleeCrit, ClientString::BOW_DOUBLE_DAMAGE);
 			}
 		}
 	}

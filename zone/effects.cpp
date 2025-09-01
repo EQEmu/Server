@@ -151,10 +151,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 			entity_list.FilteredMessageCloseString(
 				this, true, 100, Chat::SpellCrit, FilterSpellCrits,
-				OTHER_CRIT_BLAST, nullptr, GetName(), itoa(-value));
+				ClientString::OTHER_CRIT_BLAST, nullptr, GetName(), itoa(-value));
 
 			if (IsClient()) {
-				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));
+				MessageString(Chat::SpellCrit, ClientString::YOU_CRIT_BLAST, itoa(-value));
 			}
 
 			return value;
@@ -506,10 +506,10 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		if (critical_modifier > 1) {
 			entity_list.MessageCloseString(
 				this, true, 100, Chat::SpellCrit,
-				OTHER_CRIT_HEAL, GetName(), itoa(value));
+				ClientString::OTHER_CRIT_HEAL, GetName(), itoa(value));
 
 			if (IsClient()) {
-				MessageString(Chat::SpellCrit, YOU_CRIT_HEAL, itoa(value));
+				MessageString(Chat::SpellCrit, ClientString::YOU_CRIT_HEAL, itoa(value));
 			}
 		}
 
@@ -861,7 +861,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		IsPet())
 	{
 		if (IsAmnesiad()) {
-			MessageString(Chat::Red, MELEE_SILENCE);
+			MessageString(Chat::Red, ClientString::MELEE_SILENCE);
 		}
 		return false;
 	}
@@ -895,7 +895,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 
 	if(level_to_use > GetLevel()) {
-		MessageString(Chat::Red, DISC_LEVEL_USE_ERROR);
+		MessageString(Chat::Red, ClientString::DISC_LEVEL_USE_ERROR);
 		//should summon them a new one...
 		return false;
 	}
@@ -907,7 +907,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	// sneak attack discs require you to be hidden for 4 seconds before use
 	if (spell.sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
-		MessageString(Chat::SpellFailure, SNEAK_RESTRICT);
+		MessageString(Chat::SpellFailure, ClientString::SNEAK_RESTRICT);
 		return false;
 	}
 

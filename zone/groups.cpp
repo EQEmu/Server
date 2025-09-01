@@ -189,8 +189,8 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 			// the group member other than the character doing the /split only gets this message "(splitter) shares the money with the group"
 			if (share && member_client != splitter) {
 				member_client->MessageString(
-					YOU_RECEIVE_AS_SPLIT,
-					SHARE_MONEY,
+					ClientString::YOU_RECEIVE_AS_SPLIT,
+					ClientString::SHARE_MONEY,
 					splitter->GetCleanName()
 				);
 			}
@@ -200,7 +200,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 				member_client->AddMoneyToPP(receive_copper, receive_silver, receive_gold, receive_platinum, true);
 				member_client->MessageString(
 					Chat::MoneySplit,
-					YOU_RECEIVE_AS_SPLIT,
+					ClientString::YOU_RECEIVE_AS_SPLIT,
 					Strings::Money(receive_platinum, receive_gold, receive_silver, receive_copper).c_str()
 				);
 			}

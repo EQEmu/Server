@@ -5050,13 +5050,13 @@ void Mob::Say(const char *format, ...)
 		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(buf);
 		entity_list.MessageCloseString(
 			talker, false, distance, Chat::NPCQuestSay,
-			GENERIC_SAY, GetCleanName(), new_message.c_str()
+			ClientString::GENERIC_SAY, GetCleanName(), new_message.c_str()
 		);
 	}
 	else {
 		entity_list.MessageCloseString(
 			talker, false, distance, Chat::NPCQuestSay,
-			GENERIC_SAY, GetCleanName(), buf
+			ClientString::GENERIC_SAY, GetCleanName(), buf
 		);
 	}
 }
@@ -5072,7 +5072,7 @@ void Mob::SayString(uint32 string_id, const char *message3, const char *message4
 
 	entity_list.MessageCloseString(
 		this, false, 200, 10,
-		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
+		ClientString::GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
 }
@@ -5085,7 +5085,7 @@ void Mob::SayString(uint32 type, uint32 string_id, const char *message3, const c
 
 	entity_list.MessageCloseString(
 		this, false, 200, type,
-		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
+		ClientString::GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
 }
@@ -5097,7 +5097,7 @@ void Mob::SayString(Client *to, uint32 string_id, const char *message3, const ch
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->MessageString(Chat::NPCQuestSay, ClientString::GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::SayString(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
@@ -5107,7 +5107,7 @@ void Mob::SayString(Client *to, uint32 type, uint32 string_id, const char *messa
 
 	auto string_id_str = std::to_string(string_id);
 
-	to->MessageString(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+	to->MessageString(type, ClientString::GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::Shout(const char *format, ...)
@@ -5120,7 +5120,7 @@ void Mob::Shout(const char *format, ...)
 	va_end(ap);
 
 	entity_list.MessageString(this, false, Chat::Shout,
-		GENERIC_SHOUT, GetCleanName(), buf);
+		ClientString::GENERIC_SHOUT, GetCleanName(), buf);
 }
 
 void Mob::Emote(const char *format, ...)
@@ -5134,7 +5134,7 @@ void Mob::Emote(const char *format, ...)
 
 	entity_list.MessageCloseString(
 		this, false, 200, 10,
-		GENERIC_EMOTE, GetCleanName(), buf
+		ClientString::GENERIC_EMOTE, GetCleanName(), buf
 	);
 }
 
@@ -5322,12 +5322,12 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 	}
 
 	if (IsSilenced() && !IsDiscipline(spell_id)) {
-		MessageString(Chat::Red, SILENCED_STRING);
+		MessageString(Chat::Red, ClientString::SILENCED_STRING);
 		return;
 	}
 
 	if (IsAmnesiad() && IsDiscipline(spell_id)) {
-		MessageString(Chat::Red, MELEE_SILENCE);
+		MessageString(Chat::Red, ClientString::MELEE_SILENCE);
 		return;
 	}
 
@@ -7154,16 +7154,16 @@ void Mob::SlowMitigation(Mob* caster)
 	if (GetSlowMitigation() && caster && caster->IsClient())
 	{
 		if ((GetSlowMitigation() > 0) && (GetSlowMitigation() < 26))
-			caster->MessageString(Chat::SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, ClientString::SLOW_MOSTLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 26) && (GetSlowMitigation() < 74))
-			caster->MessageString(Chat::SpellFailure, SLOW_PARTIALLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, ClientString::SLOW_PARTIALLY_SUCCESSFUL);
 
 		else if ((GetSlowMitigation() >= 74) && (GetSlowMitigation() < 101))
-			caster->MessageString(Chat::SpellFailure, SLOW_SLIGHTLY_SUCCESSFUL);
+			caster->MessageString(Chat::SpellFailure, ClientString::SLOW_SLIGHTLY_SUCCESSFUL);
 
 		else if (GetSlowMitigation() > 100)
-			caster->MessageString(Chat::SpellFailure, SPELL_OPPOSITE_EFFECT);
+			caster->MessageString(Chat::SpellFailure, ClientString::SPELL_OPPOSITE_EFFECT);
 	}
 }
 
@@ -7956,7 +7956,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 
 	if (!can_shield_npc && shield_target->IsNPC()) {
 		if (IsClient()) {
-			MessageString(Chat::White, SHIELD_TARGET_NPC);
+			MessageString(Chat::White, ClientString::SHIELD_TARGET_NPC);
 		}
 		return false;
 	}
@@ -7977,7 +7977,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 	//You have a shielder, or your 'Shield Target' already has a 'Shielder'
 	if (GetShielderID() || shield_target->GetShielderID()) {
 		if (IsClient()) {
-			MessageString(Chat::White, ALREADY_SHIELDED);
+			MessageString(Chat::White, ClientString::ALREADY_SHIELDED);
 		}
 		return false;
 	}
@@ -7985,7 +7985,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 	//You are being shielded or already have a 'Shield Target'
 	if (GetShieldTargetID() || shield_target->GetShieldTargetID()) {
 		if (IsClient()) {
-			MessageString(Chat::White, ALREADY_SHIELDING);
+			MessageString(Chat::White, ClientString::ALREADY_SHIELDING);
 		}
 		return false;
 	}
@@ -7997,11 +7997,11 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 	}
 
 	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
-		MessageString(Chat::Blue, TARGET_TOO_FAR);
+		MessageString(Chat::Blue, ClientString::TARGET_TOO_FAR);
 		return false;
 	}
 
-	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
+	entity_list.MessageCloseString(this, false, 100, 0, ClientString::START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 
 	SetShieldTargetID(shield_target->GetID());
 	SetShielderMitigation(shielder_mitigation);
@@ -8025,7 +8025,7 @@ void Mob::ShieldAbilityFinish()
 	Mob* shield_target = entity_list.GetMob(GetShieldTargetID());
 
 	if (shield_target) {
-		entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
+		entity_list.MessageCloseString(this, false, 100, 0, ClientString::END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 		shield_target->SetShielderID(0);
 		shield_target->SetShieldTargetMitigation(0);
 	}

@@ -529,7 +529,7 @@ void NPC::AI_Stop() {
 
 void Client::AI_Stop() {
 	Mob::AI_Stop();
-	MessageString(Chat::Red,PLAYER_REGAIN);
+	MessageString(Chat::Red, ClientString::PLAYER_REGAIN);
 
 	auto app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
 	Charm_Struct *ps = (Charm_Struct*)app->pBuffer;
@@ -1101,7 +1101,7 @@ void Mob::AI_Process() {
 
 			auto pet_owner = GetOwner();
 			if (pet_owner && pet_owner->IsClient()) {
-				pet_owner->MessageString(Chat::NPCQuestSay, CANNOT_WAKE, GetCleanName(), target->GetCleanName());
+				pet_owner->MessageString(Chat::NPCQuestSay, ClientString::CANNOT_WAKE, GetCleanName(), target->GetCleanName());
 			}
 
 			RemoveFromHateList(target);
@@ -1960,14 +1960,14 @@ void Mob::StartEnrage()
 
 	// start the timer. need to call IsEnraged frequently since we dont have callback timers :-/
 	bEnraged = true;
-	entity_list.MessageCloseString(this, true, 200, Chat::NPCEnrage, NPC_ENRAGE_START, GetCleanName());
+	entity_list.MessageCloseString(this, true, 200, Chat::NPCEnrage, ClientString::NPC_ENRAGE_START, GetCleanName());
 }
 
 void Mob::ProcessEnrage(){
 	if(IsEnraged()){
 		Timer *timer = GetSpecialAbilityTimer(SpecialAbility::Enrage);
 		if(timer && timer->Check()){
-			entity_list.MessageCloseString(this, true, 200, Chat::NPCEnrage, NPC_ENRAGE_END, GetCleanName());
+			entity_list.MessageCloseString(this, true, 200, Chat::NPCEnrage, ClientString::NPC_ENRAGE_END, GetCleanName());
 
 			int enraged_cooldown = GetSpecialAbilityParam(SpecialAbility::Enrage, 2);
 			enraged_cooldown = enraged_cooldown > 0 ? enraged_cooldown : EnragedTimer;
@@ -1993,7 +1993,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 				true,
 				200,
 				Chat::PetFlurry,
-				NPC_FLURRY,
+				ClientString::NPC_FLURRY,
 				GetCleanName(),
 				target->GetCleanName());
 		} else {
@@ -2002,7 +2002,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 				true,
 				200,
 				Chat::NPCFlurry,
-				NPC_FLURRY,
+				ClientString::NPC_FLURRY,
 				GetCleanName(),
 				target->GetCleanName());
 		}
@@ -2070,9 +2070,9 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
 	if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()){
-		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, NPC_RAMPAGE, GetCleanName());
+		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, ClientString::NPC_RAMPAGE, GetCleanName());
 	} else {
-		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
+		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, ClientString::NPC_RAMPAGE, GetCleanName());
 	}
 
 	int rampage_targets = GetSpecialAbilityParam(SpecialAbility::Rampage, 1);
@@ -2143,9 +2143,9 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
 	if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()) { // do not know every pet AA so thought it safer to add this
-		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, AE_RAMPAGE, GetCleanName());
+		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, ClientString::AE_RAMPAGE, GetCleanName());
 	} else {
-		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, AE_RAMPAGE, GetCleanName());
+		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, ClientString::AE_RAMPAGE, GetCleanName());
 	}
 
 	int rampage_targets = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 1);

@@ -123,7 +123,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		RuleB(Inventory, EnforceAugmentRestriction) &&
 		user->IsAugmentRestricted(tobe_auged->GetItemType(), auged_with->GetAugmentRestriction())
 	) {
-		user->MessageString(Chat::Red, AUGMENT_RESTRICTED);
+		user->MessageString(Chat::Red, ClientString::AUGMENT_RESTRICTED);
 		return;
 	}
 
@@ -349,13 +349,13 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				Strings::ToInt(container->GetItem()->IDFile + 2)
 			);
 
-			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, ClientString::TRANSFORM_COMPLETE, inst->GetItem()->Name);
 			if (RuleB(Inventory, DeleteTransformationMold)) {
 				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 			}
 		}
 		else if (inst) {
-			user->MessageString(Chat::LightBlue, TRANSFORM_FAILED, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, ClientString::TRANSFORM_FAILED, inst->GetItem()->Name);
 		}
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
@@ -379,10 +379,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQ::invslot::slotCursor, 0, 0);
-			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, ClientString::TRANSFORM_COMPLETE, inst->GetItem()->Name);
 		}
 		else if (inst) {
-			user->MessageString(Chat::LightBlue, DETRANSFORM_FAILED, inst->GetItem()->Name);
+			user->MessageString(Chat::LightBlue, ClientString::DETRANSFORM_FAILED, inst->GetItem()->Name);
 		}
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
@@ -407,7 +407,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		LogTradeskillsDetail("Check 2");
 
 		if (!is_augmented) {
-			user->MessageString(Chat::Emote, TRADESKILL_NOCOMBINE);
+			user->MessageString(Chat::Emote, ClientString::TRADESKILL_NOCOMBINE);
 		} else {
 			user->Message(Chat::Emote, "You must remove augments from all component items before you can attempt this combine.");
 		}
@@ -536,7 +536,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Update Made count
 	if (success) {
 		if (!spec.has_learnt && ((spec.must_learn&0x10) != 0x10)) {
-			user->MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
+			user->MessageString(Chat::LightBlue, ClientString::TRADESKILL_LEARN_RECIPE, spec.name.c_str());
 		}
 		database.UpdateRecipeMadecount(spec.recipe_id, user->CharacterID(), spec.madecount+1);
 	}
@@ -726,13 +726,13 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 		safe_delete(outapp);
 
-		user->MessageString(Chat::Skills, TRADESKILL_MISSING_COMPONENTS);
+		user->MessageString(Chat::Skills, ClientString::TRADESKILL_MISSING_COMPONENTS);
 
 		for (auto it = MissingItems.begin(); it != MissingItems.end(); ++it) {
 			const EQ::ItemData* item = database.GetItem(*it);
 
 			if(item)
-				user->MessageString(Chat::Skills, TRADESKILL_MISSING_ITEM, item->Name);
+				user->MessageString(Chat::Skills, ClientString::TRADESKILL_MISSING_ITEM, item->Name);
 		}
 
 		return;
@@ -786,7 +786,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 	if (success) {
 		if (!spec.has_learnt && ((spec.must_learn & 0x10) != 0x10)) {
-			user->MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, spec.name.c_str());
+			user->MessageString(Chat::LightBlue, ClientString::TRADESKILL_LEARN_RECIPE, spec.name.c_str());
 		}
 		database.UpdateRecipeMadecount(spec.recipe_id, user->CharacterID(), spec.madecount+1);
 	}
@@ -1104,7 +1104,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			chance = 100;
 		}
 
-		MessageString(Chat::Emote, TRADESKILL_TRIVIAL);
+		MessageString(Chat::Emote, ClientString::TRADESKILL_TRIVIAL);
 	} else if(chance < 5) {
 		// Minimum chance is always 5
 		chance = 5;
@@ -1141,7 +1141,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			CheckIncreaseTradeskill(bonusstat, stat_modifier, skillup_modifier, success_modifier, spec->tradeskill);
 		}
 
-		MessageString(Chat::LightBlue, TRADESKILL_SUCCEED, spec->name.c_str());
+		MessageString(Chat::LightBlue, ClientString::TRADESKILL_SUCCEED, spec->name.c_str());
 
 		LogTradeskills("Tradeskill success");
 
@@ -1189,7 +1189,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		if(over_trivial < 0)
 			CheckIncreaseTradeskill(bonusstat, stat_modifier, skillup_modifier, success_modifier, spec->tradeskill);
 
-		MessageString(Chat::Emote,TRADESKILL_FAILED);
+		MessageString(Chat::Emote, ClientString::TRADESKILL_FAILED);
 
 		LogTradeskills("Tradeskill failed");
 			if (GetGroup())
@@ -1714,7 +1714,7 @@ void Client::LearnRecipe(uint32 recipe_id)
 		return;
 	}
 
-	MessageString(Chat::LightBlue, TRADESKILL_LEARN_RECIPE, tradeskill_recipe.name.c_str());
+	MessageString(Chat::LightBlue, ClientString::TRADESKILL_LEARN_RECIPE, tradeskill_recipe.name.c_str());
 
 	database.QueryDatabase(
 		fmt::format(
@@ -1921,7 +1921,7 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 					linker.SetLinkType(EQ::saylink::SayLinkItemData);
 					linker.SetItemData(tre_inst);
 					auto item_link = linker.GenerateLink();
-					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+					MessageString(Chat::Red, ClientString::TRADESKILL_COMBINE_LORE, item_link.c_str());
 					return true;
 				}
 			}
