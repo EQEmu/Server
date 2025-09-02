@@ -122,16 +122,6 @@ bool SharedDatabase::SetGMFlymode(uint32 account_id, uint8 flymode)
 	return a.id > 0;
 }
 
-uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
-	uint32 EntitledTime = 0;
-	const std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
-	auto results = QueryDatabase(query);
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		EntitledTime += Strings::ToUnsignedInt(row[0]);
-	}
-	return EntitledTime;
-}
-
 void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 {
 	char mail_key[17];
