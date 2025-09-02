@@ -1519,6 +1519,11 @@ public:
 	bool IsGuildmaster() const;
 	bool IsDestroying() const { return m_destroying; }
 
+	int GetStatCap(uint8 stat_id) const;
+	std::map<uint8, int> GetStatCaps() { return m_stat_caps; }
+	bool HasStatCap(uint8 stat_id) const { return m_stat_caps.count(stat_id); }
+	void SetStatCap(uint8 stat_id, int stat_cap, bool save = false);
+
 protected:
 	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -1801,6 +1806,8 @@ protected:
 	bool is_boat;
 
 	CombatRecord m_combat_record{};
+
+	std::map<uint8, int> m_stat_caps;
 
 public:
 	const CombatRecord &GetCombatRecord() const;

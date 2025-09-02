@@ -7189,6 +7189,21 @@ CHANGE COLUMN `field222` `spell_class` int(11) NULL DEFAULT 0 AFTER `caster_requ
 CHANGE COLUMN `field223` `spell_subclass` int(11) NULL DEFAULT 0 AFTER `spell_class`,
 CHANGE COLUMN `field232` `no_remove` int(11) NOT NULL DEFAULT 0 AFTER `min_range`;
 )"
+	},
+	ManifestEntry{
+		.version = 9329,
+		.description = "2025_08_20_character_stat_caps.sql",
+		.check = "SHOW TABLES LIKE 'character_stat_caps'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_stat_caps`  (
+  `character_id` int(11) UNSIGNED NOT NULL,
+  `stat_id` tinyint(3) UNSIGNED NULL,
+  `stat_cap` int(11) NOT NULL DEFAULT -1,
+  PRIMARY KEY (`character_id`, `stat_id`)
+)
+)"
 	}
 
 // -- template; copy/paste this when you need to create a new entry

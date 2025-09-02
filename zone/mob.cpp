@@ -22,7 +22,9 @@
 #include "../common/misc_functions.h"
 
 #include "../common/repositories/bot_data_repository.h"
+#include "../common/repositories/bot_stat_caps_repository.h"
 #include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/character_stat_caps_repository.h"
 
 #include "../common/data_bucket.h"
 #include "quest_parser_collection.h"
@@ -2061,8 +2063,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 0: {
 				mod2a_name = "Avoidance";
 				mod2b_name = "Combat Effects";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAvoidanceCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemCombatEffectsCap));
+				mod2a_cap  = Strings::Commify(GetStatCap(StatCap::Avoidance));
+				mod2b_cap  = Strings::Commify(GetStatCap(StatCap::CombatEffects));
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetAvoidance());
@@ -2081,8 +2083,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 1: {
 				mod2a_name = "Accuracy";
 				mod2b_name = "Strikethrough";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemAccuracyCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemStrikethroughCap));
+				mod2a_cap  = Strings::Commify(GetStatCap(StatCap::Accuracy));
+				mod2b_cap  = Strings::Commify(GetStatCap(StatCap::Strikethrough));
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetAccuracy());
@@ -2101,8 +2103,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 2: {
 				mod2a_name = "Shielding";
 				mod2b_name = "Spell Shielding";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemShieldingCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemSpellShieldingCap));
+				mod2a_cap  = Strings::Commify(GetStatCap(StatCap::Shielding));
+				mod2b_cap  = Strings::Commify(GetStatCap(StatCap::SpellShielding));
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetShielding());
@@ -2122,8 +2124,8 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			case 3: {
 				mod2a_name = "Stun Resist";
 				mod2b_name = "DOT Shielding";
-				mod2a_cap  = Strings::Commify(RuleI(Character, ItemStunResistCap));
-				mod2b_cap  = Strings::Commify(RuleI(Character, ItemDoTShieldingCap));
+				mod2a_cap  = Strings::Commify(GetStatCap(StatCap::DOTShielding));
+				mod2b_cap  = Strings::Commify(GetStatCap(StatCap::StunResist));
 
 				if (IsBot()) {
 					mod2a = Strings::Commify(CastToBot()->GetStunResist());
@@ -2368,7 +2370,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			fmt::format(
 				" | Item: {} / {} | Used: {}",
 				Strings::Commify(itembonuses.ATK),
-				Strings::Commify(RuleI(Character, ItemATKCap)),
+				Strings::Commify(GetStatCap(StatCap::Attack)),
 				Strings::Commify(static_cast<int>(itembonuses.ATK * 1.342))
 			) :
 			""
@@ -2433,7 +2435,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 					fmt::format(
 						"{} ({})",
 						IsClient() ? Strings::Commify(CastToClient()->GetHaste()) : Strings::Commify(GetHaste()),
-						Strings::Commify(RuleI(Character, HasteCap))
+						Strings::Commify(GetStatCap(StatCap::Haste))
 					)
 				)
 			)
@@ -2471,17 +2473,17 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		final_string += fmt::format(
 			"Heal Amount: {} / {}{}",
 			Strings::Commify(GetHealAmt()),
-			Strings::Commify(RuleI(Character, ItemHealAmtCap)),
+			Strings::Commify(GetStatCap(StatCap::HealAmount)),
 			DialogueWindow::Break(1)
 		);
 	}
 
-	// Heal Amount
+	// Spell Damage
 	if (GetSpellDmg()) {
 		final_string += fmt::format(
 			"Spell Damage: {} / {}{}",
 			Strings::Commify(GetSpellDmg()),
-			Strings::Commify(RuleI(Character, ItemSpellDmgCap)),
+			Strings::Commify(GetStatCap(StatCap::SpellDamage)),
 			DialogueWindow::Break(1)
 		);
 	}
@@ -2501,7 +2503,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				fmt::format(
 					" | Item: {} / {}",
 					Strings::Commify(itembonuses.DamageShield),
-					Strings::Commify(RuleI(Character, ItemDamageShieldCap))
+					Strings::Commify(GetStatCap(StatCap::DamageShield))
 				) :
 				""
 			),
@@ -2510,12 +2512,12 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	}
 
 	// Clairvoyance
-	const auto clairvoyance  = IsBot() ? CastToBot()->GetClair() : CastToClient()->GetClair();
+	const auto clairvoyance = IsBot() ? CastToBot()->GetClair() : CastToClient()->GetClair();
 	if (clairvoyance) {
 		final_string += fmt::format(
 			"Clairvoyance: {} / {}{}",
 			Strings::Commify(clairvoyance),
-			Strings::Commify(RuleI(Character, ItemClairvoyanceCap)),
+			Strings::Commify(GetStatCap(StatCap::Clairvoyance)),
 			DialogueWindow::Break(1)
 		);
 	}
@@ -2526,7 +2528,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		final_string += fmt::format(
 			"DS Mitigation: {} / {}{}",
 			Strings::Commify(ds_mitigation),
-			Strings::Commify(RuleI(Character, ItemDSMitigationCap)),
+			Strings::Commify(GetStatCap(StatCap::DSMitigation)),
 			DialogueWindow::Break(1)
 		);
 	}
@@ -2596,7 +2598,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			GetRaceIDName(GetRace()),
 			GetRace(),
 			IsBot() ? Strings::Commify(CastToBot()->GetDS()) : Strings::Commify(CastToClient()->GetDS()),
-			Strings::Commify(RuleI(Character, ItemDamageShieldCap)),
+			Strings::Commify(GetStatCap(StatCap::DamageShield)),
 			GetSize(),
 			GetRunspeed(),
 			IsBot() ? static_cast<float>(CastToBot()->CalcCurrentWeight()) / 10.0f : static_cast<float>(CastToClient()->CalcCurrentWeight()) / 10.0f,
@@ -2694,7 +2696,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			"Attack: {} Item and Spell Attack: {}/{} Server Side Attack: {}",
 			IsBot() ? Strings::Commify(CastToBot()->GetTotalATK()) : Strings::Commify(CastToClient()->GetTotalATK()),
 			Strings::Commify(GetATKBonus()),
-			Strings::Commify(RuleI(Character, ItemATKCap)),
+			Strings::Commify(GetStatCap(StatCap::Attack)),
 			Strings::Commify(GetATK())
 		).c_str()
 	);
@@ -2705,7 +2707,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			fmt::format(
 				"Haste: {}/{} (Item: {} + Spell: {} + Over: {})",
 				IsClient() ? Strings::Commify(CastToClient()->GetHaste()) : Strings::Commify(GetHaste()),
-				Strings::Commify(RuleI(Character, HasteCap)),
+				Strings::Commify(GetStatCap(StatCap::Haste)),
 				Strings::Commify(itembonuses.haste),
 				Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2),
 				Strings::Commify(spellbonuses.hastetype3 + extra_haste)
@@ -8792,4 +8794,73 @@ bool Mob::LoadDataBucketsCache()
 	}
 
 	return true;
+}
+
+int Mob::GetStatCap(uint8 stat_id) const
+{
+	if (HasStatCap(stat_id)) {
+		return m_stat_caps.at(stat_id);
+	}
+
+	static const std::map<uint8, int> default_caps = {
+		{ StatCap::Accuracy,       RuleI(Character, ItemAccuracyCap) },
+		{ StatCap::Attack,         RuleI(Character, ItemATKCap) },
+		{ StatCap::Avoidance,      RuleI(Character, ItemAvoidanceCap) },
+		{ StatCap::Clairvoyance,   RuleI(Character, ItemClairvoyanceCap) },
+		{ StatCap::CombatEffects,  RuleI(Character, ItemCombatEffectsCap) },
+		{ StatCap::DamageShield,   RuleI(Character, ItemDamageShieldCap) },
+		{ StatCap::DOTShielding,   RuleI(Character, ItemDoTShieldingCap) },
+		{ StatCap::DSMitigation,   RuleI(Character, ItemDSMitigationCap) },
+		{ StatCap::EnduranceRegen, RuleI(Character, ItemEnduranceRegenCap) },
+		{ StatCap::ExtraDamage,    RuleI(Character, ItemExtraDmgCap) },
+		{ StatCap::Haste,          RuleI(Character, HasteCap) },
+		{ StatCap::HasteV3,        RuleI(Character, Hastev3Cap) },
+		{ StatCap::HealAmount,     RuleI(Character, ItemHealAmtCap) },
+		{ StatCap::HealthRegen,    RuleI(Character, ItemHealthRegenCap) },
+		{ StatCap::ManaRegen,      RuleI(Character, ItemManaRegenCap) },
+		{ StatCap::QuiverHaste,    RuleI(Combat, QuiverHasteCap) },
+		{ StatCap::Shielding,      RuleI(Character, ItemShieldingCap) },
+		{ StatCap::SpellDamage,    RuleI(Character, ItemSpellDmgCap) },
+		{ StatCap::SpellShielding, RuleI(Character, ItemSpellShieldingCap) },
+		{ StatCap::Stat,           RuleI(Character, StatCap) },
+		{ StatCap::Strikethrough,  RuleI(Character, ItemStrikethroughCap) },
+		{ StatCap::StunResist,     RuleI(Character, ItemStunResistCap) },
+	};
+
+	auto it = default_caps.find(stat_id);
+	if (it != default_caps.end()) {
+		return it->second;
+	}
+
+	return -1;
+}
+
+void Mob::SetStatCap(uint8 stat_id, int stat_cap, bool save)
+{
+	m_stat_caps[stat_id] = stat_cap;
+
+	if (!save) {
+		return;
+	}
+
+	if (IsBot()) {
+		BotStatCapsRepository::ReplaceOne(
+			database,
+			BotStatCapsRepository::BotStatCaps{
+				.bot_id = CastToBot()->GetBotID(),
+				.stat_id = stat_id,
+				.stat_cap = stat_cap
+			}
+		);
+	}
+	else if (IsClient()) {
+		CharacterStatCapsRepository::ReplaceOne(
+			database,
+			CharacterStatCapsRepository::CharacterStatCaps{
+				.character_id = CastToClient()->CharacterID(),
+				.stat_id = stat_id,
+				.stat_cap = stat_cap
+			}
+		);
+	}
 }

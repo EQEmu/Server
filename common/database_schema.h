@@ -69,6 +69,7 @@ namespace DatabaseSchema {
 			{"character_potionbelt",           "id"},
 			{"character_skills",               "id"},
 			{"character_spells",               "id"},
+			{"character_stat_caps",            "character_id"},
 			{"character_stats_record",         "character_id"},
 			{"character_task_timers",          "character_id"},
 			{"character_tasks",                "charid"},
@@ -144,6 +145,7 @@ namespace DatabaseSchema {
 			"character_potionbelt",
 			"character_skills",
 			"character_spells",
+			"character_stat_caps",
 			"character_stats_record",
 			"character_task_timers",
 			"character_tasks",
@@ -412,6 +414,7 @@ namespace DatabaseSchema {
 			"bot_spell_settings",
 			"bot_spells_entries",
 			"bot_stances",
+			"bot_stat_caps",
 			"bot_timers"
 		};
 	}

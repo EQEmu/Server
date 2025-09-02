@@ -246,16 +246,24 @@ void Mob::ProcessItemCaps()
 
 	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
 
-	if (IsOfClientBotMerc() && itembonuses.SpellDmg > RuleI(Character, ItemSpellDmgCap)) {
-		itembonuses.SpellDmg = RuleI(Character, ItemSpellDmgCap);
+	if (IsOfClientBotMerc() && itembonuses.SpellDmg > GetStatCap(StatCap::SpellDamage)) {
+		itembonuses.SpellDmg = GetStatCap(StatCap::SpellDamage);
 	}
 
-	if (IsOfClientBotMerc() && itembonuses.HealAmt > RuleI(Character, ItemHealAmtCap)) {
-		itembonuses.HealAmt = RuleI(Character, ItemHealAmtCap);
+	if (IsOfClientBotMerc() && itembonuses.HealAmt > GetStatCap(StatCap::HealAmount)) {
+		itembonuses.HealAmt = GetStatCap(StatCap::HealAmount);
 	}
 }
 
-void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_augment, bool is_tribute, int recommended_level_override, bool is_ammo_item) {
+void Mob::AddItemBonuses(
+	const EQ::ItemInstance* inst,
+	StatBonuses* b,
+	bool is_augment,
+	bool is_tribute,
+	int recommended_level_override,
+	bool is_ammo_item
+)
+{
 	if (!inst || !inst->IsClassCommon()) {
 		return;
 	}
@@ -352,20 +360,29 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 	b->EnduranceRegen += CalcItemBonus(item->EnduranceRegen);
 
 	// These have rule-configured caps.
-	b->ATK              = CalcCappedItemBonus(b->ATK, item->Attack, RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap);
-	b->DamageShield     = CalcCappedItemBonus(b->DamageShield, item->DamageShield, RuleI(Character, ItemDamageShieldCap));
-	b->SpellShield      = CalcCappedItemBonus(b->SpellShield, item->SpellShield, RuleI(Character, ItemSpellShieldingCap));
-	b->MeleeMitigation  = CalcCappedItemBonus(b->MeleeMitigation, item->Shielding, RuleI(Character, ItemShieldingCap));
-	b->StunResist       = CalcCappedItemBonus(b->StunResist, item->StunResist, RuleI(Character, ItemStunResistCap));
-	b->StrikeThrough    = CalcCappedItemBonus(b->StrikeThrough, item->StrikeThrough, RuleI(Character, ItemStrikethroughCap));
-	b->AvoidMeleeChance = CalcCappedItemBonus(b->AvoidMeleeChance, item->Avoidance, RuleI(Character, ItemAvoidanceCap));
-	b->HitChance        = CalcCappedItemBonus(b->HitChance, item->Accuracy, RuleI(Character, ItemAccuracyCap));
-	b->ProcChance       = CalcCappedItemBonus(b->ProcChance, item->CombatEffects, RuleI(Character, ItemCombatEffectsCap));
-	b->DoTShielding     = CalcCappedItemBonus(b->DoTShielding, item->DotShielding, RuleI(Character, ItemDoTShieldingCap));
-	b->HealAmt          = CalcCappedItemBonus(b->HealAmt, item->HealAmt, RuleI(Character, ItemHealAmtCap));
-	b->SpellDmg         = CalcCappedItemBonus(b->SpellDmg, item->SpellDmg, RuleI(Character, ItemSpellDmgCap));
-	b->Clairvoyance     = CalcCappedItemBonus(b->Clairvoyance, item->Clairvoyance, RuleI(Character, ItemClairvoyanceCap));
-	b->DSMitigation     = CalcCappedItemBonus(b->DSMitigation, item->DSMitigation, RuleI(Character, ItemDSMitigationCap));
+	b->ATK = CalcCappedItemBonus(
+		b->ATK,
+		item->Attack,
+		(
+			GetStatCap(StatCap::Attack) +
+			itembonuses.ItemATKCap +
+			spellbonuses.ItemATKCap +
+			aabonuses.ItemATKCap
+		)
+	);
+	b->AvoidMeleeChance = CalcCappedItemBonus(b->AvoidMeleeChance, item->Avoidance, GetStatCap(StatCap::Avoidance));
+	b->Clairvoyance = CalcCappedItemBonus(b->Clairvoyance, item->Clairvoyance, GetStatCap(StatCap::Clairvoyance));
+	b->DamageShield = CalcCappedItemBonus(b->DamageShield, item->DamageShield, GetStatCap(StatCap::DamageShield));
+	b->DoTShielding = CalcCappedItemBonus(b->DoTShielding, item->DotShielding, GetStatCap(StatCap::DOTShielding));
+	b->DSMitigation = CalcCappedItemBonus(b->DSMitigation, item->DSMitigation, GetStatCap(StatCap::DSMitigation));
+	b->HealAmt = CalcCappedItemBonus(b->HealAmt, item->HealAmt, GetStatCap(StatCap::HealAmount));
+	b->HitChance = CalcCappedItemBonus(b->HitChance, item->Accuracy, GetStatCap(StatCap::Accuracy));
+	b->MeleeMitigation = CalcCappedItemBonus(b->MeleeMitigation, item->Shielding, GetStatCap(StatCap::Shielding));
+	b->ProcChance = CalcCappedItemBonus(b->ProcChance, item->CombatEffects, GetStatCap(StatCap::CombatEffects));
+	b->SpellDmg = CalcCappedItemBonus(b->SpellDmg, item->SpellDmg, GetStatCap(StatCap::SpellDamage));
+	b->SpellShield = CalcCappedItemBonus(b->SpellShield, item->SpellShield, GetStatCap(StatCap::SpellShielding));
+	b->StrikeThrough = CalcCappedItemBonus(b->StrikeThrough, item->StrikeThrough, GetStatCap(StatCap::Strikethrough));
+	b->StunResist = CalcCappedItemBonus(b->StunResist, item->StunResist, GetStatCap(StatCap::StunResist));
 
 	if (b->haste < item->Haste) {
 		b->haste = item->Haste;
@@ -374,10 +391,18 @@ void Mob::AddItemBonuses(const EQ::ItemInstance* inst, StatBonuses* b, bool is_a
 	if (item->ExtraDmgAmt != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
 		if (item->ExtraDmgSkill == ALL_SKILLS) {
 			for (const auto &skill_id: EQ::skills::GetExtraDamageSkills()) {
-				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(b->SkillDamageAmount[skill_id], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
+				b->SkillDamageAmount[skill_id] = CalcCappedItemBonus(
+					b->SkillDamageAmount[skill_id],
+					item->ExtraDmgAmt,
+					GetStatCap(StatCap::ExtraDamage)
+				);
 			}
 		} else {
-			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(b->SkillDamageAmount[item->ExtraDmgSkill], item->ExtraDmgAmt, RuleI(Character, ItemExtraDmgCap));
+			b->SkillDamageAmount[item->ExtraDmgSkill] = CalcCappedItemBonus(
+				b->SkillDamageAmount[item->ExtraDmgSkill],
+				item->ExtraDmgAmt,
+				GetStatCap(StatCap::ExtraDamage)
+			);
 		}
 	}
 
