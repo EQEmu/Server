@@ -61,6 +61,7 @@ void Client::SendBulkParcels()
 				inst->SetCharges(p.second.quantity);
 				inst->SetMerchantCount(1);
 				inst->SetMerchantSlot(p.second.slot_id);
+				inst->SetEvolveCurrentAmount(p.second.evolve_amount);
 				if (inst->IsStackable()) {
 					inst->SetCharges(p.second.quantity);
 				}
@@ -164,6 +165,7 @@ void Client::SendParcel(Parcel_Struct &parcel_in)
 			inst->SetCharges(p.quantity);
 			inst->SetMerchantCount(1);
 			inst->SetMerchantSlot(p.slot_id);
+			inst->SetEvolveCurrentAmount(p.evolve_amount);
 			if (inst->IsStackable()) {
 				inst->SetCharges(p.quantity);
 			}
@@ -381,23 +383,23 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				return;
 			}
 
-			uint32 quantity{};
+			uint32 quantity = 1;
 			if (inst->IsStackable()) {
 				quantity = parcel_in->quantity;
-			}
-			else {
-				quantity = inst->GetCharges() >= 0 ? inst->GetCharges() : parcel_in->quantity;
+			} else if (inst->GetItem()->MaxCharges > 0) {
+				quantity = inst->GetCharges();
 			}
 
 			CharacterParcelsRepository::CharacterParcels parcel_out{};
-			parcel_out.from_name = GetName();
-			parcel_out.note      = parcel_in->note;
-			parcel_out.sent_date = time(nullptr);
-			parcel_out.quantity  = quantity;
-			parcel_out.item_id   = inst->GetID();
-			parcel_out.char_id   = send_to_client.at(0).char_id;
-			parcel_out.slot_id   = next_slot;
-			parcel_out.id        = 0;
+			parcel_out.from_name     = GetName();
+			parcel_out.note          = parcel_in->note;
+			parcel_out.sent_date     = time(nullptr);
+			parcel_out.quantity      = quantity;
+			parcel_out.item_id       = inst->GetID();
+			parcel_out.char_id       = send_to_client.at(0).char_id;
+			parcel_out.slot_id       = next_slot;
+			parcel_out.evolve_amount = inst->GetEvolveCurrentAmount();
+			parcel_out.id            = 0;
 
 			if (inst->IsAugmented()) {
 				auto augs			  = inst->GetAugmentIDs();
@@ -445,7 +447,9 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 						cpc.aug_slot_5 = augs.at(4);
 						cpc.aug_slot_6 = augs.at(5);
 					}
-					cpc.quantity   = kv.second->GetCharges() >= 0 ? kv.second->GetCharges() : 1;
+
+					cpc.quantity      = kv.second->GetCharges() >= 0 ? kv.second->GetCharges() : 1;
+					cpc.evolve_amount = kv.second->GetEvolveCurrentAmount();
 					all_entries.push_back(cpc);
 				}
 				CharacterParcelsContainersRepository::InsertMany(database, all_entries);
@@ -679,6 +683,8 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 			return;
 		}
 
+		inst->SetEvolveCurrentAmount(p->second.evolve_amount);
+
 		if (inst->IsStackable()) {
 			inst->SetCharges(item_quantity > 0 ? item_quantity : 1);
 		}
@@ -714,6 +720,8 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 							SendParcelRetrieveAck();
 							return;
 						}
+
+						item->SetEvolveCurrentAmount(i.evolve_amount);
 
 						if (CheckLoreConflict(item->GetItem())) {
 							if (RuleB(Parcel, DeleteOnDuplicate)) {
