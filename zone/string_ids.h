@@ -309,6 +309,7 @@
 #define PLAYER_CHARMED				1461	//You lose control of yourself!
 #define TRADER_BUSY					1468	//That Trader is currently with a customer. Please wait until their transaction is finished.
 #define SENSE_CORPSE_DIRECTION		1563	//You sense a corpse in this direction.
+#define HOW_CAN_YOU_BUY_MORE        1571    //%1 tells you, 'Your inventory appears full!  How can you buy more?'
 #define DUPE_LORE_MERCHANT			1573	//%1 tells you, 'You already have the lore item, %2, on your person, on your shroud, in the bank, in a real estate, or as an augment in another item.  You cannot have more than one of a particular lore item at a time.'
 #define QUEUED_TELL					2458	//[queued]
 #define QUEUE_TELL_FULL				2459	//[zoing and queue is full]
@@ -415,6 +416,7 @@
 #define MAX_ACTIVE_TASKS			6010	//Sorry %3, you already have the maximum number of active tasks.
 #define TASK_REQUEST_COOLDOWN_TIMER 6011    //Sorry, %3, but you can't request another task for %4 minutes and %5 seconds.
 #define FORAGE_MASTERY				6012	//Your forage mastery has enabled you to find something else!
+#define BUYER                       6056    //BUYER
 #define BUYER_WELCOME               6065    //There are %1 Buyers waiting to purchase your loot.  Type /barter to search for them, or use /buyer to set up your own Buy Lines.
 #define BUYER_GREETING              6070    //%1 greets you, '%2'
 #define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item. Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
@@ -466,6 +468,8 @@
 #define LDON_NO_LOCKPICK			7564	//You must have a lock pick in your inventory to do this.
 #define LDON_WAS_NOT_LOCKED			7565	//%1 was not locked.
 #define LDON_WAS_NOT_TRAPPED		7566	//%1 was not trapped
+#define DUPLICATE_LORE              7623    //Transaction failed: Duplicate Lore Item!
+#define INSUFFICIENT_FUNDS          7632    //Transaction failed: Insufficient funds!
 #define GAIN_SINGLE_AA_SINGLE_AA	8019	//You have gained an ability point!  You now have %1 ability point.
 #define GAIN_SINGLE_AA_MULTI_AA		8020	//You have gained an ability point!  You now have %1 ability points.
 #define GAIN_MULTI_AA_MULTI_AA		8021	//You have gained %1 ability point(s)!  You now have %2 ability point(s).
@@ -540,6 +544,7 @@
 #define GROUP_INVITEE_NOT_FOUND		12268	//You must target a player or use /invite <name> to invite someone to your group.
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define ALREADY_IN_PARTY			12272	//That person is already in your party.
+#define TRADER                      12315   //TRADER
 #define TALKING_TO_SELF				12323	//Talking to yourself again?
 #define SPLIT_NO_GROUP				12328	//You are not in a group! Keep it all.
 #define NO_LONGER_HIDDEN			12337   //You are no longer hidden.

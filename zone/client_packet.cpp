@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
 #include "../common/raid.h"
+#include "../common/repositories/character_offline_transactions_repository.h"
 
 #include <iomanip>
 #include <iostream>
@@ -323,6 +324,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_MoveCoin] = &Client::Handle_OP_MoveCoin;
 	ConnectedOpcodes[OP_MoveItem] = &Client::Handle_OP_MoveItem;
 	ConnectedOpcodes[OP_MoveMultipleItems] = &Client::Handle_OP_MoveMultipleItems;
+	ConnectedOpcodes[OP_Offline] = &Client::Handle_OP_Offline;
 	ConnectedOpcodes[OP_OpenContainer] = &Client::Handle_OP_OpenContainer;
 	ConnectedOpcodes[OP_OpenGuildTributeMaster] = &Client::Handle_OP_OpenGuildTributeMaster;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
@@ -833,7 +835,7 @@ void Client::CompleteConnect()
 
 		if (is_first_login) {
 			e.first_login = time(nullptr);
-			TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", CharacterID()));
+			TraderRepository::DeleteWhere(database, fmt::format("`character_id` = '{}'", CharacterID()));
 			BuyerRepository::DeleteBuyer(database, CharacterID());
 			LogTradingDetail(
 				"Removed trader abd buyer entries for Character ID {} on first logon to ensure table consistency.",
@@ -855,6 +857,54 @@ void Client::CompleteConnect()
 		if (IsNameChangeAllowed() && !RuleB(Character, AlwaysAllowNameChange)) {
 			InvokeChangeNameWindow(false);
 		}
+	}
+
+	auto offline_transactions_trader = CharacterOfflineTransactionsRepository::GetWhere(
+		database, fmt::format("`character_id` = {} AND `type` = {}", CharacterID(), TRADER_TRANSACTION)
+	);
+	if (offline_transactions_trader.size() > 0) {
+		Message(Chat::Yellow, "You sold the following items while in offline trader mode:");
+
+		for (auto const &t: offline_transactions_trader) {
+			Message(
+				Chat::Yellow,
+				fmt::format(
+					"You sold {} {}{} to {} for {}.",
+					t.quantity,
+					t.item_name,
+					t.quantity > 1 ? "s" : "",
+					t.buyer_name,
+					DetermineMoneyString(t.price))
+					.c_str());
+		}
+
+		CharacterOfflineTransactionsRepository::DeleteWhere(
+			database, fmt::format("`character_id` = '{}' AND `type` = '{}'", CharacterID(), TRADER_TRANSACTION)
+		);
+	}
+
+	auto offline_transactions_buyer = CharacterOfflineTransactionsRepository::GetWhere(
+		database, fmt::format("`character_id` = {} AND `type` = {}", CharacterID(), BUYER_TRANSACTION)
+	);
+	if (offline_transactions_buyer.size() > 0) {
+		Message(Chat::Yellow, "You bought the following items while in offline buyer mode:");
+
+		for (auto const &t: offline_transactions_buyer) {
+			Message(
+				Chat::Yellow,
+				fmt::format(
+					"You bought {} {}{} from {} for {}.",
+					t.quantity,
+					t.item_name,
+					t.quantity > 1 ? "s" : "",
+					t.buyer_name,
+					DetermineMoneyString(t.price))
+					.c_str());
+		}
+
+		CharacterOfflineTransactionsRepository::DeleteWhere(
+			database, fmt::format("`character_id` = {} AND `type` = {}", CharacterID(), BUYER_TRANSACTION)
+		);
 	}
 
 	if(ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
@@ -900,7 +950,7 @@ void Client::CompleteConnect()
 			SendGuildMembersList();
 		}
 
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr), 0);
 
 		SendGuildList();
 		if (GetGuildListDirty()) {
@@ -15686,10 +15736,10 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			TraderStartTrader(app);
 			break;
 		}
-		case PriceUpdate:
-		case ItemMove: {
-			LogTrading("Trader Price Update");
-			TraderPriceUpdate(app);
+		case ItemMove:
+		case PriceUpdate:{
+			LogTrading("Trader item updated - removed, added or price change");
+			TraderUpdateItem(app);
 			break;
 		}
 		case EndTransaction: {
@@ -15708,7 +15758,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			break;
 		}
 		default: {
-			LogError("Unknown size for OP_Trader: [{}]\n", app->size);
 		}
 	}
 }
@@ -15719,28 +15768,12 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	//
 	// Client has elected to buy an item from a Trader
 	//
-	auto in     = (TraderBuy_Struct *) app->pBuffer;
 
-	if (RuleB(Bazaar, UseAlternateBazaarSearch) && in->trader_id >= TraderRepository::TRADER_CONVERT_ID) {
-		auto trader = TraderRepository::GetTraderByInstanceAndSerialnumber(
-			database,
-			in->trader_id - TraderRepository::TRADER_CONVERT_ID,
-			in->serial_number
-		);
-
-		if (!trader.trader_id) {
-			LogTrading("Unable to convert trader id for {} and serial number {}.  Trader Buy aborted.",
-				in->trader_id - TraderRepository::TRADER_CONVERT_ID,
-				in->serial_number
-			);
-			return;
-		}
-
-		in->trader_id = trader.trader_id;
-		strn0cpy(in->seller_name, trader.trader_name.c_str(), sizeof(in->seller_name));
-	}
-
-	auto trader = entity_list.GetClientByID(in->trader_id);
+	auto in             = (TraderBuy_Struct *) app->pBuffer;
+	auto item_unique_id = std::string(in->item_unique_id);
+	auto trader_details = TraderRepository::GetTraderByItemUniqueNumber(database, item_unique_id);
+	auto trader         = entity_list.GetClientByID(in->trader_id);
+	strn0cpy(in->seller_name, trader_details.trader_name.c_str(), sizeof(in->seller_name));
 
 	switch (in->method) {
 		case BazaarByVendor: {
@@ -15750,9 +15783,9 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 						   in->trader_id,
 						   in->item_id,
 						   in->quantity,
-						   in->serial_number
+						   in->item_unique_id
 				);
-				BuyTraderItem(in, trader, app);
+				BuyTraderItem(app);
 			}
 			break;
 		}
@@ -15776,9 +15809,9 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 					   in->trader_id,
 					   in->item_id,
 					   in->quantity,
-					   in->serial_number
+					   in->item_unique_id
 			);
-			BuyTraderItemOutsideBazaar(in, app);
+			BuyTraderItemFromBazaarWindow(app);
 			break;
 		}
 		case BazaarByDirectToInventory: {
@@ -15801,7 +15834,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 					   in->trader_id,
 					   in->item_id,
 					   in->quantity,
-					   in->serial_number
+					   in->item_unique_id
 			);
 			Message(
 				Chat::Yellow,
@@ -15811,6 +15844,9 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 			in->sub_action = Failed;
 			TradeRequestFailed(app);
 			break;
+		}
+		default: {
+
 		}
 	}
 }
@@ -15902,17 +15938,18 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 	switch (in->Code) {
 		case ClickTrader: {
 			LogTrading("Handle_OP_TraderShop case ClickTrader [{}]", in->Code);
-			auto outapp =
-				std::make_unique<EQApplicationPacket>(OP_TraderShop, static_cast<uint32>(sizeof(TraderClick_Struct))
+			auto outapp        = std::make_unique<EQApplicationPacket>(
+				OP_TraderShop,
+				static_cast<uint32>(sizeof(TraderClick_Struct))
 			);
 			auto data          = (TraderClick_Struct *) outapp->pBuffer;
-			auto trader_client = entity_list.GetClientByID(in->TraderID);
+			auto trader = entity_list.GetClientByID(in->TraderID);
 
-			if (trader_client) {
-				data->Approval = trader_client->WithCustomer(GetID());
+			if (trader) {
+				data->Approval = trader->WithCustomer(GetID());
 				LogTrading("Client::Handle_OP_TraderShop: Shop Request ([{}]) to ([{}]) with Approval: [{}]",
 						   GetCleanName(),
-						   trader_client->GetCleanName(),
+						   trader->GetCleanName(),
 						   data->Approval
 				);
 			}
@@ -15920,6 +15957,9 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 				LogTrading("Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
 						   " returned a nullptr pointer"
 				);
+				auto outapp = new EQApplicationPacket(OP_ShopEndConfirm);
+				QueuePacket(outapp);
+				safe_delete(outapp);
 				return;
 			}
 
@@ -15929,8 +15969,9 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 			QueuePacket(outapp.get());
 
 			if (data->Approval) {
-				BulkSendTraderInventory(trader_client->CharacterID());
-				trader_client->Trader_CustomerBrowsing(this);
+				ClearTraderMerchantList();
+				BulkSendTraderInventory(trader->CharacterID());
+				trader->Trader_CustomerBrowsing(this);
 				SetTraderID(in->TraderID);
 				LogTrading("Client::Handle_OP_TraderShop: Trader Inventory Sent to [{}] from [{}]",
 						   GetID(),
@@ -17619,4 +17660,52 @@ void Client::SyncWorldPositionsToClient(bool ignore_idle)
 	if (ignore_idle && reset_idle) {
 		m_is_idle = false;
 	}
+}
+
+
+void Client::Handle_OP_Offline(const EQApplicationPacket *app)
+{
+	if (IsThereACustomer()) {
+		auto customer = entity_list.GetClientByID(GetCustomerID());
+		if (customer) {
+			auto end_session = new EQApplicationPacket(OP_ShopEnd);
+			customer->FastQueuePacket(&end_session);
+		}
+	}
+
+	AccountRepository::SetOfflineStatus(database, AccountID(), true);
+	SetOffline(true);
+
+	EQStreamInterface *eqsi           = nullptr;
+	auto               offline_client = new Client(eqsi);
+
+	database.LoadCharacterData(CharacterID(), &offline_client->GetPP(), &offline_client->GetEPP());
+	offline_client->Clone(*this);
+	offline_client->GetInv().SetGMInventory(true);
+	offline_client->SetPosition(GetX(), GetY(), GetZ());
+	offline_client->SetHeading(GetHeading());
+	offline_client->SetSpawned();
+	offline_client->SetBecomeNPC(false);
+	offline_client->SetOffline(true);
+	entity_list.AddClient(offline_client);
+
+	if (IsBuyer()) {
+		offline_client->SetBuyerID(offline_client->CharacterID());
+		if (!BuyerRepository::UpdateBuyerEntityID(database, CharacterID(), GetID(), offline_client->GetID())) {
+			entity_list.RemoveMob(offline_client->CastToMob()->GetID());
+			return;
+		}
+	}
+	else {
+		offline_client->SetTrader(true);
+	}
+
+	OnDisconnect(true);
+
+	auto outapp = new EQApplicationPacket();
+	offline_client->CreateSpawnPacket(outapp);
+	entity_list.QueueClients(nullptr, outapp, false);
+	safe_delete(outapp);
+
+	offline_client->UpdateWho(3);
 }
