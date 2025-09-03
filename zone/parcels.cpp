@@ -386,9 +386,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			uint32 quantity = 1;
 			if (inst->IsStackable()) {
 				quantity = parcel_in->quantity;
-			}
-
-			if (inst->GetItem()->MaxCharges > 0) {
+			} else if (inst->GetItem()->MaxCharges > 0) {
 				quantity = inst->GetCharges();
 			}
 
