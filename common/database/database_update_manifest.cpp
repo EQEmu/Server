@@ -7248,7 +7248,7 @@ ALTER TABLE `sharedbank`
 		.content_schema_update = false
 	},
 	ManifestEntry{
-		.version = 9328,
+		.version = 9330,
 		.description = "2025_01_27_offline_account_status.sql",
 		.check       = "SHOW COLUMNS FROM `account` LIKE 'offline'",
 		.condition   = "empty",
