@@ -2076,10 +2076,10 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	classtemp = cc->class_ - 1;
 	racetemp = cc->race - 1;
 	// these have non sequential race numbers so they need to be mapped
-	if (cc->race == FROGLOK) racetemp = 14;
-	if (cc->race == VAHSHIR) racetemp = 13;
-	if (cc->race == IKSAR) racetemp = 12;
-	if (cc->race == DRAKKIN) racetemp = 15;
+	if (cc->race == Race::Froglok2) racetemp = 14;
+	if (cc->race == Race::VahShir) racetemp = 13;
+	if (cc->race == Race::Iksar) racetemp = 12;
+	if (cc->race == Race::Drakkin) racetemp = 15;
 
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
@@ -2186,43 +2186,43 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 {
 	switch( pp->race )
 	{
-	case BARBARIAN:
-	case DWARF:
-	case ERUDITE:
-	case HALF_ELF:
-	case HIGH_ELF:
-	case HUMAN:
-	case OGRE:
-	case TROLL:
-	case DRAKKIN:	//Drakkin are supposed to get a starting AA Skill
+	case Race::Barbarian:
+	case Race::Dwarf:
+	case Race::Erudite:
+	case Race::HalfElf:
+	case Race::HighElf:
+	case Race::Human:
+	case Race::Ogre:
+	case Race::Troll:
+	case Race::Drakkin:	//Drakkin are supposed to get a starting AA Skill
 		{
 			// No Race Specific Skills
 			break;
 		}
-	case DARK_ELF:
+	case Race::DarkElf:
 		{
 			pp->skills[EQ::skills::SkillHide] = 50;
 			break;
 		}
-	case FROGLOK:
+	case Race::Froglok2:
 		{
 			if (RuleI(Skills, SwimmingStartValue) < 125) {
 				pp->skills[EQ::skills::SkillSwimming] = 125;
 			}
 			break;
 		}
-	case GNOME:
+	case Race::Gnome:
 		{
 			pp->skills[EQ::skills::SkillTinkering] = 50;
 			break;
 		}
-	case HALFLING:
+	case Race::Halfling:
 		{
 			pp->skills[EQ::skills::SkillHide] = 50;
 			pp->skills[EQ::skills::SkillSneak] = 50;
 			break;
 		}
-	case IKSAR:
+	case Race::Iksar:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
 			if (RuleI(Skills, SwimmingStartValue) < 100) {
@@ -2230,13 +2230,13 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 			}
 			break;
 		}
-	case WOOD_ELF:
+	case Race::WoodElf:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
 			pp->skills[EQ::skills::SkillHide] = 50;
 			break;
 		}
-	case VAHSHIR:
+	case Race::VahShir:
 		{
 			pp->skills[EQ::skills::SkillSafeFall] = 50;
 			pp->skills[EQ::skills::SkillSneak] = 50;

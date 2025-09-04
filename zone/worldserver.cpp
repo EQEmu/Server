@@ -957,7 +957,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 				LogSpells("[WorldServer::HandleMessage] Found corpse. Marking corpse as rezzed if needed");
 				// I don't know why Rezzed is not set to true in CompleteRezz().
-				if (!IsEffectInSpell(srs->rez.spellid, SE_SummonToCorpse)) {
+				if (!IsEffectInSpell(srs->rez.spellid, SpellEffect::SummonToCorpse)) {
 					corpse->IsRezzed(true);
 					corpse->CompleteResurrection();
 				}
@@ -4276,7 +4276,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 	uint16 player_race = GetPlayerRaceValue(From->GetRace());
 
-	if (player_race == PLAYER_RACE_UNKNOWN) {
+	if (player_race == Race::Doug) {
 		player_race = From->GetBaseRace();
 	}
 

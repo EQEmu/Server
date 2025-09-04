@@ -51,19 +51,10 @@
 #include "repositories/inventory_repository.h"
 #include "repositories/books_repository.h"
 #include "repositories/sharedbank_repository.h"
-
-namespace ItemField
-{
-	enum {
-		source = 0,
-#define F(x) x,
-#include "item_fieldlist.h"
-#undef F
-		updated,
-		minstatus,
-		comment,
-	};
-}
+#include "repositories/character_inspect_messages_repository.h"
+#include "repositories/spells_new_repository.h"
+#include "repositories/damageshieldtypes_repository.h"
+#include "repositories/items_repository.h"
 
 SharedDatabase::SharedDatabase()
 : Database()
@@ -457,27 +448,20 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id)
 	);
 }
 
-
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
-	const auto query   = fmt::format("SELECT sharedplat FROM account WHERE id = {}", account_id);
-	auto       results = QueryDatabase(query);
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
-
-	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	const auto& e = AccountRepository::FindOne(*this, account_id);
+	
+	return e.sharedplat;
 }
 
-bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
-	const std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
-	const auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
+bool SharedDatabase::AddSharedPlatinum(uint32 account_id, int amount)
+{
+	auto e = AccountRepository::FindOne(*this, account_id);
 
-	return true;
+	e.sharedplat += amount;
+
+	return AccountRepository::UpdateOne(*this, e);
 }
 
 bool SharedDatabase::SetStartingItems(
@@ -944,27 +928,10 @@ void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
 	);
 }
 
-void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
+void SharedDatabase::GetItemsCount(int32& item_count, uint32& max_id)
 {
-	item_count = -1;
-	max_id = 0;
-
-	const std::string query = "SELECT MAX(id), count(*) FROM items";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
-
-	if (results.RowCount() == 0)
-		return;
-
-	auto& row = results.begin();
-
-	if (row[0])
-		max_id = Strings::ToUnsignedInt(row[0]);
-
-	if (row[1])
-		item_count = Strings::ToUnsignedInt(row[1]);
+	max_id     = ItemsRepository::GetMaxId(*this);
+	item_count = ItemsRepository::Count(*this);
 }
 
 bool SharedDatabase::LoadItems(const std::string &prefix) {
@@ -994,14 +961,14 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 	std::string variable_buffer;
 
-	bool disable_attuneable = RuleB(Items, DisableAttuneable);
-	bool disable_bard_focus_effects = RuleB(Items, DisableBardFocusEffects);
-	bool disable_lore = RuleB(Items, DisableLore);
-	bool disable_no_drop = RuleB(Items, DisableNoDrop);
-	bool disable_no_pet = RuleB(Items, DisableNoPet);
-	bool disable_no_rent = RuleB(Items, DisableNoRent);
-	bool disable_no_transfer = RuleB(Items, DisableNoTransfer);
-	bool disable_potion_belt = RuleB(Items, DisablePotionBelt);
+	bool disable_attuneable          = RuleB(Items, DisableAttuneable);
+	bool disable_bard_focus_effects  = RuleB(Items, DisableBardFocusEffects);
+	bool disable_lore                = RuleB(Items, DisableLore);
+	bool disable_no_drop             = RuleB(Items, DisableNoDrop);
+	bool disable_no_pet              = RuleB(Items, DisableNoPet);
+	bool disable_no_rent             = RuleB(Items, DisableNoRent);
+	bool disable_no_transfer         = RuleB(Items, DisableNoTransfer);
+	bool disable_potion_belt         = RuleB(Items, DisablePotionBelt);
 	bool disable_spell_focus_effects = RuleB(Items, DisableSpellFocusEffects);
 
 	// Old Variable Code
@@ -1032,206 +999,204 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 	EQ::ItemData item;
 
-	const std::string query = "SELECT source,"
-#define F(x) "`"#x"`,"
-#include "item_fieldlist.h"
-#undef F
-		"updated, minstatus, comment FROM items ORDER BY id";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	const auto& l = ItemsRepository::All(*this);
+
+	if (l.empty()) {
 		return;
 	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
+	for (const auto& e : l) {
 		memset(&item, 0, sizeof(EQ::ItemData));
 
 		// Unique Identifier
-		item.ID = Strings::ToUnsignedInt(row[ItemField::id]);
+		item.ID = e.id;
 
 		// Minimum Status
-		item.MinStatus = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::minstatus]));
+		item.MinStatus = static_cast<uint8>(e.minstatus);
 
 		// Name, Lore, and Comment
-		strn0cpy(item.Name, row[ItemField::name], sizeof(item.Name));
-		strn0cpy(item.Lore, row[ItemField::lore], sizeof(item.Lore));
-		strn0cpy(item.Comment, row[ItemField::comment], sizeof(item.Comment));
+		strn0cpy(item.Name, e.Name.c_str(), sizeof(item.Name));
+		strn0cpy(item.Lore, e.lore.c_str(), sizeof(item.Lore));
+		strn0cpy(item.Comment, e.comment.c_str(), sizeof(item.Comment));
 
 		// Flags
-		item.ArtifactFlag = Strings::ToBool(row[ItemField::artifactflag]);
-		item.Attuneable = !disable_attuneable && Strings::ToBool(row[ItemField::attuneable]);
-		item.BenefitFlag = Strings::ToBool(row[ItemField::benefitflag]);
-		item.FVNoDrop = Strings::ToBool(row[ItemField::fvnodrop]);
-		item.Magic = Strings::ToBool(row[ItemField::magic]);
-		item.NoDrop = disable_no_drop ? static_cast<uint8>(255) : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::nodrop]));
-		item.NoPet = !disable_no_pet && Strings::ToBool(row[ItemField::nopet]);
-		item.NoRent = disable_no_rent ? static_cast<uint8>(255) : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::norent]));
-		item.NoTransfer = !disable_no_transfer && Strings::ToBool(row[ItemField::notransfer]);
-		item.PendingLoreFlag = Strings::ToBool(row[ItemField::pendingloreflag]);
-		item.QuestItemFlag = Strings::ToBool(row[ItemField::questitemflag]);
-		item.Stackable = Strings::ToBool(row[ItemField::stackable]);
-		item.Tradeskills = Strings::ToBool(row[ItemField::tradeskills]);
-		item.SummonedFlag = Strings::ToBool(row[ItemField::summonedflag]);
+		item.ArtifactFlag    = e.artifactflag;
+		item.Attuneable      = !disable_attuneable && e.attuneable;
+		item.BenefitFlag     = e.benefitflag;
+		item.FVNoDrop        = e.fvnodrop;
+		item.Magic           = e.magic;
+		item.NoDrop          = disable_no_drop ? std::numeric_limits<uint8>::max() : e.nodrop;
+		item.NoPet           = !disable_no_pet && e.nopet;
+		item.NoRent          = disable_no_rent ? std::numeric_limits<uint8>::max() : e.norent;
+		item.NoTransfer      = !disable_no_transfer && e.notransfer;
+		item.PendingLoreFlag = e.pendingloreflag;
+		item.QuestItemFlag   = e.questitemflag;
+		item.Stackable       = e.stackable;
+		item.Tradeskills     = e.tradeskills;
+		item.SummonedFlag    = e.summonedflag;
 
 		// Lore
-		item.LoreGroup = disable_lore ? 0 : Strings::ToInt(row[ItemField::loregroup]);
-		item.LoreFlag = !disable_lore && item.LoreGroup != 0;
+		item.LoreGroup = disable_lore ? 0 : e.loregroup;
+		item.LoreFlag  = !disable_lore && item.LoreGroup != 0;
 
 		// Type
-		item.AugType = Strings::ToUnsignedInt(row[ItemField::augtype]);
-		item.ItemType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::itemtype]));
-		item.SubType = Strings::ToInt(row[ItemField::subtype]);
+		item.AugType  = e.augtype;
+		item.ItemType = static_cast<uint8>(e.itemtype);
+		item.SubType  = e.subtype;
 
 		// Miscellaneous
-		item.ExpendableArrow = static_cast<uint16>(Strings::ToUnsignedInt(row[ItemField::expendablearrow]));
-		item.Light = static_cast<int8>(Strings::ToInt(row[ItemField::light]));
-		item.MaxCharges = static_cast<int16>(Strings::ToInt(row[ItemField::maxcharges]));
-		item.Size = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::size]));
-		item.StackSize = static_cast<int16>(Strings::ToInt(row[ItemField::stacksize]));
-		item.Weight = Strings::ToInt(row[ItemField::weight]);
+		item.ExpendableArrow = e.expendablearrow;
+		item.Light           = EQ::Clamp(e.light, -128, 127);
+		item.MaxCharges      = e.maxcharges;
+		item.Size            = static_cast<uint8>(e.size);
+		item.StackSize       = e.stacksize;
+		item.Weight          = e.weight;
 
 		// Potion Belt
-		item.PotionBelt = !disable_potion_belt && Strings::ToBool(row[ItemField::potionbelt]);
-		item.PotionBeltSlots = disable_potion_belt ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::potionbeltslots]));
+		item.PotionBelt      = !disable_potion_belt && e.potionbelt;
+		item.PotionBeltSlots = disable_potion_belt ? 0 : static_cast<uint8>(e.potionbeltslots);
 
 		// Merchant
-		item.Favor = Strings::ToUnsignedInt(row[ItemField::favor]);
-		item.GuildFavor = Strings::ToUnsignedInt(row[ItemField::guildfavor]);
-		item.Price = Strings::ToUnsignedInt(row[ItemField::price]);
-		item.SellRate = Strings::ToFloat(row[ItemField::sellrate]);
+		item.Favor      = e.favor;
+		item.GuildFavor = e.guildfavor;
+		item.Price      = e.price;
+		item.SellRate   = e.sellrate;
 
 		// Display
-		item.Color = Strings::ToUnsignedInt(row[ItemField::color]);
-		item.EliteMaterial = Strings::ToUnsignedInt(row[ItemField::elitematerial]);
-		item.HerosForgeModel = Strings::ToUnsignedInt(row[ItemField::herosforgemodel]);
-		item.Icon = Strings::ToUnsignedInt(row[ItemField::icon]);
-		strn0cpy(item.IDFile, row[ItemField::idfile], sizeof(item.IDFile));
-		item.Material = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::material]));
+		item.Color           = e.color;
+		item.EliteMaterial   = e.elitematerial;
+		item.HerosForgeModel = e.herosforgemodel;
+		item.Icon            = e.icon;
+		strn0cpy(item.IDFile, e.idfile.c_str(), sizeof(item.IDFile));
+		item.Material = e.material;
 
 		// Resists
-		item.CR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::cr]), -128, 127));
-		item.DR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::dr]), -128, 127));
-		item.FR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::fr]), -128, 127));
-		item.MR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::mr]), -128, 127));
-		item.PR = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::pr]), -128, 127));
-		item.SVCorruption = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::svcorruption]), -128, 127));
+		item.CR           = EQ::Clamp(e.cr, -128, 127);
+		item.DR           = EQ::Clamp(e.dr, -128, 127);
+		item.FR           = EQ::Clamp(e.fr, -128, 127);
+		item.MR           = EQ::Clamp(e.mr, -128, 127);
+		item.PR           = EQ::Clamp(e.pr, -128, 127);
+		item.SVCorruption = EQ::Clamp(e.svcorruption, -128, 127);
 
 		// Heroic Resists
-		item.HeroicCR = Strings::ToInt(row[ItemField::heroic_cr]);
-		item.HeroicDR = Strings::ToInt(row[ItemField::heroic_dr]);
-		item.HeroicFR = Strings::ToInt(row[ItemField::heroic_fr]);
-		item.HeroicMR = Strings::ToInt(row[ItemField::heroic_mr]);
-		item.HeroicPR = Strings::ToInt(row[ItemField::heroic_pr]);
-		item.HeroicSVCorrup = Strings::ToInt(row[ItemField::heroic_svcorrup]);
+		item.HeroicCR       = e.heroic_cr;
+		item.HeroicDR       = e.heroic_dr;
+		item.HeroicFR       = e.heroic_fr;
+		item.HeroicMR       = e.heroic_mr;
+		item.HeroicPR       = e.heroic_pr;
+		item.HeroicSVCorrup = e.heroic_svcorrup;
 
 		// Stats
-		item.AAgi = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::aagi]), -128, 127));
-		item.ACha = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::acha]), -128, 127));
-		item.ADex = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::adex]), -128, 127));
-		item.AInt = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::aint]), -128, 127));
-		item.ASta = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::asta]), -128, 127));
-		item.AStr = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::astr]), -128, 127));
-		item.AWis = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::awis]), -128, 127));
+		item.AAgi = EQ::Clamp(e.aagi, -128, 127);
+		item.ACha = EQ::Clamp(e.acha, -128, 127);
+		item.ADex = EQ::Clamp(e.adex, -128, 127);
+		item.AInt = EQ::Clamp(e.aint, -128, 127);
+		item.ASta = EQ::Clamp(e.asta, -128, 127);
+		item.AStr = EQ::Clamp(e.astr, -128, 127);
+		item.AWis = EQ::Clamp(e.awis, -128, 127);
 
 		// Heroic Stats
-		item.HeroicAgi = Strings::ToInt(row[ItemField::heroic_agi]);
-		item.HeroicCha = Strings::ToInt(row[ItemField::heroic_cha]);
-		item.HeroicDex = Strings::ToInt(row[ItemField::heroic_dex]);
-		item.HeroicInt = Strings::ToInt(row[ItemField::heroic_int]);
-		item.HeroicSta = Strings::ToInt(row[ItemField::heroic_sta]);
-		item.HeroicStr = Strings::ToInt(row[ItemField::heroic_str]);
-		item.HeroicWis = Strings::ToInt(row[ItemField::heroic_wis]);
+		item.HeroicAgi = e.heroic_agi;
+		item.HeroicCha = e.heroic_cha;
+		item.HeroicDex = e.heroic_dex;
+		item.HeroicInt = e.heroic_int;
+		item.HeroicSta = e.heroic_sta;
+		item.HeroicStr = e.heroic_str;
+		item.HeroicWis = e.heroic_wis;
 
 		// Health, Mana, and Endurance
-		item.HP = Strings::ToInt(row[ItemField::hp]);
-		item.Regen = Strings::ToInt(row[ItemField::regen]);
-		item.Mana = Strings::ToInt(row[ItemField::mana]);
-		item.ManaRegen = Strings::ToInt(row[ItemField::manaregen]);
-		item.Endur = Strings::ToInt(row[ItemField::endur]);
-		item.EnduranceRegen = Strings::ToInt(row[ItemField::enduranceregen]);
+		item.HP             = e.hp;
+		item.Regen          = e.regen;
+		item.Mana           = e.mana;
+		item.ManaRegen      = e.manaregen;
+		item.Endur          = e.endur;
+		item.EnduranceRegen = e.enduranceregen;
 
 		// Bane Damage
-		item.BaneDmgAmt = Strings::ToInt(row[ItemField::banedmgamt]);
-		item.BaneDmgBody = Strings::ToUnsignedInt(row[ItemField::banedmgbody]);
-		item.BaneDmgRace = Strings::ToUnsignedInt(row[ItemField::banedmgrace]);
-		item.BaneDmgRaceAmt = Strings::ToUnsignedInt(row[ItemField::banedmgraceamt]);
+		item.BaneDmgAmt     = e.banedmgamt;
+		item.BaneDmgBody    = e.banedmgbody;
+		item.BaneDmgRace    = e.banedmgrace;
+		item.BaneDmgRaceAmt = e.banedmgraceamt;
 
 		// Elemental Damage
-		item.ElemDmgType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::elemdmgtype]));
-		item.ElemDmgAmt = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::elemdmgamt]));
+		item.ElemDmgType = static_cast<uint8>(e.elemdmgtype);
+		item.ElemDmgAmt  = static_cast<uint8>(e.elemdmgamt);
 
 		// Combat
-		item.BackstabDmg = Strings::ToUnsignedInt(row[ItemField::backstabdmg]);
-		item.Damage = Strings::ToUnsignedInt(row[ItemField::damage]);
-		item.Delay = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::delay]));
-		item.Range = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::range]));
+		item.BackstabDmg = e.backstabdmg;
+		item.Damage      = e.damage;
+		item.Delay       = static_cast<uint8>(e.delay);
+		item.Range       = static_cast<uint8>(e.range_);
 
 		// Combat Stats
-		item.AC = Strings::ToInt(row[ItemField::ac]);
-		item.Accuracy = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::accuracy]), -128, 127));
-		item.Attack = Strings::ToInt(row[ItemField::attack]);
-		item.Avoidance = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::avoidance]), -128, 127));
-		item.Clairvoyance = Strings::ToUnsignedInt(row[ItemField::clairvoyance]);
-		item.CombatEffects = Strings::IsNumber(row[ItemField::combateffects]) ? static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::combateffects]), -128, 127)) : 0;
-		item.DamageShield = Strings::ToInt(row[ItemField::damageshield]);
-		item.DotShielding = Strings::ToInt(row[ItemField::dotshielding]);
-		item.DSMitigation = Strings::ToUnsignedInt(row[ItemField::dsmitigation]);
-		item.Haste = Strings::ToInt(row[ItemField::haste]);
-		item.HealAmt = Strings::ToInt(row[ItemField::healamt]);
-		item.Purity = Strings::ToUnsignedInt(row[ItemField::purity]);
-		item.Shielding = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::shielding]), -128, 127));
-		item.SpellDmg = Strings::ToInt(row[ItemField::spelldmg]);
-		item.SpellShield = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::spellshield]), -128, 127));
-		item.StrikeThrough = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::strikethrough]), -128, 127));
-		item.StunResist = static_cast<int8>(EQ::Clamp(Strings::ToInt(row[ItemField::stunresist]), -128, 127));
+		item.AC           = e.ac;
+		item.Accuracy     = EQ::Clamp(e.accuracy, -128, 127);
+		item.Attack       = e.attack;
+		item.Avoidance    = EQ::Clamp(e.avoidance, -128, 127);
+		item.Clairvoyance = e.clairvoyance;
+		item.CombatEffects = Strings::IsNumber(e.combateffects) ? static_cast<int8>(EQ::Clamp(Strings::ToInt(e.combateffects), -128, 127)) : 0;
+		item.DamageShield  = e.damageshield;
+		item.DotShielding  = e.dotshielding;
+		item.DSMitigation  = e.dsmitigation;
+		item.Haste         = e.haste;
+		item.HealAmt       = e.healamt;
+		item.Purity        = e.purity;
+		item.Shielding     = EQ::Clamp(e.shielding, -128, 127);
+		item.SpellDmg      = e.spelldmg;
+		item.SpellShield   = EQ::Clamp(e.spellshield, -128, 127);
+		item.StrikeThrough = EQ::Clamp(e.strikethrough, -128, 127);
+		item.StunResist    = EQ::Clamp(e.stunresist, -128, 127);
 
 		// Restrictions
-		item.AugRestrict = Strings::ToUnsignedInt(row[ItemField::augrestrict]);
-		item.Classes = Strings::ToUnsignedInt(row[ItemField::classes]);
-		item.Deity = Strings::ToUnsignedInt(row[ItemField::deity]);
-		item.ItemClass = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::itemclass]));
-		item.Races = Strings::ToUnsignedInt(row[ItemField::races]);
-		item.RecLevel = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::reclevel]));
-		item.RecSkill = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::recskill]));
-		item.ReqLevel = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::reqlevel]));
-		item.Slots = Strings::ToUnsignedInt(row[ItemField::slots]);
+		item.AugRestrict = e.augrestrict;
+		item.Classes     = e.classes;
+		item.Deity       = e.deity;
+		item.ItemClass   = static_cast<uint8>(e.itemclass);
+		item.Races       = e.races;
+		item.RecLevel    = static_cast<uint8>(e.reclevel);
+		item.RecSkill    = static_cast<uint8>(e.recskill);
+		item.ReqLevel    = static_cast<uint8>(e.reqlevel);
+		item.Slots       = e.slots;
 
 		// Skill Modifier
-		item.SkillModValue = Strings::ToInt(row[ItemField::skillmodvalue]);
-		item.SkillModMax = Strings::ToInt(row[ItemField::skillmodmax]);
-		item.SkillModType = Strings::ToUnsignedInt(row[ItemField::skillmodtype]);
+		item.SkillModValue = e.skillmodvalue;
+		item.SkillModMax   = e.skillmodmax;
+		item.SkillModType  = e.skillmodtype;
 
 		// Extra Damage Skill
-		item.ExtraDmgSkill = Strings::ToInt(row[ItemField::extradmgskill]);
-		item.ExtraDmgAmt = Strings::ToInt(row[ItemField::extradmgamt]);
+		item.ExtraDmgSkill = e.extradmgskill;
+		item.ExtraDmgAmt   = e.extradmgamt;
 
 		// Bard
-		item.BardType = Strings::ToUnsignedInt(row[ItemField::bardtype]);
-		item.BardValue = Strings::ToInt(row[ItemField::bardvalue]);
+		item.BardType  = e.bardtype;
+		item.BardValue = e.bardvalue;
 
 		// Faction
-		item.FactionAmt1 = Strings::ToInt(row[ItemField::factionamt1]);
-		item.FactionMod1 = Strings::ToInt(row[ItemField::factionmod1]);
-		item.FactionAmt2 = Strings::ToInt(row[ItemField::factionamt2]);
-		item.FactionMod2 = Strings::ToInt(row[ItemField::factionmod2]);
-		item.FactionAmt3 = Strings::ToInt(row[ItemField::factionamt3]);
-		item.FactionMod3 = Strings::ToInt(row[ItemField::factionmod3]);
-		item.FactionAmt4 = Strings::ToInt(row[ItemField::factionamt4]);
-		item.FactionMod4 = Strings::ToInt(row[ItemField::factionmod4]);
+		item.FactionAmt1 = e.factionamt1;
+		item.FactionMod1 = e.factionmod1;
+		item.FactionAmt2 = e.factionamt2;
+		item.FactionMod2 = e.factionmod2;
+		item.FactionAmt3 = e.factionamt3;
+		item.FactionMod3 = e.factionmod3;
+		item.FactionAmt4 = e.factionamt4;
+		item.FactionMod4 = e.factionmod4;
 
-		// Augment
-		item.AugDistiller = Strings::ToUnsignedInt(row[ItemField::augdistiller]);
-		item.AugSlotType[0] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot1type]));
-		item.AugSlotVisible[0] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot1visible]));
-		item.AugSlotType[1] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot2type]));
-		item.AugSlotVisible[1] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot2visible]));
-		item.AugSlotType[2] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot3type]));
-		item.AugSlotVisible[2] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot3visible]));
-		item.AugSlotType[3] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot4type]));
-		item.AugSlotVisible[3] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot4visible]));
-		item.AugSlotType[4] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot5type]));
-		item.AugSlotVisible[4] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot5visible]));
-		item.AugSlotType[5] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot6type]));
-		item.AugSlotVisible[5] = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::augslot6visible]));
+		// Augment Distiller
+		item.AugDistiller = e.augdistiller;
+
+		// Augment Slots
+		item.AugSlotType[0]    = static_cast<uint8>(e.augslot1type);
+		item.AugSlotVisible[0] = static_cast<uint8>(e.augslot1visible);
+		item.AugSlotType[1]    = static_cast<uint8>(e.augslot2type);
+		item.AugSlotVisible[1] = static_cast<uint8>(e.augslot2visible);
+		item.AugSlotType[2]    = static_cast<uint8>(e.augslot3type);
+		item.AugSlotVisible[2] = static_cast<uint8>(e.augslot3visible);
+		item.AugSlotType[3]    = static_cast<uint8>(e.augslot4type);
+		item.AugSlotVisible[3] = static_cast<uint8>(e.augslot4visible);
+		item.AugSlotType[4]    = static_cast<uint8>(e.augslot5type);
+		item.AugSlotVisible[4] = static_cast<uint8>(e.augslot5visible);
+		item.AugSlotType[5]    = static_cast<uint8>(e.augslot6type);
+		item.AugSlotVisible[5] = static_cast<uint8>(e.augslot6visible);
 
 		// Augment Unknowns
 		for (uint8 i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
@@ -1239,79 +1204,79 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		}
 
 		// LDoN
-		item.LDoNTheme = Strings::ToUnsignedInt(row[ItemField::ldontheme]);
-		item.LDoNPrice = Strings::ToUnsignedInt(row[ItemField::ldonprice]);
-		item.LDoNSellBackRate = Strings::ToUnsignedInt(row[ItemField::ldonsellbackrate]);
-		item.LDoNSold = Strings::ToUnsignedInt(row[ItemField::ldonsold]);
-		item.PointType = Strings::ToUnsignedInt(row[ItemField::pointtype]);
+		item.LDoNTheme        = e.ldontheme;
+		item.LDoNPrice        = e.ldonprice;
+		item.LDoNSellBackRate = e.ldonsellbackrate;
+		item.LDoNSold         = e.ldonsold;
+		item.PointType        = e.pointtype;
 
 		// Bag
-		item.BagSize = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagsize]));
-		item.BagSlots = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagslots]), 0, static_cast<int>(EQ::invbag::SLOT_COUNT)));
-		item.BagType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagtype]));
-		item.BagWR = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagwr]), 0, 100));
+		item.BagSize  = static_cast<uint8>(e.bagsize);
+		item.BagSlots = EQ::Clamp(e.bagslots, 0, static_cast<int>(EQ::invbag::SLOT_COUNT));
+		item.BagType  = static_cast<uint8>(e.bagtype);
+		item.BagWR    = EQ::Clamp(e.bagwr, 0, 100);
 
 		// Bard Effect
-		item.Bard.Effect = disable_bard_focus_effects ? 0 : Strings::ToInt(row[ItemField::bardeffect]);
-		item.Bard.Type = disable_bard_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bardtype]));
-		item.Bard.Level = disable_bard_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bardlevel]));
-		item.Bard.Level2 = disable_bard_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bardlevel2]));
+		item.Bard.Effect = disable_bard_focus_effects ? 0 : e.bardeffect;
+		item.Bard.Type   = disable_bard_focus_effects ? 0 : static_cast<uint8>(e.bardtype);
+		item.Bard.Level  = disable_bard_focus_effects ? 0 : static_cast<uint8>(e.bardlevel);
+		item.Bard.Level2 = disable_bard_focus_effects ? 0 : static_cast<uint8>(e.bardlevel2);
 
 		// Book
-		item.Book = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::book]));
-		item.BookType = Strings::ToUnsignedInt(row[ItemField::booktype]);
+		item.Book     = static_cast<uint8>(e.book);
+		item.BookType = e.booktype;
 
 		// Click Effect
-		item.CastTime = Strings::ToUnsignedInt(row[ItemField::casttime]);
-		item.CastTime_ = Strings::ToInt(row[ItemField::casttime_]);
-		item.Click.Effect = Strings::ToInt(row[ItemField::clickeffect]);
-		item.Click.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::clicktype]));
-		item.Click.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::clicklevel]));
-		item.Click.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::clicklevel2]));
-		strn0cpy(item.ClickName, row[ItemField::clickname], sizeof(item.ClickName));
-		item.RecastDelay = Strings::ToUnsignedInt(row[ItemField::recastdelay]);
-		item.RecastType = Strings::ToInt(row[ItemField::recasttype]);
+		item.CastTime     = e.casttime;
+		item.CastTime_    = e.casttime_;
+		item.Click.Effect = e.clickeffect;
+		item.Click.Type   = static_cast<uint8>(e.clicktype);
+		item.Click.Level  = static_cast<uint8>(e.clicklevel);
+		item.Click.Level2 = static_cast<uint8>(e.clicklevel2);
+		strn0cpy(item.ClickName, e.clickname.c_str(), sizeof(item.ClickName));
+		item.RecastDelay = e.recastdelay;
+		item.RecastType  = e.recasttype;
 
 		// Focus Effect
-		item.Focus.Effect = disable_spell_focus_effects ? 0 : Strings::ToInt(row[ItemField::focuseffect]);
-		item.Focus.Type = disable_spell_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::focustype]));
-		item.Focus.Level = disable_spell_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::focuslevel]));
-		item.Focus.Level2 = disable_spell_focus_effects ? 0 : static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::focuslevel2]));
-		strn0cpy(item.FocusName, disable_spell_focus_effects ? "" : row[ItemField::focusname], sizeof(item.FocusName));
+		item.Focus.Effect = disable_spell_focus_effects ? 0 : e.focuseffect;
+		item.Focus.Type   = disable_spell_focus_effects ? 0 : static_cast<uint8>(e.focustype);
+		item.Focus.Level  = disable_spell_focus_effects ? 0 : static_cast<uint8>(e.focuslevel);
+		item.Focus.Level2 = disable_spell_focus_effects ? 0 : static_cast<uint8>(e.focuslevel2);
+		strn0cpy(item.FocusName, disable_spell_focus_effects ? "" : e.focusname.c_str(), sizeof(item.FocusName));
 
 		// Proc Effect
-		item.Proc.Effect = Strings::ToInt(row[ItemField::proceffect]);
-		item.Proc.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::proctype]));
-		item.Proc.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::proclevel]));
-		item.Proc.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::proclevel2]));
-		strn0cpy(item.ProcName, row[ItemField::procname], sizeof(item.ProcName));
-		item.ProcRate = Strings::ToInt(row[ItemField::procrate]);
+		item.Proc.Effect = e.proceffect;
+		item.Proc.Type   = static_cast<uint8>(e.proctype);
+		item.Proc.Level  = static_cast<uint8>(e.proclevel);
+		item.Proc.Level2 = static_cast<uint8>(e.proclevel2);
+		strn0cpy(item.ProcName, e.procname.c_str(), sizeof(item.ProcName));
+		item.ProcRate = e.procrate;
 
 		// Scroll Effect
-		item.Scroll.Effect = Strings::ToInt(row[ItemField::scrolleffect]);
-		item.Scroll.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::scrolltype]));
-		item.Scroll.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::scrolllevel]));
-		item.Scroll.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::scrolllevel2]));
-		strn0cpy(item.ScrollName, row[ItemField::scrollname], sizeof(item.ScrollName));
+		item.Scroll.Effect = e.scrolleffect;
+		item.Scroll.Type   = static_cast<uint8>(e.scrolltype);
+		item.Scroll.Level  = static_cast<uint8>(e.scrolllevel);
+		item.Scroll.Level2 = static_cast<uint8>(e.scrolllevel2);
+		strn0cpy(item.ScrollName, e.scrollname.c_str(), sizeof(item.ScrollName));
 
 		// Worn Effect
-		item.Worn.Effect = Strings::ToInt(row[ItemField::worneffect]);
-		item.Worn.Type = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::worntype]));
-		item.Worn.Level = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::wornlevel]));
-		item.Worn.Level2 = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::wornlevel2]));
-		strn0cpy(item.WornName, row[ItemField::wornname], sizeof(item.WornName));
+		item.Worn.Effect = e.worneffect;
+		item.Worn.Type   = static_cast<uint8>(e.worntype);
+		item.Worn.Level  = static_cast<uint8>(e.wornlevel);
+		item.Worn.Level2 = static_cast<uint8>(e.wornlevel2);
+		strn0cpy(item.WornName, e.wornname.c_str(), sizeof(item.WornName));
 
 		// Evolving Item
-		item.EvolvingID = Strings::ToUnsignedInt(row[ItemField::evoid]);
-		item.EvolvingItem = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::evoitem]));
-		item.EvolvingLevel = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::evolvinglevel]));
-		item.EvolvingMax = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::evomax]));
+		item.EvolvingID    = e.evoid;
+		item.EvolvingItem  = static_cast<uint8>(e.evoitem);
+		item.EvolvingLevel = static_cast<uint8>(e.evolvinglevel);
+		item.EvolvingMax   = static_cast<uint8>(e.evomax);
 
 		// Scripting
-		item.CharmFileID = Strings::IsNumber(row[ItemField::charmfileid]) ? Strings::ToUnsignedInt(row[ItemField::charmfileid]) : 0;
-		strn0cpy(item.CharmFile, row[ItemField::charmfile], sizeof(item.CharmFile));
-		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
-		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);
+		item.CharmFileID = Strings::IsNumber(e.charmfileid) ? Strings::ToUnsignedInt(e.charmfileid) : 0;
+		strn0cpy(item.CharmFile, e.charmfile.c_str(), sizeof(item.CharmFile));
+		strn0cpy(item.Filename, e.filename.c_str(), sizeof(item.Filename));
+		item.ScriptFileID = e.scriptfileid;
 
 		try {
 			hash.insert(item.ID, item);
@@ -1673,36 +1638,26 @@ bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsReposit
 	return true;
 }
 
-void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
-	const std::string query = StringFormat("SELECT `spellid`, `type` FROM `damageshieldtypes` WHERE `spellid` > 0 "
-	                                       "AND `spellid` <= %i", iMaxSpellID);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* s)
+{
+	const auto& l = DamageshieldtypesRepository::All(*this);
 
-    for(auto& row = results.begin(); row != results.end(); ++row) {
-	    const int spellID = Strings::ToInt(row[0]);
-        if((spellID > 0) && (spellID <= iMaxSpellID))
-            sp[spellID].damage_shield_type = Strings::ToUnsignedInt(row[1]);
-    }
+	if (l.empty()) {
+		return;
+	}
 
+	for (const auto& e : l) {
+		s[e.spellid].damage_shield_type = e.type;
+	}
 }
 
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
 	return nullptr;	// nothing here for now... database and/or sharemem pulls later
 }
 
-int SharedDatabase::GetMaxSpellID() {
-	const std::string query = "SELECT MAX(id) FROM spells_new";
-	auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return -1;
-    }
-
-    auto& row = results.begin();
-
-	return Strings::ToInt(row[0]);
+int SharedDatabase::GetMaxSpellID()
+{
+	return SpellsNewRepository::GetMaxId(*this);
 }
 
 bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp) {
@@ -1734,222 +1689,285 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 	*static_cast<uint32*>(data) = max_spells;
 	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>(static_cast<char*>(data) + sizeof(uint32));
 
-	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	const auto& l = SpellsNewRepository::All(*this);
 
-    if(results.ColumnCount() <= SPELL_LOAD_FIELD_COUNT) {
-		LogSpells("Fatal error loading spells: Spell field count < SPELL_LOAD_FIELD_COUNT([{}])", SPELL_LOAD_FIELD_COUNT);
+	if (l.empty()) {
 		return;
-    }
+	}
 
-	int counter = 0;
-
-    for (auto& row = results.begin(); row != results.end(); ++row) {
-	    const int tempid = Strings::ToInt(row[0]);
-        if(tempid >= max_spells) {
+	for (const auto& e : l) {
+		if (e.id >= max_spells) {
 			LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
 			continue;
 		}
 
-        ++counter;
-        sp[tempid].id = tempid;
-        strn0cpy(sp[tempid].name, row[1], sizeof(sp[tempid].name));
-        strn0cpy(sp[tempid].player_1, row[2], sizeof(sp[tempid].player_1));
-		strn0cpy(sp[tempid].teleport_zone, row[3], sizeof(sp[tempid].teleport_zone));
-		strn0cpy(sp[tempid].you_cast, row[4], sizeof(sp[tempid].you_cast));
-		strn0cpy(sp[tempid].other_casts, row[5], sizeof(sp[tempid].other_casts));
-		strn0cpy(sp[tempid].cast_on_you, row[6], sizeof(sp[tempid].cast_on_you));
-		strn0cpy(sp[tempid].cast_on_other, row[7], sizeof(sp[tempid].cast_on_other));
-		strn0cpy(sp[tempid].spell_fades, row[8], sizeof(sp[tempid].spell_fades));
+		sp[e.id].id = e.id;
 
-		sp[tempid].range = Strings::ToFloat(row[9]);
-		sp[tempid].aoe_range = Strings::ToFloat(row[10]);
-		sp[tempid].push_back = Strings::ToFloat(row[11]);
-		sp[tempid].push_up = Strings::ToFloat(row[12]);
-		sp[tempid].cast_time=Strings::ToUnsignedInt(row[13]);
-		sp[tempid].recovery_time=Strings::ToUnsignedInt(row[14]);
-		sp[tempid].recast_time=Strings::ToUnsignedInt(row[15]);
-		sp[tempid].buff_duration_formula=Strings::ToUnsignedInt(row[16]);
-		sp[tempid].buff_duration=Strings::ToUnsignedInt(row[17]);
-		sp[tempid].aoe_duration=Strings::ToUnsignedInt(row[18]);
-		sp[tempid].mana=Strings::ToInt(row[19]);
+		strn0cpy(sp[e.id].name, e.name.c_str(), sizeof(sp[e.id].name));
+		strn0cpy(sp[e.id].player_1, e.player_1.c_str(), sizeof(sp[e.id].player_1));
+		strn0cpy(sp[e.id].teleport_zone, e.teleport_zone.c_str(), sizeof(sp[e.id].teleport_zone));
+		strn0cpy(sp[e.id].you_cast, e.you_cast.c_str(), sizeof(sp[e.id].you_cast));
+		strn0cpy(sp[e.id].other_casts, e.other_casts.c_str(), sizeof(sp[e.id].other_casts));
+		strn0cpy(sp[e.id].cast_on_you, e.cast_on_you.c_str(), sizeof(sp[e.id].cast_on_you));
+		strn0cpy(sp[e.id].cast_on_other, e.cast_on_other.c_str(), sizeof(sp[e.id].cast_on_other));
+		strn0cpy(sp[e.id].spell_fades, e.spell_fades.c_str(), sizeof(sp[e.id].spell_fades));
 
-		int y=0;
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].base_value[y]=Strings::ToInt(row[20+y]); // effect_base_value
+		sp[e.id].range                 = e.range_;
+		sp[e.id].aoe_range             = e.aoerange;
+		sp[e.id].push_back             = e.pushback;
+		sp[e.id].push_up               = e.pushup;
+		sp[e.id].cast_time             = e.cast_time;
+		sp[e.id].recovery_time         = e.recovery_time;
+		sp[e.id].recast_time           = e.recast_time;
+		sp[e.id].buff_duration_formula = e.buffdurationformula;
+		sp[e.id].buff_duration         = e.buffduration;
+		sp[e.id].aoe_duration          = e.AEDuration;
+		sp[e.id].mana                  = e.mana;
 
-		for(y=0; y < EFFECT_COUNT; y++)
-			sp[tempid].limit_value[y]=Strings::ToInt(row[32+y]); // effect_limit_value
+		sp[e.id].base_value[0]  = e.effect_base_value1;
+		sp[e.id].base_value[1]  = e.effect_base_value2;
+		sp[e.id].base_value[2]  = e.effect_base_value3;
+		sp[e.id].base_value[3]  = e.effect_base_value4;
+		sp[e.id].base_value[4]  = e.effect_base_value5;
+		sp[e.id].base_value[5]  = e.effect_base_value6;
+		sp[e.id].base_value[6]  = e.effect_base_value7;
+		sp[e.id].base_value[7]  = e.effect_base_value8;
+		sp[e.id].base_value[8]  = e.effect_base_value9;
+		sp[e.id].base_value[9]  = e.effect_base_value10;
+		sp[e.id].base_value[10] = e.effect_base_value11;
+		sp[e.id].base_value[11] = e.effect_base_value12;
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].max_value[y]=Strings::ToInt(row[44+y]);
+		sp[e.id].limit_value[0]  = e.effect_limit_value1;
+		sp[e.id].limit_value[1]  = e.effect_limit_value2;
+		sp[e.id].limit_value[2]  = e.effect_limit_value3;
+		sp[e.id].limit_value[3]  = e.effect_limit_value4;
+		sp[e.id].limit_value[4]  = e.effect_limit_value5;
+		sp[e.id].limit_value[5]  = e.effect_limit_value6;
+		sp[e.id].limit_value[6]  = e.effect_limit_value7;
+		sp[e.id].limit_value[7]  = e.effect_limit_value8;
+		sp[e.id].limit_value[8]  = e.effect_limit_value9;
+		sp[e.id].limit_value[9]  = e.effect_limit_value10;
+		sp[e.id].limit_value[10] = e.effect_limit_value11;
+		sp[e.id].limit_value[11] = e.effect_limit_value12;
 
-		for(y=0; y< 4;y++)
-			sp[tempid].component[y]=Strings::ToInt(row[58+y]);
+		sp[e.id].max_value[0]  = e.max1;
+		sp[e.id].max_value[1]  = e.max2;
+		sp[e.id].max_value[2]  = e.max3;
+		sp[e.id].max_value[3]  = e.max4;
+		sp[e.id].max_value[4]  = e.max5;
+		sp[e.id].max_value[5]  = e.max6;
+		sp[e.id].max_value[6]  = e.max7;
+		sp[e.id].max_value[7]  = e.max8;
+		sp[e.id].max_value[8]  = e.max9;
+		sp[e.id].max_value[9]  = e.max10;
+		sp[e.id].max_value[10] = e.max11;
+		sp[e.id].max_value[11] = e.max12;
 
-		for(y=0; y< 4;y++)
-			sp[tempid].component_count[y]=Strings::ToInt(row[62+y]);
+		sp[e.id].component[0] = e.components1;
+		sp[e.id].component[1] = e.components2;
+		sp[e.id].component[2] = e.components3;
+		sp[e.id].component[3] = e.components4;
 
-		for(y=0; y< 4;y++)
-			sp[tempid].no_expend_reagent[y]=Strings::ToInt(row[66+y]);
+		sp[e.id].component_count[0] = e.component_counts1;
+		sp[e.id].component_count[1] = e.component_counts2;
+		sp[e.id].component_count[2] = e.component_counts3;
+		sp[e.id].component_count[3] = e.component_counts4;
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].formula[y]=Strings::ToUnsignedInt(row[70+y]);
+		sp[e.id].no_expend_reagent[0] = e.NoexpendReagent1;
+		sp[e.id].no_expend_reagent[1] = e.NoexpendReagent2;
+		sp[e.id].no_expend_reagent[2] = e.NoexpendReagent3;
+		sp[e.id].no_expend_reagent[3] = e.NoexpendReagent4;
 
-		sp[tempid].good_effect=Strings::ToInt(row[83]);
-		sp[tempid].activated=Strings::ToInt(row[84]);
-		sp[tempid].resist_type=Strings::ToInt(row[85]);
+		sp[e.id].formula[0]  = e.formula1;
+		sp[e.id].formula[1]  = e.formula2;
+		sp[e.id].formula[2]  = e.formula3;
+		sp[e.id].formula[3]  = e.formula4;
+		sp[e.id].formula[4]  = e.formula5;
+		sp[e.id].formula[5]  = e.formula6;
+		sp[e.id].formula[6]  = e.formula7;
+		sp[e.id].formula[7]  = e.formula8;
+		sp[e.id].formula[8]  = e.formula9;
+		sp[e.id].formula[9]  = e.formula10;
+		sp[e.id].formula[10] = e.formula11;
+		sp[e.id].formula[11] = e.formula12;
 
-		for(y=0; y< EFFECT_COUNT;y++)
-			sp[tempid].effect_id[y]=Strings::ToInt(row[86+y]);
+		sp[e.id].good_effect = e.goodEffect;
+		sp[e.id].activated   = e.Activated;
+		sp[e.id].resist_type = e.resisttype;
 
-		sp[tempid].target_type = static_cast<SpellTargetType>(Strings::ToInt(row[98]));
-		sp[tempid].base_difficulty=Strings::ToInt(row[99]);
+		sp[e.id].effect_id[0]  = e.effectid1;
+		sp[e.id].effect_id[1]  = e.effectid2;
+		sp[e.id].effect_id[2]  = e.effectid3;
+		sp[e.id].effect_id[3]  = e.effectid4;
+		sp[e.id].effect_id[4]  = e.effectid5;
+		sp[e.id].effect_id[5]  = e.effectid6;
+		sp[e.id].effect_id[6]  = e.effectid7;
+		sp[e.id].effect_id[7]  = e.effectid8;
+		sp[e.id].effect_id[8]  = e.effectid9;
+		sp[e.id].effect_id[9]  = e.effectid10;
+		sp[e.id].effect_id[10] = e.effectid11;
+		sp[e.id].effect_id[11] = e.effectid12;
 
-		int tmp_skill = Strings::ToInt(row[100]);
+		sp[e.id].target_type = static_cast<SpellTargetType>(e.targettype);
 
-		if (tmp_skill < 0 || tmp_skill > EQ::skills::HIGHEST_SKILL)
-			sp[tempid].skill = EQ::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
-        else
-			sp[tempid].skill = static_cast<EQ::skills::SkillType>(tmp_skill);
+		sp[e.id].base_difficulty  = e.basediff;
 
-		sp[tempid].zone_type=Strings::ToInt(row[101]);
-		sp[tempid].environment_type=Strings::ToInt(row[102]);
-		sp[tempid].time_of_day=Strings::ToInt(row[103]);
+		sp[e.id].skill = (
+			EQ::ValueWithin(e.skill, 0, EQ::skills::HIGHEST_SKILL) ?
+			static_cast<EQ::skills::SkillType>(e.skill) :
+			EQ::skills::SkillBegging
+		);
 
-		for(y=0; y < Class::PLAYER_CLASS_COUNT;y++)
-			sp[tempid].classes[y]=Strings::ToInt(row[104+y]);
+		sp[e.id].zone_type        = e.zonetype;
+		sp[e.id].environment_type = e.EnvironmentType;
+		sp[e.id].time_of_day      = e.TimeOfDay;
 
-		sp[tempid].casting_animation=Strings::ToInt(row[120]);
-		sp[tempid].spell_affect_index=Strings::ToInt(row[123]);
-		sp[tempid].disallow_sit=Strings::ToInt(row[124]);
-		sp[tempid].deity_agnostic=Strings::ToInt(row[125]);
+		sp[e.id].classes[0]  = e.classes1;
+		sp[e.id].classes[1]  = e.classes2;
+		sp[e.id].classes[2]  = e.classes3;
+		sp[e.id].classes[3]  = e.classes4;
+		sp[e.id].classes[4]  = e.classes5;
+		sp[e.id].classes[5]  = e.classes6;
+		sp[e.id].classes[6]  = e.classes7;
+		sp[e.id].classes[7]  = e.classes8;
+		sp[e.id].classes[8]  = e.classes9;
+		sp[e.id].classes[9]  = e.classes10;
+		sp[e.id].classes[10] = e.classes11;
+		sp[e.id].classes[11] = e.classes12;
+		sp[e.id].classes[12] = e.classes13;
+		sp[e.id].classes[13] = e.classes14;
+		sp[e.id].classes[14] = e.classes15;
+		sp[e.id].classes[15] = e.classes16;
 
-		for (y = 0; y < 16; y++)
-			sp[tempid].deities[y]=Strings::ToInt(row[126+y]);
+		sp[e.id].casting_animation  = e.CastingAnim;
+		sp[e.id].spell_affect_index = e.SpellAffectIndex;
+		sp[e.id].disallow_sit       = e.disallow_sit;
 
-		sp[tempid].new_icon=Strings::ToInt(row[144]);
-		sp[tempid].uninterruptable=Strings::ToBool(row[146]);
-		sp[tempid].resist_difficulty=Strings::ToInt(row[147]);
-		sp[tempid].unstackable_dot = Strings::ToBool(row[148]);
-		sp[tempid].recourse_link = Strings::ToUnsignedInt(row[150]);
-		sp[tempid].no_partial_resist = Strings::ToBool(row[151]);
+		sp[e.id].deity_agnostic = e.deities0; // Agnostic
+		sp[e.id].deities[0]  = e.deities1; // Bertoxxulous
+		sp[e.id].deities[1]  = e.deities2; // Brell Serilis
+		sp[e.id].deities[2]  = e.deities3; // Cazic Thule
+		sp[e.id].deities[3]  = e.deities4; // Erollsi Marr
+		sp[e.id].deities[4]  = e.deities5; // Bristlebane
+		sp[e.id].deities[5]  = e.deities6; // Innoruuk
+		sp[e.id].deities[6]  = e.deities7; // Karana
+		sp[e.id].deities[7]  = e.deities8; // Mithaniel Marr
+		sp[e.id].deities[8]  = e.deities9; // Prexius
+		sp[e.id].deities[9]  = e.deities10; // Quellious
+		sp[e.id].deities[10] = e.deities11; // Rallos Zek
+		sp[e.id].deities[11] = e.deities12; // Rodcet Nife
+		sp[e.id].deities[12] = e.deities13; // Solusek Ro
+		sp[e.id].deities[13] = e.deities14; // The Tribunal
+		sp[e.id].deities[14] = e.deities15; // Tunare
+		sp[e.id].deities[15] = e.deities16; // Veeshan
 
-		sp[tempid].short_buff_box = Strings::ToInt(row[154]);
-		sp[tempid].description_id = Strings::ToInt(row[155]);
-		sp[tempid].type_description_id = Strings::ToInt(row[156]);
-		sp[tempid].effect_description_id = Strings::ToInt(row[157]);
+		sp[e.id].new_icon              = e.new_icon;
+		sp[e.id].uninterruptable       = e.uninterruptable;
+		sp[e.id].resist_difficulty     = e.ResistDiff;
+		sp[e.id].unstackable_dot       = e.dot_stacking_exempt;
+		sp[e.id].recourse_link         = e.RecourseLink;
+		sp[e.id].no_partial_resist     = e.no_partial_resist;
+		sp[e.id].short_buff_box        = e.short_buff_box;
+		sp[e.id].description_id        = e.descnum;
+		sp[e.id].type_description_id   = e.typedescnum;
+		sp[e.id].effect_description_id = e.effectdescnum;
+		sp[e.id].npc_no_los            = e.npc_no_los;
+		sp[e.id].feedbackable          = e.feedbackable;
+		sp[e.id].reflectable           = e.reflectable;
+		sp[e.id].bonus_hate            = e.bonushate;
+		sp[e.id].ldon_trap             = e.ldon_trap;
+		sp[e.id].endurance_cost        = e.EndurCost;
+		sp[e.id].timer_id              = e.EndurTimerIndex;
+		sp[e.id].is_discipline         = e.IsDiscipline;
+		sp[e.id].hate_added            = e.HateAdded;
+		sp[e.id].endurance_upkeep      = e.EndurUpkeep;
+		sp[e.id].hit_number_type       = e.numhits;
+		sp[e.id].hit_number            = e.numhitstype;
+		sp[e.id].pvp_resist_base       = e.pvpresistbase;
+		sp[e.id].pvp_resist_per_level  = e.pvpresistcalc;
+		sp[e.id].pvp_resist_cap        = e.pvpresistcap;
+		sp[e.id].spell_category        = e.spell_category;
+		sp[e.id].pvp_duration          = e.pvp_duration;
+		sp[e.id].pvp_duration_cap      = e.pvp_duration_cap;
+		sp[e.id].pcnpc_only_flag       = e.pcnpc_only_flag;
+		sp[e.id].cast_not_standing     = e.cast_not_standing;
+		sp[e.id].can_mgb               = e.can_mgb;
+		sp[e.id].dispel_flag           = e.nodispell;
+		sp[e.id].min_resist            = e.MinResist;
+		sp[e.id].max_resist            = e.MaxResist;
+		sp[e.id].viral_targets         = e.viral_targets;
+		sp[e.id].viral_timer           = e.viral_timer;
+		sp[e.id].nimbus_effect         = e.nimbuseffect;
+		sp[e.id].directional_start     = e.ConeStartAngle;
+		sp[e.id].directional_end       = e.ConeStopAngle;
+		sp[e.id].sneak                 = e.sneaking;
+		sp[e.id].not_focusable         = e.not_extendable;
 
-		sp[tempid].npc_no_los = Strings::ToBool(row[159]);
-		sp[tempid].feedbackable = Strings::ToBool(row[160]);
-		sp[tempid].reflectable = Strings::ToBool(row[161]);
-		sp[tempid].bonus_hate=Strings::ToInt(row[162]);
+		sp[e.id].no_detrimental_spell_aggro = e.no_detrimental_spell_aggro;
 
-		sp[tempid].ldon_trap = Strings::ToBool(row[165]);
-		sp[tempid].endurance_cost= Strings::ToInt(row[166]);
-		sp[tempid].timer_id= Strings::ToInt(row[167]);
-		sp[tempid].is_discipline = Strings::ToBool(row[168]);
-		sp[tempid].hate_added= Strings::ToInt(row[173]);
-		sp[tempid].endurance_upkeep=Strings::ToInt(row[174]);
-		sp[tempid].hit_number_type = Strings::ToInt(row[175]);
-		sp[tempid].hit_number = Strings::ToInt(row[176]);
-		sp[tempid].pvp_resist_base= Strings::ToInt(row[177]);
-		sp[tempid].pvp_resist_per_level= Strings::ToInt(row[178]);
-		sp[tempid].pvp_resist_cap= Strings::ToInt(row[179]);
-		sp[tempid].spell_category= Strings::ToInt(row[180]);
-		sp[tempid].pvp_duration = Strings::ToInt(row[181]);
-		sp[tempid].pvp_duration_cap = Strings::ToInt(row[182]);
-		sp[tempid].pcnpc_only_flag= Strings::ToInt(row[183]);
-		sp[tempid].cast_not_standing = Strings::ToInt(row[184]) != 0;
-		sp[tempid].can_mgb= Strings::ToBool(row[185]);
-		sp[tempid].dispel_flag = Strings::ToInt(row[186]);
-		sp[tempid].min_resist = Strings::ToInt(row[189]);
-		sp[tempid].max_resist = Strings::ToInt(row[190]);
-		sp[tempid].viral_targets = Strings::ToInt(row[191]);
-		sp[tempid].viral_timer = Strings::ToInt(row[192]);
-		sp[tempid].nimbus_effect = Strings::ToInt(row[193]);
-		sp[tempid].directional_start = Strings::ToFloat(row[194]);
-		sp[tempid].directional_end = Strings::ToFloat(row[195]);
-		sp[tempid].sneak = Strings::ToBool(row[196]);
-		sp[tempid].not_focusable = Strings::ToBool(row[197]);
-		sp[tempid].no_detrimental_spell_aggro = Strings::ToBool(row[198]);
-		sp[tempid].suspendable = Strings::ToBool(row[200]);
-		sp[tempid].viral_range = Strings::ToInt(row[201]);
-		sp[tempid].song_cap = Strings::ToInt(row[202]);
-		sp[tempid].no_block = Strings::ToInt(row[205]);
-		sp[tempid].spell_group=Strings::ToInt(row[207]);
-		sp[tempid].rank = Strings::ToInt(row[208]);
-		sp[tempid].no_resist=Strings::ToInt(row[209]);
-		sp[tempid].cast_restriction = Strings::ToInt(row[211]);
-		sp[tempid].allow_rest = Strings::ToBool(row[212]);
-		sp[tempid].can_cast_in_combat = Strings::ToBool(row[213]);
-		sp[tempid].can_cast_out_of_combat = Strings::ToBool(row[214]);
-		sp[tempid].override_crit_chance = Strings::ToInt(row[217]);
-		sp[tempid].aoe_max_targets = Strings::ToInt(row[218]);
-		sp[tempid].no_heal_damage_item_mod = Strings::ToInt(row[219]);
-		sp[tempid].caster_requirement_id = Strings::ToInt(row[220]);
-		sp[tempid].spell_class = Strings::ToInt(row[221]);
-		sp[tempid].spell_subclass = Strings::ToInt(row[222]);
-		sp[tempid].persist_death = Strings::ToBool(row[224]);
-		sp[tempid].min_distance = Strings::ToFloat(row[227]);
-		sp[tempid].min_distance_mod = Strings::ToFloat(row[228]);
-		sp[tempid].max_distance = Strings::ToFloat(row[229]);
-		sp[tempid].max_distance_mod = Strings::ToFloat(row[230]);
-		sp[tempid].min_range = Strings::ToFloat(row[231]);
-		sp[tempid].no_remove = Strings::ToBool(row[232]);
-		sp[tempid].damage_shield_type = 0;
+		sp[e.id].suspendable             = e.suspendable;
+		sp[e.id].viral_range             = e.viral_range;
+		sp[e.id].song_cap                = e.songcap;
+		sp[e.id].no_block                = e.no_block;
+		sp[e.id].spell_group             = e.spellgroup;
+		sp[e.id].rank                    = e.rank_;
+		sp[e.id].no_resist               = e.no_resist;
+		sp[e.id].cast_restriction        = e.CastRestriction;
+		sp[e.id].allow_rest              = e.allowrest;
+		sp[e.id].can_cast_in_combat      = e.InCombat;
+		sp[e.id].can_cast_out_of_combat  = e.OutofCombat;
+		sp[e.id].override_crit_chance    = e.override_crit_chance;
+		sp[e.id].aoe_max_targets         = e.aemaxtargets;
+		sp[e.id].no_heal_damage_item_mod = e.no_heal_damage_item_mod;
+		sp[e.id].caster_requirement_id   = e.caster_requirement_id;
+		sp[e.id].spell_class             = e.spell_class;
+		sp[e.id].spell_subclass          = e.spell_subclass;
+		sp[e.id].persist_death           = e.persistdeath;
+		sp[e.id].min_distance            = e.min_dist;
+		sp[e.id].min_distance_mod        = e.min_dist_mod;
+		sp[e.id].max_distance            = e.max_dist;
+		sp[e.id].max_distance_mod        = e.max_dist_mod;
+		sp[e.id].min_range               = e.min_range;
+		sp[e.id].no_remove               = e.no_remove;
+		sp[e.id].damage_shield_type      = 0;
 	}
 
-	LoadDamageShieldTypes(sp, max_spells);
+	LoadDamageShieldTypes(sp);
 }
 
-void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
-	const std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
-	auto results = QueryDatabase(query);
-	memset(message, '\0', sizeof(InspectMessage_Struct));
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		memcpy(message, row[0], sizeof(InspectMessage_Struct));
+void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* s)
+{
+	const auto& e = CharacterInspectMessagesRepository::FindOne(*this, character_id);
+
+	memset(s, '\0', sizeof(InspectMessage_Struct));
+
+	if (!e.id) {
+		return;
 	}
+
+	memcpy(s, e.inspect_message.c_str(), sizeof(InspectMessage_Struct));
 }
 
-void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
-	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, Strings::Escape(message->text).c_str());
-	auto results = QueryDatabase(query);
+void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* s)
+{
+	auto e = CharacterInspectMessagesRepository::NewEntity();
+
+	e.id              = character_id;
+	e.inspect_message = s->text;
+
+	if (!CharacterInspectMessagesRepository::ReplaceOne(*this, e)) {
+		LogError("Failed to save character inspect message of [{}] for character_id [{}]", s->text, character_id);
+	}
 }
 
 uint32 SharedDatabase::GetSpellsCount()
 {
-	auto results = QueryDatabase("SELECT count(*) FROM spells_new");
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
-
-	auto& row = results.begin();
-
-	if (row[0]) {
-		return Strings::ToUnsignedInt(row[0]);
-	}
-
-	return 0;
+	return SpellsNewRepository::Count(*this);
 }
 
 uint32 SharedDatabase::GetItemsCount()
 {
-	auto results = QueryDatabase("SELECT count(*) FROM items");
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
-
-	auto& row = results.begin();
-
-	if (row[0]) {
-		return Strings::ToUnsignedInt(row[0]);
-	}
-
-	return 0;
+	return ItemsRepository::Count(*this);
 }
 
 void SharedDatabase::SetSharedItemsCount(uint32 shared_items_count)

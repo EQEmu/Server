@@ -105,7 +105,7 @@ bool IsTargetableAESpell(uint16 spell_id)
 
 bool IsSacrificeSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Sacrifice);
+	return IsEffectInSpell(spell_id, SpellEffect::Sacrifice);
 }
 
 bool IsLifetapSpell(uint16 spell_id)
@@ -129,7 +129,7 @@ bool IsLifetapSpell(uint16 spell_id)
 
 bool IsMesmerizeSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Mez);
+	return IsEffectInSpell(spell_id, SpellEffect::Mez);
 }
 
 bool SpellBreaksMez(uint16 spell_id)
@@ -139,7 +139,7 @@ bool SpellBreaksMez(uint16 spell_id)
 
 bool IsStunSpell(uint16 spell_id)
 {
-	return (IsValidSpell(spell_id) && IsEffectInSpell(spell_id, SE_Stun) || IsEffectInSpell(spell_id, SE_SpinTarget));
+	return (IsValidSpell(spell_id) && IsEffectInSpell(spell_id, SpellEffect::Stun) || IsEffectInSpell(spell_id, SpellEffect::SpinTarget));
 }
 
 bool IsSummonSpell(uint16 spell_id)
@@ -153,9 +153,9 @@ bool IsSummonSpell(uint16 spell_id)
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		const auto effect_id = spell.effect_id[i];
 		if (
-			effect_id == SE_SummonPet ||
-			effect_id == SE_SummonItem ||
-			effect_id == SE_SummonPC
+			effect_id == SpellEffect::SummonPet ||
+			effect_id == SpellEffect::SummonItem ||
+			effect_id == SpellEffect::SummonPC
 		) {
 			return true;
 		}
@@ -180,7 +180,7 @@ bool IsDamageSpell(uint16 spell_id)
 		const auto effect_id = spell.effect_id[i];
 		if (
 			spell.base_value[i] < 0 &&
-			(effect_id == SE_CurrentHPOnce || effect_id == SE_CurrentHP)
+			(effect_id == SpellEffect::CurrentHPOnce || effect_id == SpellEffect::CurrentHP)
 		) {
 			return true;
 		}
@@ -207,9 +207,9 @@ bool IsAnyDamageSpell(uint16 spell_id)
 		if (
 			spell.base_value[i] < 0 &&
 			(
-				effect_id == SE_CurrentHPOnce ||
+				effect_id == SpellEffect::CurrentHPOnce ||
 				(
-					effect_id == SE_CurrentHP &&
+					effect_id == SpellEffect::CurrentHP &&
 					spell.buff_duration < 1
 				)
 			)
@@ -241,7 +241,7 @@ bool IsDamageOverTimeSpell(uint16 spell_id)
 		const auto effect_id = spell.effect_id[i];
 		if (
 			spell.base_value[i] < 0 &&
-			effect_id == SE_CurrentHP &&
+			effect_id == SpellEffect::CurrentHP &&
 			spell.buff_duration > 1
 		) {
 			return true;
@@ -253,7 +253,7 @@ bool IsDamageOverTimeSpell(uint16 spell_id)
 
 bool IsFearSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Fear);
+	return IsEffectInSpell(spell_id, SpellEffect::Fear);
 }
 
 bool IsCureSpell(uint16 spell_id)
@@ -268,10 +268,10 @@ bool IsCureSpell(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_DiseaseCounter ||
-			spell.effect_id[i] == SE_PoisonCounter ||
-			spell.effect_id[i] == SE_CurseCounter ||
-			spell.effect_id[i] == SE_CorruptionCounter
+			spell.effect_id[i] == SpellEffect::DiseaseCounter ||
+			spell.effect_id[i] == SpellEffect::PoisonCounter ||
+			spell.effect_id[i] == SpellEffect::CurseCounter ||
+			spell.effect_id[i] == SpellEffect::CorruptionCounter
 		) {
 			has_cure_effect = true;
 		}
@@ -298,9 +298,9 @@ bool IsSlowSpell(uint16 spell_id)
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		const auto effect_id = spell.effect_id[i];
 		if (
-			effect_id == SE_AttackSpeed4 ||
+			effect_id == SpellEffect::AttackSpeed4 ||
 			(
-				effect_id == SE_AttackSpeed &&
+				effect_id == SpellEffect::AttackSpeed &&
 				spell.base_value[i] < 100
 			)
 		) {
@@ -320,7 +320,7 @@ bool IsHasteSpell(uint16 spell_id)
 	const auto& spell = spells[spell_id];
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
-		if (spell.effect_id[i] == SE_AttackSpeed) {
+		if (spell.effect_id[i] == SpellEffect::AttackSpeed) {
 			return (spell.base_value[i] < 100);
 		}
 	}
@@ -331,15 +331,15 @@ bool IsHasteSpell(uint16 spell_id)
 bool IsHarmonySpell(uint16 spell_id)
 {
 	return (
-		IsEffectInSpell(spell_id, SE_ChangeFrenzyRad) ||
-		IsEffectInSpell(spell_id, SE_Harmony) ||
-		IsEffectInSpell(spell_id, SE_Lull)
+		IsEffectInSpell(spell_id, SpellEffect::ChangeFrenzyRad) ||
+		IsEffectInSpell(spell_id, SpellEffect::Harmony) ||
+		IsEffectInSpell(spell_id, SpellEffect::Lull)
 	);
 }
 
 bool IsPercentalHealSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_PercentalHeal);
+	return IsEffectInSpell(spell_id, SpellEffect::PercentalHeal);
 }
 
 bool IsGroupOnlySpell(uint16 spell_id)
@@ -359,13 +359,13 @@ bool IsBeneficialSpell(uint16 spell_id)
 
 	// You'd think just checking goodEffect flag would be enough?
 	if (spells[spell_id].good_effect == BENEFICIAL_EFFECT) {
-		// If the target type is ST_Self or ST_Pet and is a SE_CancleMagic spell
+		// If the target type is ST_Self or ST_Pet and is a SpellEffect::CancleMagic spell
 		// it is not Beneficial
 		const auto target_type = spells[spell_id].target_type;
 		if (
 			target_type != ST_Self &&
 			target_type != ST_Pet &&
-			IsEffectInSpell(spell_id, SE_CancelMagic)
+			IsEffectInSpell(spell_id, SpellEffect::CancelMagic)
 		) {
 			return false;
 		}
@@ -387,7 +387,7 @@ bool IsBeneficialSpell(uint16 spell_id)
 				// checking these SAI cause issues with the rng defensive proc line
 				// So I guess instead of fixing it for real, just a quick hack :P
 				if (
-					spells[spell_id].effect_id[0] != SE_DefensiveProc &&
+					spells[spell_id].effect_id[0] != SpellEffect::DefensiveProc &&
 					(
 						spell_affect_index == SAI_Calm ||
 						spell_affect_index == SAI_Dispell_Sight ||
@@ -403,16 +403,16 @@ bool IsBeneficialSpell(uint16 spell_id)
 				if (
 					(
 						spell_affect_index == SAI_Calm &&
-						IsEffectInSpell(spell_id, SE_Harmony)
+						IsEffectInSpell(spell_id, SpellEffect::Harmony)
 					) ||
 					(
 						spell_affect_index == SAI_Calm_Song &&
-						IsEffectInSpell(spell_id, SE_BindSight)
+						IsEffectInSpell(spell_id, SpellEffect::BindSight)
 					) ||
 					(
 						spell_affect_index == SAI_Dispell_Sight &&
 						spells[spell_id].skill == EQ::skills::SkillDivination &&
-						!IsEffectInSpell(spell_id, SE_VoiceGraft)
+						!IsEffectInSpell(spell_id, SpellEffect::VoiceGraft)
 					)
 				) {
 					return false;
@@ -436,52 +436,52 @@ bool IsDetrimentalSpell(uint16 spell_id)
 bool IsInvisibleSpell(uint16 spell_id)
 {
 	return (
-		IsEffectInSpell(spell_id, SE_Invisibility) ||
-		IsEffectInSpell(spell_id, SE_Invisibility2) ||
-		IsEffectInSpell(spell_id, SE_InvisVsUndead) ||
-		IsEffectInSpell(spell_id, SE_InvisVsUndead2) ||
-		IsEffectInSpell(spell_id, SE_InvisVsAnimals) ||
-		IsEffectInSpell(spell_id, SE_ImprovedInvisAnimals)
+		IsEffectInSpell(spell_id, SpellEffect::Invisibility) ||
+		IsEffectInSpell(spell_id, SpellEffect::Invisibility2) ||
+		IsEffectInSpell(spell_id, SpellEffect::InvisVsUndead) ||
+		IsEffectInSpell(spell_id, SpellEffect::InvisVsUndead2) ||
+		IsEffectInSpell(spell_id, SpellEffect::InvisVsAnimals) ||
+		IsEffectInSpell(spell_id, SpellEffect::ImprovedInvisAnimals)
 	);
 }
 
 bool IsInvulnerabilitySpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_DivineAura);
+	return IsEffectInSpell(spell_id, SpellEffect::DivineAura);
 }
 
 bool IsCompleteHealDurationSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_CompleteHeal);
+	return IsEffectInSpell(spell_id, SpellEffect::CompleteHeal);
 }
 
 bool IsPoisonCounterSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_PoisonCounter);
+	return IsEffectInSpell(spell_id, SpellEffect::PoisonCounter);
 }
 
 bool IsDiseaseCounterSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_DiseaseCounter);
+	return IsEffectInSpell(spell_id, SpellEffect::DiseaseCounter);
 }
 
 bool IsSummonItemSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_SummonItem);
+	return IsEffectInSpell(spell_id, SpellEffect::SummonItem);
 }
 
 bool IsSummonSkeletonSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_NecPet);
+	return IsEffectInSpell(spell_id, SpellEffect::NecPet);
 }
 
 bool IsSummonPetSpell(uint16 spell_id)
 {
 	return (
-		IsEffectInSpell(spell_id, SE_SummonPet) ||
-		IsEffectInSpell(spell_id, SE_SummonBSTPet) ||
-		IsEffectInSpell(spell_id, SE_Familiar) ||
-		IsEffectInSpell(spell_id, SE_NecPet)
+		IsEffectInSpell(spell_id, SpellEffect::SummonPet) ||
+		IsEffectInSpell(spell_id, SpellEffect::SummonBSTPet) ||
+		IsEffectInSpell(spell_id, SpellEffect::Familiar) ||
+		IsEffectInSpell(spell_id, SpellEffect::NecPet)
 	);
 }
 
@@ -495,12 +495,12 @@ bool IsPetSpell(uint16 spell_id)
 
 bool IsSummonPCSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_SummonPC);
+	return IsEffectInSpell(spell_id, SpellEffect::SummonPC);
 }
 
 bool IsCharmSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Charm);
+	return IsEffectInSpell(spell_id, SpellEffect::Charm);
 }
 
 bool IsResurrectionSicknessSpell(uint16 spell_id) {
@@ -515,42 +515,42 @@ bool IsResurrectionSicknessSpell(uint16 spell_id) {
 
 bool IsBlindSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Blind);
+	return IsEffectInSpell(spell_id, SpellEffect::Blind);
 }
 
 bool IsHealthSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_CurrentHP);
+	return IsEffectInSpell(spell_id, SpellEffect::CurrentHP);
 }
 
 bool IsCastTimeReductionSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_IncreaseSpellHaste);
+	return IsEffectInSpell(spell_id, SpellEffect::IncreaseSpellHaste);
 }
 
 bool IsIncreaseDurationSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_IncreaseSpellDuration);
+	return IsEffectInSpell(spell_id, SpellEffect::IncreaseSpellDuration);
 }
 
 bool IsManaCostReductionSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_ReduceManaCost);
+	return IsEffectInSpell(spell_id, SpellEffect::ReduceManaCost);
 }
 
 bool IsIncreaseRangeSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_IncreaseRange);
+	return IsEffectInSpell(spell_id, SpellEffect::IncreaseRange);
 }
 
 bool IsImprovedHealingSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_ImprovedHeal);
+	return IsEffectInSpell(spell_id, SpellEffect::ImprovedHeal);
 }
 
 bool IsImprovedDamageSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_ImprovedDamage);
+	return IsEffectInSpell(spell_id, SpellEffect::ImprovedDamage);
 }
 
 bool IsAEDurationSpell(uint16 spell_id)
@@ -596,7 +596,7 @@ bool IsPureNukeSpell(uint16 spell_id)
 
 	if (
 		effect_count == 1 &&
-		IsEffectInSpell(spell_id, SE_CurrentHP) &&
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) &&
 		spells[spell_id].buff_duration == 0 &&
 		IsDamageSpell(spell_id)
 	) {
@@ -799,8 +799,8 @@ bool IsPartialResistableSpell(uint16 spell_id)
 		if (
 			spell.base_value[o] < 0 &&
 			(
-				effect_id == SE_CurrentHPOnce ||
-				effect_id == SE_CurrentHP
+				effect_id == SpellEffect::CurrentHPOnce ||
+				effect_id == SpellEffect::CurrentHP
 			)
 		) {
 			return true;
@@ -846,7 +846,7 @@ bool IsTGBCompatibleSpell(uint16 spell_id)
 		!IsDetrimentalSpell(spell_id) &&
 		spells[spell_id].buff_duration != 0 &&
 		!IsBardSong(spell_id) &&
-		!IsEffectInSpell(spell_id, SE_Illusion)
+		!IsEffectInSpell(spell_id, SpellEffect::Illusion)
 	) {
 		return true;
 	}
@@ -899,10 +899,10 @@ uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_TriggerOnCast ||
-			spell.effect_id[i] == SE_SpellTrigger ||
-			spell.effect_id[i] == SE_ApplyEffect ||
-			spell.effect_id[i] == SE_Trigger_Spell_Non_Item
+			spell.effect_id[i] == SpellEffect::TriggerOnCast ||
+			spell.effect_id[i] == SpellEffect::SpellTrigger ||
+			spell.effect_id[i] == SpellEffect::ApplyEffect ||
+			spell.effect_id[i] == SpellEffect::Trigger_Spell_Non_Item
 		) {
 			const auto trigger_spell_id = spell.limit_value[i];
 			if (
@@ -932,17 +932,17 @@ bool IsBlankSpellEffect(uint16 spell_id, int effect_index)
 	const auto base_value = spell.base_value[effect_index];
 	const auto formula    = spell.formula[effect_index];
 
-	// SE_CHA is "spacer"
-	// SE_Stacking* are also considered blank where this is used
+	// SpellEffect::CHA is "spacer"
+	// SpellEffect::Stacking* are also considered blank where this is used
 	if (
-		effect == SE_Blank ||
+		effect == SpellEffect::Blank ||
 		(
-			effect == SE_CHA &&
+			effect == SpellEffect::CHA &&
 			base_value == 0 &&
 			formula == 100
 		) ||
-		effect == SE_StackingCommand_Block ||
-		effect == SE_StackingCommand_Overwrite
+		effect == SpellEffect::StackingCommand_Block ||
+		effect == SpellEffect::StackingCommand_Overwrite
 	) {
 		return true;
 	}
@@ -1041,7 +1041,7 @@ int CalculatePoisonCounters(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_PoisonCounter &&
+			spell.effect_id[i] == SpellEffect::PoisonCounter &&
 			spell.base_value[i] > 0
 		) {
 			counters += spell.base_value[i];
@@ -1063,7 +1063,7 @@ int CalculateDiseaseCounters(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_DiseaseCounter &&
+			spell.effect_id[i] == SpellEffect::DiseaseCounter &&
 			spell.base_value[i] > 0
 		) {
 			counters += spell.base_value[i];
@@ -1085,7 +1085,7 @@ int CalculateCurseCounters(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_CurseCounter &&
+			spell.effect_id[i] == SpellEffect::CurseCounter &&
 			spell.base_value[i] > 0
 		) {
 			counters += spell.base_value[i];
@@ -1107,7 +1107,7 @@ int CalculateCorruptionCounters(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_CorruptionCounter &&
+			spell.effect_id[i] == SpellEffect::CorruptionCounter &&
 			spell.base_value[i] > 0) {
 
 			counters += spell.base_value[i];
@@ -1254,30 +1254,30 @@ int8 GetSpellResurrectionSicknessCheck(uint16 spell_id_one, uint16 spell_id_two)
 
 bool IsRuneSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Rune);
+	return IsEffectInSpell(spell_id, SpellEffect::Rune);
 }
 
 bool IsMagicRuneSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_AbsorbMagicAtt);
+	return IsEffectInSpell(spell_id, SpellEffect::AbsorbMagicAtt);
 }
 
 bool IsManaTapSpell(uint16 spell_id)
 {
 	return (
-		IsEffectInSpell(spell_id, SE_CurrentMana) &&
+		IsEffectInSpell(spell_id, SpellEffect::CurrentMana) &&
 		spells[spell_id].target_type == ST_Tap
 	);
 }
 
 bool IsAllianceSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_AddFaction);
+	return IsEffectInSpell(spell_id, SpellEffect::AddFaction);
 }
 
 bool IsDeathSaveSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_DeathSave);
+	return IsEffectInSpell(spell_id, SpellEffect::DeathSave);
 }
 
 // Deathsave spells with base of 1 are partial
@@ -1291,7 +1291,7 @@ bool IsPartialDeathSaveSpell(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_DeathSave &&
+			spell.effect_id[i] == SpellEffect::DeathSave &&
 			spell.base_value[i] == PARTIAL_DEATH_SAVE
 		) {
 			return true;
@@ -1312,7 +1312,7 @@ bool IsFullDeathSaveSpell(uint16 spell_id)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (
-			spell.effect_id[i] == SE_DeathSave &&
+			spell.effect_id[i] == SpellEffect::DeathSave &&
 			spell.base_value[i] == FULL_DEATH_SAVE
 		) {
 			return true;
@@ -1324,33 +1324,33 @@ bool IsFullDeathSaveSpell(uint16 spell_id)
 
 bool IsShadowStepSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_ShadowStep);
+	return IsEffectInSpell(spell_id, SpellEffect::ShadowStep);
 }
 
 bool IsSuccorSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Succor);
+	return IsEffectInSpell(spell_id, SpellEffect::Succor);
 }
 
 bool IsTeleportSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Teleport);
+	return IsEffectInSpell(spell_id, SpellEffect::Teleport);
 }
 
 bool IsTranslocateSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Translocate);
+	return IsEffectInSpell(spell_id, SpellEffect::Translocate);
 }
 
 bool IsGateSpell(uint16 spell_id)
 {
-	return IsEffectInSpell(spell_id, SE_Gate);
+	return IsEffectInSpell(spell_id, SpellEffect::Gate);
 }
 
 bool IsIllusionSpell(uint16 spell_id)
 {
 	return (
-		IsEffectInSpell(spell_id, SE_Illusion) &&
+		IsEffectInSpell(spell_id, SpellEffect::Illusion) &&
 		spells[spell_id].target_type == ST_Self
 	);
 }
@@ -1406,9 +1406,9 @@ DmgShieldType GetDamageShieldType(uint16 spell_id, int damage_shield_type)
 bool IsLDoNObjectSpell(uint16 spell_id)
 {
 	return (
-		IsEffectInSpell(spell_id, SE_AppraiseLDonChest) ||
-		IsEffectInSpell(spell_id, SE_DisarmLDoNTrap) ||
-		IsEffectInSpell(spell_id, SE_UnlockLDoNChest)
+		IsEffectInSpell(spell_id, SpellEffect::AppraiseLDonChest) ||
+		IsEffectInSpell(spell_id, SpellEffect::DisarmLDoNTrap) ||
+		IsEffectInSpell(spell_id, SpellEffect::UnlockLDoNChest)
 	);
 }
 
@@ -1426,8 +1426,8 @@ bool IsHealOverTimeSpell(uint16 spell_id)
 {
 	if (
 		(
-			IsEffectInSpell(spell_id, SE_HealOverTime) ||
-			GetSpellTriggerSpellID(spell_id, SE_HealOverTime)
+			IsEffectInSpell(spell_id, SpellEffect::HealOverTime) ||
+			GetSpellTriggerSpellID(spell_id, SpellEffect::HealOverTime)
 		) &&
 		!IsGroupSpell(spell_id)
 	) {
@@ -1442,9 +1442,9 @@ bool IsCompleteHealSpell(uint16 spell_id)
 	if (
 		(
 			spell_id == SPELL_COMPLETE_HEAL ||
-			IsEffectInSpell(spell_id, SE_CompleteHeal) ||
+			IsEffectInSpell(spell_id, SpellEffect::CompleteHeal) ||
 			IsPercentalHealSpell(spell_id) ||
-			GetSpellTriggerSpellID(spell_id, SE_CompleteHeal)
+			GetSpellTriggerSpellID(spell_id, SpellEffect::CompleteHeal)
 		) &&
 		!IsGroupSpell(spell_id)
 	) {
@@ -1457,16 +1457,16 @@ bool IsCompleteHealSpell(uint16 spell_id)
 
 bool IsFastHealSpell(uint16 spell_id) {
 	spell_id = (
-		IsEffectInSpell(spell_id, SE_CurrentHP) ?
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) ?
 			spell_id :
-			GetSpellTriggerSpellID(spell_id, SE_CurrentHP)
+			GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHP)
 	);
 
 	if (!spell_id) {
 		spell_id = (
-			IsEffectInSpell(spell_id, SE_CurrentHPOnce) ?
+			IsEffectInSpell(spell_id, SpellEffect::CurrentHPOnce) ?
 				spell_id :
-				GetSpellTriggerSpellID(spell_id, SE_CurrentHPOnce)
+				GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHPOnce)
 		);
 	}
 
@@ -1481,8 +1481,8 @@ bool IsFastHealSpell(uint16 spell_id) {
 				if (
 					spells[spell_id].base_value[i] > 0 &&
 					(
-						spells[spell_id].effect_id[i] == SE_CurrentHP ||
-						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHP ||
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce
 					)
 				) {
 					return true;
@@ -1497,16 +1497,16 @@ bool IsFastHealSpell(uint16 spell_id) {
 bool IsVeryFastHealSpell(uint16 spell_id)
 {
 	spell_id = (
-		IsEffectInSpell(spell_id, SE_CurrentHP) ?
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) ?
 		spell_id :
-		GetSpellTriggerSpellID(spell_id, SE_CurrentHP)
+		GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHP)
 	);
 
 	if (!spell_id) {
 		spell_id = (
-			IsEffectInSpell(spell_id, SE_CurrentHPOnce) ?
+			IsEffectInSpell(spell_id, SpellEffect::CurrentHPOnce) ?
 			spell_id :
-			GetSpellTriggerSpellID(spell_id, SE_CurrentHPOnce)
+			GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHPOnce)
 		);
 	}
 
@@ -1521,8 +1521,8 @@ bool IsVeryFastHealSpell(uint16 spell_id)
 				if (
 					spells[spell_id].base_value[i] > 0 &&
 					(
-						spells[spell_id].effect_id[i] == SE_CurrentHP ||
-						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHP ||
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce
 					)
 				) {
 					return true;
@@ -1537,16 +1537,16 @@ bool IsVeryFastHealSpell(uint16 spell_id)
 bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 {
 	spell_id = (
-		IsEffectInSpell(spell_id, SE_CurrentHP) ?
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) ?
 		spell_id :
-		GetSpellTriggerSpellID(spell_id, SE_CurrentHP)
+		GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHP)
 	);
 
 	if (!spell_id) {
 		spell_id = (
-			IsEffectInSpell(spell_id, SE_CurrentHPOnce) ?
+			IsEffectInSpell(spell_id, SpellEffect::CurrentHPOnce) ?
 			spell_id :
-			GetSpellTriggerSpellID(spell_id, SE_CurrentHPOnce)
+			GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHPOnce)
 		);
 	}
 
@@ -1567,8 +1567,8 @@ bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 					spells[spell_id].base_value[i] > 0 &&
 					spells[spell_id].buff_duration == 0 &&
 					(
-						spells[spell_id].effect_id[i] == SE_CurrentHP ||
-						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHP ||
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce
 					)
 				) {
 					return true;
@@ -1583,16 +1583,16 @@ bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 bool IsRegularPetHealSpell(uint16 spell_id)
 {
 	spell_id = (
-		IsEffectInSpell(spell_id, SE_CurrentHP) ?
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) ?
 		spell_id :
-		GetSpellTriggerSpellID(spell_id, SE_CurrentHP)
+		GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHP)
 	);
 
 	if (!spell_id) {
 		spell_id = (
-			IsEffectInSpell(spell_id, SE_CurrentHPOnce) ?
+			IsEffectInSpell(spell_id, SpellEffect::CurrentHPOnce) ?
 			spell_id :
-			GetSpellTriggerSpellID(spell_id, SE_CurrentHPOnce)
+			GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHPOnce)
 		);
 	}
 
@@ -1613,8 +1613,8 @@ bool IsRegularPetHealSpell(uint16 spell_id)
 					spells[spell_id].base_value[i] > 0 &&
 					spells[spell_id].buff_duration == 0 &&
 					(
-						spells[spell_id].effect_id[i] == SE_CurrentHP ||
-						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHP ||
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce
 					)
 				) {
 					return true;
@@ -1629,16 +1629,16 @@ bool IsRegularPetHealSpell(uint16 spell_id)
 bool IsRegularGroupHealSpell(uint16 spell_id)
 {
 	spell_id = (
-		IsEffectInSpell(spell_id, SE_CurrentHP) ?
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) ?
 		spell_id :
-		GetSpellTriggerSpellID(spell_id, SE_CurrentHP)
+		GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHP)
 	);
 
 	if (!spell_id) {
 		spell_id = (
-			IsEffectInSpell(spell_id, SE_CurrentHPOnce) ?
+			IsEffectInSpell(spell_id, SpellEffect::CurrentHPOnce) ?
 			spell_id :
-			GetSpellTriggerSpellID(spell_id, SE_CurrentHPOnce)
+			GetSpellTriggerSpellID(spell_id, SpellEffect::CurrentHPOnce)
 		);
 	}
 
@@ -1653,8 +1653,8 @@ bool IsRegularGroupHealSpell(uint16 spell_id)
 					spells[spell_id].base_value[i] > 0 &&
 					spells[spell_id].buff_duration == 0 &&
 					(
-						spells[spell_id].effect_id[i] == SE_CurrentHP ||
-						spells[spell_id].effect_id[i] == SE_CurrentHPOnce
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHP ||
+						spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce
 					)
 				) {
 					return true;
@@ -1671,9 +1671,9 @@ bool IsGroupCompleteHealSpell(uint16 spell_id) {
         IsValidSpell(spell_id) &&
         (
             spell_id == SPELL_COMPLETE_HEAL ||
-            IsEffectInSpell(spell_id, SE_CompleteHeal) ||
+            IsEffectInSpell(spell_id, SpellEffect::CompleteHeal) ||
             IsPercentalHealSpell(spell_id) ||
-            GetSpellTriggerSpellID(spell_id, SE_CompleteHeal)
+            GetSpellTriggerSpellID(spell_id, SpellEffect::CompleteHeal)
         ) &&
         IsGroupSpell(spell_id)
     ) {
@@ -1687,8 +1687,8 @@ bool IsGroupHealOverTimeSpell(uint16 spell_id) {
     if (
         IsValidSpell(spell_id) &&
         (
-            IsEffectInSpell(spell_id, SE_HealOverTime) ||
-            GetSpellTriggerSpellID(spell_id, SE_HealOverTime)
+            IsEffectInSpell(spell_id, SpellEffect::HealOverTime) ||
+            GetSpellTriggerSpellID(spell_id, SpellEffect::HealOverTime)
         ) &&
         IsGroupSpell(spell_id)
     ) {
@@ -1738,7 +1738,7 @@ bool IsAnyBuffSpell(uint16 spell_id) {
 		IsBeneficialSpell(spell_id) &&
 		!IsBardSong(spell_id) &&
 		!IsEscapeSpell(spell_id) &&
-		(!IsSummonPetSpell(spell_id) && !IsEffectInSpell(spell_id, SE_TemporaryPets))
+		(!IsSummonPetSpell(spell_id) && !IsEffectInSpell(spell_id, SpellEffect::TemporaryPets))
 	) {
 		return true;
 	}
@@ -1751,9 +1751,9 @@ bool IsDispelSpell(uint16 spell_id) {
 	}
 
 	if (
-		IsEffectInSpell(spell_id, SE_CancelMagic) ||
-		IsEffectInSpell(spell_id, SE_DispelBeneficial) ||
-		IsEffectInSpell(spell_id, SE_DispelBeneficial)
+		IsEffectInSpell(spell_id, SpellEffect::CancelMagic) ||
+		IsEffectInSpell(spell_id, SpellEffect::DispelBeneficial) ||
+		IsEffectInSpell(spell_id, SpellEffect::DispelBeneficial)
 	) {
 		return true;
 	}
@@ -1768,12 +1768,12 @@ bool IsEscapeSpell(uint16 spell_id) {
 
 	return (
 		IsInvulnerabilitySpell(spell_id) ||
-		IsEffectInSpell(spell_id, SE_FeignDeath) ||
-		IsEffectInSpell(spell_id, SE_DeathSave) ||
-		IsEffectInSpell(spell_id, SE_Destroy) ||
+		IsEffectInSpell(spell_id, SpellEffect::FeignDeath) ||
+		IsEffectInSpell(spell_id, SpellEffect::DeathSave) ||
+		IsEffectInSpell(spell_id, SpellEffect::Destroy) ||
 		(
-			IsEffectInSpell(spell_id, SE_WipeHateList) &&
-			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_WipeHateList)] > 0
+			IsEffectInSpell(spell_id, SpellEffect::WipeHateList) &&
+			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::WipeHateList)] > 0
 		)
 	);
 }
@@ -1791,12 +1791,12 @@ bool IsDebuffSpell(uint16 spell_id)
 		IsMesmerizeSpell(spell_id) ||
 		IsCharmSpell(spell_id) ||
 		IsSlowSpell(spell_id) ||
-		IsEffectInSpell(spell_id, SE_Root) ||
-		IsEffectInSpell(spell_id, SE_CancelMagic) ||
-		IsEffectInSpell(spell_id, SE_MovementSpeed) ||
+		IsEffectInSpell(spell_id, SpellEffect::Root) ||
+		IsEffectInSpell(spell_id, SpellEffect::CancelMagic) ||
+		IsEffectInSpell(spell_id, SpellEffect::MovementSpeed) ||
 		IsFearSpell(spell_id) ||
-		IsEffectInSpell(spell_id, SE_InstantHate) ||
-		IsEffectInSpell(spell_id, SE_TossUp)
+		IsEffectInSpell(spell_id, SpellEffect::InstantHate) ||
+		IsEffectInSpell(spell_id, SpellEffect::TossUp)
 	);
 }
 
@@ -1807,16 +1807,16 @@ bool IsHateReduxSpell(uint16 spell_id) {
 
 	return (
 		(
-			IsEffectInSpell(spell_id, SE_InstantHate) &&
-			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_InstantHate)] < 0
+			IsEffectInSpell(spell_id, SpellEffect::InstantHate) &&
+			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::InstantHate)] < 0
 		) ||
 		(
-			IsEffectInSpell(spell_id, SE_Hate) &&
-			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_Hate)] < 0
+			IsEffectInSpell(spell_id, SpellEffect::Hate) &&
+			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::Hate)] < 0
 		) ||
 		(
-			IsEffectInSpell(spell_id, SE_ReduceHate) &&
-			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_ReduceHate)] < 0
+			IsEffectInSpell(spell_id, SpellEffect::ReduceHate) &&
+			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::ReduceHate)] < 0
 		)
 	);
 }
@@ -1830,13 +1830,13 @@ bool IsResistDebuffSpell(uint16 spell_id)
 	return (
 		!IsBeneficialSpell(spell_id) &&
 		(
-			IsEffectInSpell(spell_id, SE_ResistFire) ||
-			IsEffectInSpell(spell_id, SE_ResistCold) ||
-			IsEffectInSpell(spell_id, SE_ResistPoison) ||
-			IsEffectInSpell(spell_id, SE_ResistDisease) ||
-			IsEffectInSpell(spell_id, SE_ResistMagic) ||
-			IsEffectInSpell(spell_id, SE_ResistAll) ||
-			IsEffectInSpell(spell_id, SE_ResistCorruption)
+			IsEffectInSpell(spell_id, SpellEffect::ResistFire) ||
+			IsEffectInSpell(spell_id, SpellEffect::ResistCold) ||
+			IsEffectInSpell(spell_id, SpellEffect::ResistPoison) ||
+			IsEffectInSpell(spell_id, SpellEffect::ResistDisease) ||
+			IsEffectInSpell(spell_id, SpellEffect::ResistMagic) ||
+			IsEffectInSpell(spell_id, SpellEffect::ResistAll) ||
+			IsEffectInSpell(spell_id, SpellEffect::ResistCorruption)
 		)
 	);
 }
@@ -1849,10 +1849,10 @@ bool IsSelfConversionSpell(uint16 spell_id)
 
 	return (
 		GetSpellTargetType(spell_id) == ST_Self &&
-		IsEffectInSpell(spell_id, SE_CurrentMana) &&
-		IsEffectInSpell(spell_id, SE_CurrentHP) &&
-		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_CurrentMana)] > 0 &&
-		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_CurrentHP)] < 0
+		IsEffectInSpell(spell_id, SpellEffect::CurrentMana) &&
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) &&
+		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::CurrentMana)] > 0 &&
+		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::CurrentHP)] < 0
 	);
 }
 
@@ -1896,9 +1896,9 @@ bool IsCastOnFadeDurationSpell(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 		if (
-			spells[spell_id].effect_id[i] == SE_CastOnFadeEffect ||
-			spells[spell_id].effect_id[i] == SE_CastOnFadeEffectNPC ||
-			spells[spell_id].effect_id[i] == SE_CastOnFadeEffectAlways
+			spells[spell_id].effect_id[i] == SpellEffect::CastOnFadeEffect ||
+			spells[spell_id].effect_id[i] == SpellEffect::CastOnFadeEffectNPC ||
+			spells[spell_id].effect_id[i] == SpellEffect::CastOnFadeEffectAlways
 		) {
 			return true;
 		}
@@ -1926,7 +1926,7 @@ bool IsDistanceModifierSpell(uint16 spell_id)
 int GetSpellPartialMeleeRuneReduction(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effect_id[i] == SE_MitigateMeleeDamage) {
+		if (spells[spell_id].effect_id[i] == SpellEffect::MitigateMeleeDamage) {
 			return spells[spell_id].base_value[i];
 		}
 	}
@@ -1937,7 +1937,7 @@ int GetSpellPartialMeleeRuneReduction(uint16 spell_id)
 int GetSpellPartialMagicRuneReduction(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effect_id[i] == SE_MitigateSpellDamage) {
+		if (spells[spell_id].effect_id[i] == SpellEffect::MitigateSpellDamage) {
 			return spells[spell_id].base_value[i];
 		}
 	}
@@ -1948,7 +1948,7 @@ int GetSpellPartialMagicRuneReduction(uint16 spell_id)
 int GetSpellPartialMeleeRuneAmount(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effect_id[i] == SE_MitigateMeleeDamage) {
+		if (spells[spell_id].effect_id[i] == SpellEffect::MitigateMeleeDamage) {
 			return spells[spell_id].max_value[i];
 		}
 	}
@@ -1959,7 +1959,7 @@ int GetSpellPartialMeleeRuneAmount(uint16 spell_id)
 int GetSpellPartialMagicRuneAmount(uint16 spell_id)
 {
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effect_id[i] == SE_MitigateSpellDamage) {
+		if (spells[spell_id].effect_id[i] == SpellEffect::MitigateSpellDamage) {
 			return spells[spell_id].max_value[i];
 		}
 	}
@@ -2002,15 +2002,15 @@ bool IsStackableDOT(uint16 spell_id)
 	}
 
 	return (
-		IsEffectInSpell(spell_id, SE_CurrentHP) ||
-		IsEffectInSpell(spell_id, SE_GravityEffect)
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) ||
+		IsEffectInSpell(spell_id, SpellEffect::GravityEffect)
 	);
 }
 
 bool IsBardOnlyStackEffect(int effect_id)
 {
 	switch (effect_id) {
-		case SE_BardAEDot:
+		case SpellEffect::BardAEDot:
 			return true;
 		default:
 			return false;
@@ -2039,91 +2039,91 @@ bool IsEffectIgnoredInStacking(int effect_id)
 {
 	// this should match RoF2
 	switch (effect_id) {
-		case SE_SeeInvis:
-		case SE_DiseaseCounter:
-		case SE_PoisonCounter:
-		case SE_Levitate:
-		case SE_InfraVision:
-		case SE_UltraVision:
-		case SE_CurrentHPOnce:
-		case SE_CurseCounter:
-		case SE_ImprovedDamage:
-		case SE_ImprovedHeal:
-		case SE_SpellResistReduction:
-		case SE_IncreaseSpellHaste:
-		case SE_IncreaseSpellDuration:
-		case SE_IncreaseRange:
-		case SE_SpellHateMod:
-		case SE_ReduceReagentCost:
-		case SE_ReduceManaCost:
-		case SE_FcStunTimeMod:
-		case SE_LimitMaxLevel:
-		case SE_LimitResist:
-		case SE_LimitTarget:
-		case SE_LimitEffect:
-		case SE_LimitSpellType:
-		case SE_LimitSpell:
-		case SE_LimitMinDur:
-		case SE_LimitInstant:
-		case SE_LimitMinLevel:
-		case SE_LimitCastTimeMin:
-		case SE_LimitCastTimeMax:
-		case SE_StackingCommand_Block:
-		case SE_StackingCommand_Overwrite:
-		case SE_PetPowerIncrease:
-		case SE_SkillDamageAmount:
-		case SE_ChannelChanceSpells:
-		case SE_Blank:
-		case SE_FcDamageAmt:
-		case SE_SpellDurationIncByTic:
-		case SE_FcSpellVulnerability:
-		case SE_FcDamageAmtIncoming:
-		case SE_FcDamagePctCrit:
-		case SE_FcDamageAmtCrit:
-		case SE_ReduceReuseTimer:
-		case SE_LimitCombatSkills:
-		case SE_BlockNextSpellFocus:
-		case SE_SpellTrigger:
-		case SE_LimitManaMin:
-		case SE_CorruptionCounter:
-		case SE_ApplyEffect:
-		case SE_NegateSpellEffect:
-		case SE_LimitSpellGroup:
-		case SE_LimitManaMax:
-		case SE_FcHealAmt:
-		case SE_FcHealPctIncoming:
-		case SE_FcHealAmtIncoming:
-		case SE_FcHealPctCritIncoming:
-		case SE_FcHealAmtCrit:
-		case SE_LimitClass:
-		case SE_LimitRace:
-		case SE_FcBaseEffects:
-		case SE_FFItemClass:
-		case SE_SkillDamageAmount2:
-		case SE_FcLimitUse:
-		case SE_FcIncreaseNumHits:
-		case SE_LimitUseMin:
-		case SE_LimitUseType:
-		case SE_GravityEffect:
-		case SE_Display:
+		case SpellEffect::SeeInvis:
+		case SpellEffect::DiseaseCounter:
+		case SpellEffect::PoisonCounter:
+		case SpellEffect::Levitate:
+		case SpellEffect::InfraVision:
+		case SpellEffect::UltraVision:
+		case SpellEffect::CurrentHPOnce:
+		case SpellEffect::CurseCounter:
+		case SpellEffect::ImprovedDamage:
+		case SpellEffect::ImprovedHeal:
+		case SpellEffect::SpellResistReduction:
+		case SpellEffect::IncreaseSpellHaste:
+		case SpellEffect::IncreaseSpellDuration:
+		case SpellEffect::IncreaseRange:
+		case SpellEffect::SpellHateMod:
+		case SpellEffect::ReduceReagentCost:
+		case SpellEffect::ReduceManaCost:
+		case SpellEffect::FcStunTimeMod:
+		case SpellEffect::LimitMaxLevel:
+		case SpellEffect::LimitResist:
+		case SpellEffect::LimitTarget:
+		case SpellEffect::LimitEffect:
+		case SpellEffect::LimitSpellType:
+		case SpellEffect::LimitSpell:
+		case SpellEffect::LimitMinDur:
+		case SpellEffect::LimitInstant:
+		case SpellEffect::LimitMinLevel:
+		case SpellEffect::LimitCastTimeMin:
+		case SpellEffect::LimitCastTimeMax:
+		case SpellEffect::StackingCommand_Block:
+		case SpellEffect::StackingCommand_Overwrite:
+		case SpellEffect::PetPowerIncrease:
+		case SpellEffect::SkillDamageAmount:
+		case SpellEffect::ChannelChanceSpells:
+		case SpellEffect::Blank:
+		case SpellEffect::FcDamageAmt:
+		case SpellEffect::SpellDurationIncByTic:
+		case SpellEffect::FcSpellVulnerability:
+		case SpellEffect::FcDamageAmtIncoming:
+		case SpellEffect::FcDamagePctCrit:
+		case SpellEffect::FcDamageAmtCrit:
+		case SpellEffect::ReduceReuseTimer:
+		case SpellEffect::LimitCombatSkills:
+		case SpellEffect::BlockNextSpellFocus:
+		case SpellEffect::SpellTrigger:
+		case SpellEffect::LimitManaMin:
+		case SpellEffect::CorruptionCounter:
+		case SpellEffect::ApplyEffect:
+		case SpellEffect::NegateSpellEffect:
+		case SpellEffect::LimitSpellGroup:
+		case SpellEffect::LimitManaMax:
+		case SpellEffect::FcHealAmt:
+		case SpellEffect::FcHealPctIncoming:
+		case SpellEffect::FcHealAmtIncoming:
+		case SpellEffect::FcHealPctCritIncoming:
+		case SpellEffect::FcHealAmtCrit:
+		case SpellEffect::LimitClass:
+		case SpellEffect::LimitRace:
+		case SpellEffect::FcBaseEffects:
+		case SpellEffect::FFItemClass:
+		case SpellEffect::SkillDamageAmount2:
+		case SpellEffect::FcLimitUse:
+		case SpellEffect::FcIncreaseNumHits:
+		case SpellEffect::LimitUseMin:
+		case SpellEffect::LimitUseType:
+		case SpellEffect::GravityEffect:
+		case SpellEffect::Display:
 			//Spell effects implemented after ROF2, following same pattern, lets assume these should go here.
-		case SE_Fc_Spell_Damage_Pct_IncomingPC:
-		case SE_Fc_Spell_Damage_Amt_IncomingPC:
-		case SE_Ff_CasterClass:
-		case SE_Ff_Same_Caster:
-		case SE_Proc_Timer_Modifier:
-		case SE_Weapon_Stance:
-		case SE_TwinCastBlocker:
-		case SE_Fc_CastTimeAmt:
-		case SE_Fc_CastTimeMod2:
-		case SE_Ff_DurationMax:
-		case SE_Ff_Endurance_Max:
-		case SE_Ff_Endurance_Min:
-		case SE_Ff_ReuseTimeMin:
-		case SE_Ff_ReuseTimeMax:
-		case SE_Ff_Value_Min:
-		case SE_Ff_Value_Max:
-		case SE_Ff_FocusTimerMin:
+		case SpellEffect::Fc_Spell_Damage_Pct_IncomingPC:
+		case SpellEffect::Fc_Spell_Damage_Amt_IncomingPC:
+		case SpellEffect::Ff_CasterClass:
+		case SpellEffect::Ff_Same_Caster:
+		case SpellEffect::Proc_Timer_Modifier:
+		case SpellEffect::Weapon_Stance:
+		case SpellEffect::TwinCastBlocker:
+		case SpellEffect::Fc_CastTimeAmt:
+		case SpellEffect::Fc_CastTimeMod2:
+		case SpellEffect::Ff_DurationMax:
+		case SpellEffect::Ff_Endurance_Max:
+		case SpellEffect::Ff_Endurance_Min:
+		case SpellEffect::Ff_ReuseTimeMin:
+		case SpellEffect::Ff_ReuseTimeMax:
+		case SpellEffect::Ff_Value_Min:
+		case SpellEffect::Ff_Value_Max:
+		case SpellEffect::Ff_FocusTimerMin:
 			return true;
 		default:
 			return false;
@@ -2133,40 +2133,40 @@ bool IsEffectIgnoredInStacking(int effect_id)
 bool IsFocusLimit(int effect_id)
 {
 	switch (effect_id) {
-		case SE_LimitMaxLevel:
-		case SE_LimitResist:
-		case SE_LimitTarget:
-		case SE_LimitEffect:
-		case SE_LimitSpellType:
-		case SE_LimitSpell:
-		case SE_LimitMinDur:
-		case SE_LimitInstant:
-		case SE_LimitMinLevel:
-		case SE_LimitCastTimeMin:
-		case SE_LimitCastTimeMax:
-		case SE_LimitCombatSkills:
-		case SE_LimitManaMin:
-		case SE_LimitSpellGroup:
-		case SE_LimitManaMax:
-		case SE_LimitSpellClass:
-		case SE_LimitSpellSubclass:
-		case SE_LimitClass:
-		case SE_LimitRace:
-		case SE_LimitCastingSkill:
-		case SE_LimitUseMin:
-		case SE_LimitUseType:
-		case SE_Ff_Override_NotFocusable:
-		case SE_Ff_CasterClass:
-		case SE_Ff_Same_Caster:
-		case SE_Ff_DurationMax:
-		case SE_Ff_Endurance_Max:
-		case SE_Ff_Endurance_Min:
-		case SE_Ff_ReuseTimeMin:
-		case SE_Ff_ReuseTimeMax:
-		case SE_Ff_Value_Min:
-		case SE_Ff_Value_Max:
-		case SE_Ff_FocusTimerMin:
-		case SE_FFItemClass:
+		case SpellEffect::LimitMaxLevel:
+		case SpellEffect::LimitResist:
+		case SpellEffect::LimitTarget:
+		case SpellEffect::LimitEffect:
+		case SpellEffect::LimitSpellType:
+		case SpellEffect::LimitSpell:
+		case SpellEffect::LimitMinDur:
+		case SpellEffect::LimitInstant:
+		case SpellEffect::LimitMinLevel:
+		case SpellEffect::LimitCastTimeMin:
+		case SpellEffect::LimitCastTimeMax:
+		case SpellEffect::LimitCombatSkills:
+		case SpellEffect::LimitManaMin:
+		case SpellEffect::LimitSpellGroup:
+		case SpellEffect::LimitManaMax:
+		case SpellEffect::LimitSpellClass:
+		case SpellEffect::LimitSpellSubclass:
+		case SpellEffect::LimitClass:
+		case SpellEffect::LimitRace:
+		case SpellEffect::LimitCastingSkill:
+		case SpellEffect::LimitUseMin:
+		case SpellEffect::LimitUseType:
+		case SpellEffect::Ff_Override_NotFocusable:
+		case SpellEffect::Ff_CasterClass:
+		case SpellEffect::Ff_Same_Caster:
+		case SpellEffect::Ff_DurationMax:
+		case SpellEffect::Ff_Endurance_Max:
+		case SpellEffect::Ff_Endurance_Min:
+		case SpellEffect::Ff_ReuseTimeMin:
+		case SpellEffect::Ff_ReuseTimeMax:
+		case SpellEffect::Ff_Value_Min:
+		case SpellEffect::Ff_Value_Max:
+		case SpellEffect::Ff_FocusTimerMin:
+		case SpellEffect::FFItemClass:
 			return true;
 		default:
 			return false;
@@ -2192,10 +2192,10 @@ int GetSpellFuriousBash(uint16 spell_id)
 	auto mod                = 0;
 
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
-		if (spells[spell_id].effect_id[i] == SE_SpellHateMod) {
+		if (spells[spell_id].effect_id[i] == SpellEffect::SpellHateMod) {
 			mod = spells[spell_id].base_value[i];
 		} else if (
-			spells[spell_id].effect_id[i] == SE_LimitEffect &&
+			spells[spell_id].effect_id[i] == SpellEffect::LimitEffect &&
 			spells[spell_id].base_value[i] == 999
 		) {
 			found_effect_limit = true;
@@ -2275,47 +2275,47 @@ bool IsInstrumentModifierAppliedToSpellEffect(uint16 spell_id, int effect_id)
 	//Effects that are verified modifiable by bard instrument/singing mods, or highly likely due to similiar type of effect.
 	switch (effect_id) {
 		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
-		case SE_CurrentEndurance:
-		case SE_CurrentMana: {
+		case SpellEffect::CurrentEndurance:
+		case SpellEffect::CurrentMana: {
 			return spells[spell_id].buff_duration == 0;
 		}
 
-		case SE_CurrentHP:
-		case SE_ArmorClass:
-		case SE_ACv2:
-		case SE_MovementSpeed:
-		case SE_ATK:
-		case SE_STR:
-		case SE_DEX:
-		case SE_AGI:
-		case SE_STA:
-		case SE_INT:
-		case SE_WIS:
-		case SE_CHA:
-		case SE_AllStats:
-		case SE_ResistFire:
-		case SE_ResistCold:
-		case SE_ResistPoison:
-		case SE_ResistDisease:
-		case SE_ResistMagic:
-		case SE_ResistAll:
-		case SE_ResistCorruption:
-		case SE_Rune:
-		case SE_AbsorbMagicAtt:
-		case SE_DamageShield:
-		case SE_MitigateDamageShield:
-		case SE_Amplification: //On live Amplification is modified by singing mods, including itself.
-		case SE_TripleAttackChance:
-		case SE_Flurry:
-		case SE_DamageModifier:
-		case SE_DamageModifier2:
-		case SE_MinDamageModifier:
-		case SE_ProcChance:
-		case SE_PetFlurry: // ? Need verified
-		case SE_DiseaseCounter:
-		case SE_PoisonCounter:
-		case SE_CurseCounter:
-		case SE_CorruptionCounter:
+		case SpellEffect::CurrentHP:
+		case SpellEffect::ArmorClass:
+		case SpellEffect::ACv2:
+		case SpellEffect::MovementSpeed:
+		case SpellEffect::ATK:
+		case SpellEffect::STR:
+		case SpellEffect::DEX:
+		case SpellEffect::AGI:
+		case SpellEffect::STA:
+		case SpellEffect::INT:
+		case SpellEffect::WIS:
+		case SpellEffect::CHA:
+		case SpellEffect::AllStats:
+		case SpellEffect::ResistFire:
+		case SpellEffect::ResistCold:
+		case SpellEffect::ResistPoison:
+		case SpellEffect::ResistDisease:
+		case SpellEffect::ResistMagic:
+		case SpellEffect::ResistAll:
+		case SpellEffect::ResistCorruption:
+		case SpellEffect::Rune:
+		case SpellEffect::AbsorbMagicAtt:
+		case SpellEffect::DamageShield:
+		case SpellEffect::MitigateDamageShield:
+		case SpellEffect::Amplification: //On live Amplification is modified by singing mods, including itself.
+		case SpellEffect::TripleAttackChance:
+		case SpellEffect::Flurry:
+		case SpellEffect::DamageModifier:
+		case SpellEffect::DamageModifier2:
+		case SpellEffect::MinDamageModifier:
+		case SpellEffect::ProcChance:
+		case SpellEffect::PetFlurry: // ? Need verified
+		case SpellEffect::DiseaseCounter:
+		case SpellEffect::PoisonCounter:
+		case SpellEffect::CurseCounter:
+		case SpellEffect::CorruptionCounter:
 			return true;
 
 		/*
@@ -2323,45 +2323,45 @@ bool IsInstrumentModifierAppliedToSpellEffect(uint16 spell_id, int effect_id)
 			Focus Effects, Proc Effects, Spell Triggers are not modified but handled elsewhere, not neccessary to checked here.
 		*/
 
-		case SE_AttackSpeed: //(Haste AND Slow not modifiable)
-		case SE_AttackSpeed2:
-		case SE_AttackSpeed3:
-		case SE_Lull:
-		case SE_ChangeFrenzyRad:
-		case SE_Harmony:
-		case SE_AddFaction:
-		//case SE_CurrentMana: // duration only
-		case SE_ManaRegen_v2:
-		//case SE_CurrentEndurance: // duration only
-		case SE_PersistentEffect:
-		case SE_ReduceReuseTimer:
-		case SE_Stun:
-		case SE_Mez:
-		case SE_WipeHateList: //?
-		case SE_CancelMagic:
-		case SE_ManaAbsorbPercentDamage:
-		case SE_ResistSpellChance:
-		case SE_Reflect:
-		case SE_MitigateSpellDamage:
-		case SE_MitigateMeleeDamage:
-		case SE_AllInstrumentMod:
-		case SE_AddSingingMod:
-		case SE_SongModCap:
-		case SE_BardSongRange:
-		case SE_TemporaryPets:
-		case SE_SpellOnDeath:
-		case SE_Invisibility:
-		case SE_Invisibility2:
-		case SE_InvisVsUndead:
-		case SE_InvisVsUndead2:
-		case SE_InvisVsAnimals:
-		case SE_ImprovedInvisAnimals:
-		case SE_SeeInvis:
-		case SE_Levitate:
-		case SE_WaterBreathing:
-		case SE_ModelSize:
-		case SE_ChangeHeight:
-		case SE_MakeDrunk:
+		case SpellEffect::AttackSpeed: //(Haste AND Slow not modifiable)
+		case SpellEffect::AttackSpeed2:
+		case SpellEffect::AttackSpeed3:
+		case SpellEffect::Lull:
+		case SpellEffect::ChangeFrenzyRad:
+		case SpellEffect::Harmony:
+		case SpellEffect::AddFaction:
+		//case SpellEffect::CurrentMana: // duration only
+		case SpellEffect::ManaRegen_v2:
+		//case SpellEffect::CurrentEndurance: // duration only
+		case SpellEffect::PersistentEffect:
+		case SpellEffect::ReduceReuseTimer:
+		case SpellEffect::Stun:
+		case SpellEffect::Mez:
+		case SpellEffect::WipeHateList: //?
+		case SpellEffect::CancelMagic:
+		case SpellEffect::ManaAbsorbPercentDamage:
+		case SpellEffect::ResistSpellChance:
+		case SpellEffect::Reflect:
+		case SpellEffect::MitigateSpellDamage:
+		case SpellEffect::MitigateMeleeDamage:
+		case SpellEffect::AllInstrumentMod:
+		case SpellEffect::AddSingingMod:
+		case SpellEffect::SongModCap:
+		case SpellEffect::BardSongRange:
+		case SpellEffect::TemporaryPets:
+		case SpellEffect::SpellOnDeath:
+		case SpellEffect::Invisibility:
+		case SpellEffect::Invisibility2:
+		case SpellEffect::InvisVsUndead:
+		case SpellEffect::InvisVsUndead2:
+		case SpellEffect::InvisVsAnimals:
+		case SpellEffect::ImprovedInvisAnimals:
+		case SpellEffect::SeeInvis:
+		case SpellEffect::Levitate:
+		case SpellEffect::WaterBreathing:
+		case SpellEffect::ModelSize:
+		case SpellEffect::ChangeHeight:
+		case SpellEffect::MakeDrunk:
 			return false;
 		default:
 			return true;
@@ -2379,8 +2379,8 @@ bool IsPulsingBardSong(uint16 spell_id)
 		spells[spell_id].buff_duration == 0xFFFF ||
 		spells[spell_id].recast_time > 0 ||
 		spells[spell_id].mana > 0 ||
-		IsEffectInSpell(spell_id, SE_TemporaryPets) ||
-		IsEffectInSpell(spell_id, SE_Familiar)
+		IsEffectInSpell(spell_id, SpellEffect::TemporaryPets) ||
+		IsEffectInSpell(spell_id, SpellEffect::Familiar)
 	) {
 		return false;
 	}
@@ -2555,28 +2555,28 @@ int GetSpellProcLimitTimer(uint16 spell_id, int proc_type)
 
 		if (proc_type == ProcType::MELEE_PROC) {
 			if (
-				spells[spell_id].effect_id[i] == SE_WeaponProc ||
-				spells[spell_id].effect_id[i] == SE_AddMeleeProc
+				spells[spell_id].effect_id[i] == SpellEffect::WeaponProc ||
+				spells[spell_id].effect_id[i] == SpellEffect::AddMeleeProc
 			) {
 				use_next_timer = true;
 			}
 		}
 
 		if (proc_type == ProcType::RANGED_PROC) {
-			if (spells[spell_id].effect_id[i] == SE_RangedProc) {
+			if (spells[spell_id].effect_id[i] == SpellEffect::RangedProc) {
 				use_next_timer = true;
 			}
 		}
 
 		if (proc_type == ProcType::DEFENSIVE_PROC) {
-			if (spells[spell_id].effect_id[i] == SE_DefensiveProc) {
+			if (spells[spell_id].effect_id[i] == SpellEffect::DefensiveProc) {
 				use_next_timer = true;
 			}
 		}
 
 		if (
 			use_next_timer &&
-			spells[spell_id].effect_id[i] == SE_Proc_Timer_Modifier
+			spells[spell_id].effect_id[i] == SpellEffect::Proc_Timer_Modifier
 		) {
 			return spells[spell_id].limit_value[i];
 		}
@@ -2683,23 +2683,23 @@ bool IsAegolismSpell(uint16 spell_id) {
 
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
-		if (i == 0 && spells[spell_id].effect_id[i] != SE_StackingCommand_Block) {
+		if (i == 0 && spells[spell_id].effect_id[i] != SpellEffect::StackingCommand_Block) {
 			return 0;
 		}
 
-		if (i == 1 && spells[spell_id].effect_id[i] == SE_TotalHP) {
+		if (i == 1 && spells[spell_id].effect_id[i] == SpellEffect::TotalHP) {
 			has_max_hp = true;
 		}
 
-		if (i == 2 && spells[spell_id].effect_id[i] == SE_CurrentHPOnce) {
+		if (i == 2 && spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce) {
 			has_current_hp = true;
 		}
 
-		if (i == 3 && spells[spell_id].effect_id[i] == SE_ArmorClass) {
+		if (i == 3 && spells[spell_id].effect_id[i] == SpellEffect::ArmorClass) {
 			has_ac = true;
 		}
 
-		if (i == 4 && spells[spell_id].effect_id[i] != SE_StackingCommand_Overwrite) {
+		if (i == 4 && spells[spell_id].effect_id[i] != SpellEffect::StackingCommand_Overwrite) {
 			return 0;
 		}
 	}
@@ -2726,16 +2726,16 @@ bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
 
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
-		if ((i < 2 && spells[spell_id].effect_id[i] != SE_CHA) ||
-			i > 3 && spells[spell_id].effect_id[i] != SE_Blank) {
+		if ((i < 2 && spells[spell_id].effect_id[i] != SpellEffect::CHA) ||
+			i > 3 && spells[spell_id].effect_id[i] != SpellEffect::Blank) {
 			return 0;
 		}
 
-		if (i == 2 && spells[spell_id].effect_id[i] == SE_TotalHP) {
+		if (i == 2 && spells[spell_id].effect_id[i] == SpellEffect::TotalHP) {
 			has_max_hp = true;
 		}
 
-		if (i == 3 && spells[spell_id].effect_id[i] == SE_CurrentHPOnce) {
+		if (i == 3 && spells[spell_id].effect_id[i] == SpellEffect::CurrentHPOnce) {
 			has_current_hp = true;
 		}
 	}
@@ -2759,12 +2759,12 @@ bool AegolismStackingIsArmorClassSpell(uint16 spell_id) {
 
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
-		if ((i < 3 && spells[spell_id].effect_id[i] != SE_CHA) ||
-			i > 3 && spells[spell_id].effect_id[i] != SE_Blank) {
+		if ((i < 3 && spells[spell_id].effect_id[i] != SpellEffect::CHA) ||
+			i > 3 && spells[spell_id].effect_id[i] != SpellEffect::Blank) {
 			return 0;
 		}
 
-		if (i == 3 && spells[spell_id].effect_id[i] == SE_ArmorClass) {
+		if (i == 3 && spells[spell_id].effect_id[i] == SpellEffect::ArmorClass) {
 			has_ac = true;
 		}
 	}
@@ -2800,10 +2800,10 @@ bool IsLichSpell(uint16 spell_id)
 
 	return (
 		GetSpellTargetType(spell_id) == ST_Self &&
-		IsEffectInSpell(spell_id, SE_CurrentMana) &&
-		IsEffectInSpell(spell_id, SE_CurrentHP) &&
-		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_CurrentMana)] > 0 &&
-		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_CurrentHP)] < 0 &&
+		IsEffectInSpell(spell_id, SpellEffect::CurrentMana) &&
+		IsEffectInSpell(spell_id, SpellEffect::CurrentHP) &&
+		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::CurrentMana)] > 0 &&
+		spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::CurrentHP)] < 0 &&
 		spells[spell_id].buff_duration > 0
 	);
 }
@@ -2828,7 +2828,7 @@ bool IsResurrectSpell(uint16 spell_id)
 		return false;
 	}
 
-	return IsEffectInSpell(spell_id, SE_Revive);
+	return IsEffectInSpell(spell_id, SpellEffect::Revive);
 }
 
 bool IsResistanceBuffSpell(uint16 spell_id) {
@@ -2844,13 +2844,13 @@ bool IsResistanceBuffSpell(uint16 spell_id) {
 		}
 
 		if (
-			spell.effect_id[i] == SE_ResistFire ||
-			spell.effect_id[i] == SE_ResistCold ||
-			spell.effect_id[i] == SE_ResistPoison ||
-			spell.effect_id[i] == SE_ResistDisease ||
-			spell.effect_id[i] == SE_ResistMagic ||
-			spell.effect_id[i] == SE_ResistCorruption ||
-			spell.effect_id[i] == SE_ResistAll
+			spell.effect_id[i] == SpellEffect::ResistFire ||
+			spell.effect_id[i] == SpellEffect::ResistCold ||
+			spell.effect_id[i] == SpellEffect::ResistPoison ||
+			spell.effect_id[i] == SpellEffect::ResistDisease ||
+			spell.effect_id[i] == SpellEffect::ResistMagic ||
+			spell.effect_id[i] == SpellEffect::ResistCorruption ||
+			spell.effect_id[i] == SpellEffect::ResistAll
 		) {
 			return true;
 		}
@@ -2872,13 +2872,13 @@ bool IsResistanceOnlySpell(uint16 spell_id) {
 		}
 
 		if (
-			spell.effect_id[i] == SE_ResistFire ||
-			spell.effect_id[i] == SE_ResistCold ||
-			spell.effect_id[i] == SE_ResistPoison ||
-			spell.effect_id[i] == SE_ResistDisease ||
-			spell.effect_id[i] == SE_ResistMagic ||
-			spell.effect_id[i] == SE_ResistCorruption ||
-			spell.effect_id[i] == SE_ResistAll
+			spell.effect_id[i] == SpellEffect::ResistFire ||
+			spell.effect_id[i] == SpellEffect::ResistCold ||
+			spell.effect_id[i] == SpellEffect::ResistPoison ||
+			spell.effect_id[i] == SpellEffect::ResistDisease ||
+			spell.effect_id[i] == SpellEffect::ResistMagic ||
+			spell.effect_id[i] == SpellEffect::ResistCorruption ||
+			spell.effect_id[i] == SpellEffect::ResistAll
 		) {
 			continue;
 		}
@@ -2902,7 +2902,7 @@ bool IsDamageShieldOnlySpell(uint16 spell_id) {
 		}
 
 		if (
-			spell.effect_id[i] != SE_DamageShield
+			spell.effect_id[i] != SpellEffect::DamageShield
 		) {
 			return false;
 		}
@@ -2924,14 +2924,14 @@ bool IsDamageShieldAndResistSpell(uint16 spell_id) {
 		}
 
 		if (
-			spell.effect_id[i] != SE_DamageShield &&
-			spell.effect_id[i] != SE_ResistFire &&
-			spell.effect_id[i] != SE_ResistCold &&
-			spell.effect_id[i] != SE_ResistPoison &&
-			spell.effect_id[i] != SE_ResistDisease &&
-			spell.effect_id[i] != SE_ResistMagic &&
-			spell.effect_id[i] != SE_ResistCorruption &&
-			spell.effect_id[i] != SE_ResistAll
+			spell.effect_id[i] != SpellEffect::DamageShield &&
+			spell.effect_id[i] != SpellEffect::ResistFire &&
+			spell.effect_id[i] != SpellEffect::ResistCold &&
+			spell.effect_id[i] != SpellEffect::ResistPoison &&
+			spell.effect_id[i] != SpellEffect::ResistDisease &&
+			spell.effect_id[i] != SpellEffect::ResistMagic &&
+			spell.effect_id[i] != SpellEffect::ResistCorruption &&
+			spell.effect_id[i] != SpellEffect::ResistAll
 		) {
 			return false;
 		}
@@ -2947,12 +2947,12 @@ bool IsHateSpell(uint16 spell_id) {
 
 	return (
 		(
-			IsEffectInSpell(spell_id, SE_Hate) &&
-			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_Hate)] > 0
+			IsEffectInSpell(spell_id, SpellEffect::Hate) &&
+			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::Hate)] > 0
 		) ||
 		(
-			IsEffectInSpell(spell_id, SE_InstantHate) &&
-			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SE_InstantHate)] > 0
+			IsEffectInSpell(spell_id, SpellEffect::InstantHate) &&
+			spells[spell_id].base_value[GetSpellEffectIndex(spell_id, SpellEffect::InstantHate)] > 0
 		)
 	);
 }

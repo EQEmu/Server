@@ -1393,7 +1393,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 	case ChatChannel_Shout: { /* Shout */
 		Mob *sender = this;
-		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
+		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SpellEffect::VoiceGraft))
 			sender = GetPet();
 
 		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
@@ -1431,7 +1431,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		else if(!RuleB(Chat, ServerWideAuction)) {
 			Mob *sender = this;
 
-			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
+			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SpellEffect::VoiceGraft))
 			sender = GetPet();
 
 			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
@@ -1478,7 +1478,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		{
 			Mob *sender = this;
 
-			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
+			if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SpellEffect::VoiceGraft))
 				sender = GetPet();
 
 			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
@@ -1608,7 +1608,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 
 		Mob* sender = this;
-		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft)) {
+		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SpellEffect::VoiceGraft)) {
 			sender = GetPet();
 		}
 
@@ -6909,7 +6909,7 @@ void Client::CheckLDoNHail(NPC* n)
 	auto pet = GetPet();
 	if (pet) {
 		if (pet->GetPetType() == PetType::Charmed) {
-			pet->BuffFadeByEffect(SE_Charm);
+			pet->BuffFadeByEffect(SpellEffect::Charm);
 		} else if (pet->GetPetType() == PetType::Follow) {
 			pet->SetOwnerID(0);
 		} else {
@@ -8447,7 +8447,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
 	} else if (lowestvalue == fmod.race_mod) { // race biggest
 		// Non-standard race (ex. illusioned to wolf)
-		if (GetRace() > PLAYER_RACE_COUNT) {
+		if (!IsPlayerRace(GetRace())) {
 			messageid = zone->random.Int(1, 3); // these aren't sequential StringIDs :(
 			switch (messageid) {
 			case 1:
@@ -10660,7 +10660,7 @@ void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, b
 }
 
 void Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clip_through_walls, bool calculate_speed) {
-	BuffFadeByEffect(SE_Levitate);
+	BuffFadeByEffect(SpellEffect::Levitate);
 	if (CheckLosFN(target_x, target_y, target_z, 6.0f) || ignore_los) {
 		auto p = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
 		auto* f = (fling_struct*) p->pBuffer;
@@ -10725,7 +10725,7 @@ std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_leve
 			continue;
 		}
 
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SE_CHA) {
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SpellEffect::CHA) {
 			continue;
 		}
 
@@ -10796,7 +10796,7 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SE_CHA) {
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SpellEffect::CHA) {
 			continue;
 		}
 
@@ -11438,7 +11438,7 @@ void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<LootItem>& 
 		return;
 	}
 
-	// todo: maybe some common functions for SE_SummonItem and SE_SummonItemIntoBag
+	// todo: maybe some common functions for SpellEffect::SummonItem and SpellEffect::SummonItemIntoBag
 
 	const EQ::ItemData* bag_item = database.GetItem(bag_item_id);
 	if (!bag_item)

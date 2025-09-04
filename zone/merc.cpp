@@ -118,7 +118,7 @@ void Merc::CalcBonuses()
 	CalcMaxMana();
 	CalcMaxEndurance();
 
-	rooted = FindType(SE_Root);
+	rooted = FindType(SpellEffect::Root);
 }
 
 float Merc::GetDefaultSize() {
@@ -1730,7 +1730,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 									}
 									else {
 										//check for heal over time. if not present, try it first
-										if (!tar->FindType(SE_HealOverTime)) {
+										if (!tar->FindType(SpellEffect::HealOverTime)) {
 											selectedMercSpell = GetBestMercSpellForHealOverTime(this);
 
 											//get regular heal
@@ -1779,7 +1779,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 										if( !IsImmuneToSpell(selectedMercSpell.spellid, this)
 											&& (CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
-												if( GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
+												if( GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SpellEffect::IncreaseSpellHaste)) {
 													continue;
 												}
 
@@ -1806,7 +1806,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 												if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
 													&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
-														if( tar->GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
+														if( tar->GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SpellEffect::IncreaseSpellHaste)) {
 															continue;
 														}
 
@@ -2292,7 +2292,7 @@ int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) 
 	if(type == focusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact))
 		return 100;
 
-	if(type == focusReagentCost && (IsEffectInSpell(spell_id, SE_SummonItem) || IsSacrificeSpell(spell_id)))
+	if(type == focusReagentCost && (IsEffectInSpell(spell_id, SpellEffect::SummonItem) || IsSacrificeSpell(spell_id)))
 		return 0;
 	//Summon Spells that require reagents are typically imbue type spells, enchant metal, sacrifice and shouldn't be affected
 	//by reagent conservation for obvious reasons.
@@ -2620,7 +2620,7 @@ MercSpell Merc::GetBestMercSpellForVeryFastHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CurrentHP);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2653,7 +2653,7 @@ MercSpell Merc::GetBestMercSpellForFastHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CurrentHP);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2686,7 +2686,7 @@ MercSpell Merc::GetBestMercSpellForHealOverTime(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
+		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::HealOverTime);
 
 		for (auto mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end();
 		     ++mercSpellListItr) {
@@ -2727,7 +2727,7 @@ MercSpell Merc::GetBestMercSpellForPercentageHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster && caster->AI_HasSpells()) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CurrentHP);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2760,7 +2760,7 @@ MercSpell Merc::GetBestMercSpellForRegularSingleTargetHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CurrentHP);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2793,7 +2793,7 @@ MercSpell Merc::GetFirstMercSpellForSingleTargetHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CurrentHP);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2827,7 +2827,7 @@ MercSpell Merc::GetBestMercSpellForGroupHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CurrentHP);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CurrentHP);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2860,7 +2860,7 @@ MercSpell Merc::GetBestMercSpellForGroupHealOverTime(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SE_HealOverTime);
+		std::list<MercSpell> mercHoTSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::HealOverTime);
 
 		for (auto mercSpellListItr = mercHoTSpellList.begin(); mercSpellListItr != mercHoTSpellList.end();
 		     ++mercSpellListItr) {
@@ -2901,7 +2901,7 @@ MercSpell Merc::GetBestMercSpellForGroupCompleteHeal(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_CompleteHeal);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::CompleteHeal);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2934,7 +2934,7 @@ MercSpell Merc::GetBestMercSpellForAETaunt(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Taunt);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::Taunt);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -2969,7 +2969,7 @@ MercSpell Merc::GetBestMercSpellForTaunt(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Taunt);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::Taunt);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -3002,7 +3002,7 @@ MercSpell Merc::GetBestMercSpellForHate(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_InstantHate);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::InstantHate);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -3038,10 +3038,10 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 		return result;
 
 	int countNeedsCured = 0;
-	bool isPoisoned = tar->FindType(SE_PoisonCounter);
-	bool isDiseased = tar->FindType(SE_DiseaseCounter);
-	bool isCursed = tar->FindType(SE_CurseCounter);
-	bool isCorrupted = tar->FindType(SE_CorruptionCounter);
+	bool isPoisoned = tar->FindType(SpellEffect::PoisonCounter);
+	bool isDiseased = tar->FindType(SpellEffect::DiseaseCounter);
+	bool isCursed = tar->FindType(SpellEffect::CurseCounter);
+	bool isCorrupted = tar->FindType(SpellEffect::CorruptionCounter);
 
 	if(caster && caster->AI_HasSpells()) {
 		std::list<MercSpell> cureList = GetMercSpellsBySpellType(caster, SpellType_Cure);
@@ -3068,19 +3068,19 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 					if(selectedMercSpell.spellid == 0)
 						continue;
 
-					if(isPoisoned && IsEffectInSpell(itr->spellid, SE_PoisonCounter)) {
+					if(isPoisoned && IsEffectInSpell(itr->spellid, SpellEffect::PoisonCounter)) {
 						spellSelected = true;
 					}
-					else if(isDiseased && IsEffectInSpell(itr->spellid, SE_DiseaseCounter)) {
+					else if(isDiseased && IsEffectInSpell(itr->spellid, SpellEffect::DiseaseCounter)) {
 						spellSelected = true;
 					}
-					else if(isCursed && IsEffectInSpell(itr->spellid, SE_CurseCounter)) {
+					else if(isCursed && IsEffectInSpell(itr->spellid, SpellEffect::CurseCounter)) {
 						spellSelected = true;
 					}
-					else if(isCorrupted && IsEffectInSpell(itr->spellid, SE_CorruptionCounter)) {
+					else if(isCorrupted && IsEffectInSpell(itr->spellid, SpellEffect::CorruptionCounter)) {
 						spellSelected = true;
 					}
-					else if(IsEffectInSpell(itr->spellid, SE_DispelDetrimental)) {
+					else if(IsEffectInSpell(itr->spellid, SpellEffect::DispelDetrimental)) {
 						spellSelected = true;
 					}
 
@@ -3108,19 +3108,19 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 					if(selectedMercSpell.spellid == 0)
 						continue;
 
-					if(isPoisoned && IsEffectInSpell(itr->spellid, SE_PoisonCounter)) {
+					if(isPoisoned && IsEffectInSpell(itr->spellid, SpellEffect::PoisonCounter)) {
 						spellSelected = true;
 					}
-					else if(isDiseased && IsEffectInSpell(itr->spellid, SE_DiseaseCounter)) {
+					else if(isDiseased && IsEffectInSpell(itr->spellid, SpellEffect::DiseaseCounter)) {
 						spellSelected = true;
 					}
-					else if(isCursed && IsEffectInSpell(itr->spellid, SE_CurseCounter)) {
+					else if(isCursed && IsEffectInSpell(itr->spellid, SpellEffect::CurseCounter)) {
 						spellSelected = true;
 					}
-					else if(isCorrupted && IsEffectInSpell(itr->spellid, SE_CorruptionCounter)) {
+					else if(isCorrupted && IsEffectInSpell(itr->spellid, SpellEffect::CorruptionCounter)) {
 						spellSelected = true;
 					}
-					else if(IsEffectInSpell(itr->spellid, SE_DispelDetrimental)) {
+					else if(IsEffectInSpell(itr->spellid, SpellEffect::DispelDetrimental)) {
 						spellSelected = true;
 					}
 
@@ -3155,7 +3155,7 @@ MercSpell Merc::GetBestMercSpellForStun(Merc* caster) {
 	result.time_cancast = 0;
 
 	if(caster) {
-		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SE_Stun);
+		std::list<MercSpell> mercSpellList = GetMercSpellsForSpellEffect(caster, SpellEffect::Stun);
 
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
@@ -3492,7 +3492,7 @@ bool Merc::GetNeedsCured(Mob *tar) {
 	bool needCured = false;
 
 	if(tar) {
-		if(tar->FindType(SE_PoisonCounter) || tar->FindType(SE_DiseaseCounter) || tar->FindType(SE_CurseCounter) || tar->FindType(SE_CorruptionCounter)) {
+		if(tar->FindType(SpellEffect::PoisonCounter) || tar->FindType(SpellEffect::DiseaseCounter) || tar->FindType(SpellEffect::CurseCounter) || tar->FindType(SpellEffect::CorruptionCounter)) {
 			uint32 buff_count = tar->GetMaxTotalSlots();
 			int buffsWithCounters = 0;
 			needCured = true;

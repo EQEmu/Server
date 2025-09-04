@@ -218,11 +218,11 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
 	if (spellbonuses.Sanctuary && (spells[spell_id].target_type != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id)) {
-		BuffFadeByEffect(SE_Sanctuary);
+		BuffFadeByEffect(SpellEffect::Sanctuary);
 	}
 
 	if (spellbonuses.NegateIfCombat) {
-		BuffFadeByEffect(SE_NegateIfCombat);
+		BuffFadeByEffect(SpellEffect::NegateIfCombat);
 	}
 
 	if(GetTarget() && IsManaTapSpell(spell_id)) {
@@ -696,7 +696,7 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 		},
 		// Levitation restriction
 		{
-			[&]() { return !bypass_casting_restrictions && !zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate); },
+			[&]() { return !bypass_casting_restrictions && !zone->CanLevitate() && IsEffectInSpell(spell_id, SpellEffect::Levitate); },
 			[&]() {
 				if (gm_bypass_message("zone levitation restrictions")) { return true; }
 				Message(Chat::Red, "You have entered an area where levitation effects do not function.");
@@ -858,7 +858,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Cannot cast shield target on self
 	*/
-	if (this == spell_target && IsEffectInSpell(spell_id, SE_Shield_Target)) {
+	if (this == spell_target && IsEffectInSpell(spell_id, SpellEffect::Shield_Target)) {
 		LogSpells("You cannot shield yourself");
 		Message(Chat::SpellFailure, "You cannot shield yourself.");
 		return false;
@@ -890,7 +890,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Various charm related target restrictions
 	*/
-	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target)) {
+	if (IsEffectInSpell(spell_id, SpellEffect::Charm) && !PassCharmTargetRestriction(spell_target)) {
 		LogSpells("Spell casting canceled [{}] : can not use charm on this target.", spell_id);
 		return false;
 	}
@@ -1669,7 +1669,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 				// handle the components for traditional casters
 				else {
-					if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SE_SummonPet) || IsEffectInSpell(spell_id, SE_NecPet)) ||
+					if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SpellEffect::SummonPet) || IsEffectInSpell(spell_id, SpellEffect::NecPet)) ||
 						(IsBardSong(spell_id) && (slot == CastingSlot::Item|| slot == CastingSlot::PotionBelt))) {
 						//bypass reagent cost
 					}
@@ -1706,7 +1706,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					return;
 				}
 			}
-			else if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SE_SummonPet) || IsEffectInSpell(spell_id, SE_NecPet))) {
+			else if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SpellEffect::SummonPet) || IsEffectInSpell(spell_id, SpellEffect::NecPet))) {
 				//bypass reagent cost
 			}
 			else if (!bard_song_mode)
@@ -1922,7 +1922,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Self:
 		{
 			bool bot_can_summon_corpse = IsBot() &&
-				IsEffectInSpell(spell_id, SE_SummonCorpse) &&
+				IsEffectInSpell(spell_id, SpellEffect::SummonCorpse) &&
 				RuleB(Bots, AllowCommandedSummonCorpse);
 
 			if (!bot_can_summon_corpse) {
@@ -2878,7 +2878,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	ApplyHealthTransferDamage(this, target, spell_id);
 
 	//This needs to be here for bind sight to update correctly on client.
-	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
+	if (IsClient() && IsEffectInSpell(spell_id, SpellEffect::BindSight)) {
 		for (int i = 0; i < GetMaxTotalSlots(); i++) {
 			if (buffs[i].spellid == spell_id) {
 				CastToClient()->SendBuffNumHitPacket(buffs[i], i);//its hack, it works.
@@ -2911,7 +2911,7 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 		Bard song charm that have no mana will continue to try and pulse on target, but will only reapply when charm fades.
 		Live does not spam client with do not take hold messages. Checking here avoids that from happening. Only try to reapply if charm fades.
 	*/
-	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
+	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SpellEffect::Charm)) {
 		if (IsClient()) {
 			CastToClient()->CheckSongSkillIncrease(spell_id);
 		}
@@ -2992,7 +2992,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 		) &&
 		spell_id != SPELL_MINOR_ILLUSION &&
 		spell_id != SPELL_ILLUSION_TREE &&
-		IsEffectInSpell(spell_id, SE_Illusion)
+		IsEffectInSpell(spell_id, SpellEffect::Illusion)
 	) {
 		res = 10000; // ~16h override
 	}
@@ -3104,7 +3104,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return 0;
 	}
 
-	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {
+	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SpellEffect::CompleteHeal)) {
 		Message(0, "You must wait before you can be affected by this spell again.");
 		return -1;
 	}
@@ -3116,9 +3116,9 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			return -1;
 		}
 
-		if (!IsStackableDOT(spellid1) && !IsEffectInSpell(spellid1, SE_ManaBurn)) { // mana burn spells we need to use the stacking command blocks live actually checks those first, we should probably rework to that too
+		if (!IsStackableDOT(spellid1) && !IsEffectInSpell(spellid1, SpellEffect::ManaBurn)) { // mana burn spells we need to use the stacking command blocks live actually checks those first, we should probably rework to that too
 			if (caster_level1 > caster_level2) { // cur buff higher level than new
-				if (IsEffectInSpell(spellid1, SE_ImprovedTaunt)) {
+				if (IsEffectInSpell(spellid1, SpellEffect::ImprovedTaunt)) {
 					LogSpells("SE_ImprovedTaunt level exception, overwriting");
 					return 1;
 				} else {
@@ -3162,12 +3162,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	if (spellid1 != spellid2) {
 		for (i = 0; i < EFFECT_COUNT; i++) {
 			// we don't want this optimization for mana burns
-			if (sp1.effect_id[i] != sp2.effect_id[i] || sp1.effect_id[i] == SE_ManaBurn) {
+			if (sp1.effect_id[i] != sp2.effect_id[i] || sp1.effect_id[i] == SpellEffect::ManaBurn) {
 				effect_match = false;
 				break;
 			}
 		}
-	} else if (IsEffectInSpell(spellid1, SE_ManaBurn)) {
+	} else if (IsEffectInSpell(spellid1, SpellEffect::ManaBurn)) {
 		LogSpells("We have a Mana Burn spell that is the same, they won't stack");
 		return -1;
 	}
@@ -3181,7 +3181,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			effect2 = sp2.effect_id[i];
 
 			if (spellbonuses.Screech == 1) {
-				if (effect2 == SE_Screech && sp2.base_value[i] == -1) {
+				if (effect2 == SpellEffect::Screech && sp2.base_value[i] == -1) {
 					MessageString(Chat::SpellFailure, SCREECH_BUFF_BLOCK, sp2.name);
 					return -1;
 				}
@@ -3194,32 +3194,32 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				is not fully removed at the time of the trigger
 			*/
 			if (spellbonuses.AStacker[SBIndex::BUFFSTACKER_EXISTS]) {
-				if ((effect2 == SE_AStacker) && (sp2.effect_id[i] <= spellbonuses.AStacker[SBIndex::BUFFSTACKER_VALUE]))
+				if ((effect2 == SpellEffect::AStacker) && (sp2.effect_id[i] <= spellbonuses.AStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 			}
 
 			if (spellbonuses.BStacker[SBIndex::BUFFSTACKER_EXISTS]) {
-				if ((effect2 == SE_BStacker) && (sp2.effect_id[i] <= spellbonuses.BStacker[SBIndex::BUFFSTACKER_VALUE]))
+				if ((effect2 == SpellEffect::BStacker) && (sp2.effect_id[i] <= spellbonuses.BStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
-				if ((effect2 == SE_AStacker) && (!IsCastOnFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
+				if ((effect2 == SpellEffect::AStacker) && (!IsCastOnFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SpellEffect::BStacker)))
 					return -1;
 			}
 
 			if (spellbonuses.CStacker[SBIndex::BUFFSTACKER_EXISTS]) {
-				if ((effect2 == SE_CStacker) && (sp2.effect_id[i] <= spellbonuses.CStacker[SBIndex::BUFFSTACKER_VALUE]))
+				if ((effect2 == SpellEffect::CStacker) && (sp2.effect_id[i] <= spellbonuses.CStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
-				if ((effect2 == SE_BStacker) && (!IsCastOnFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
+				if ((effect2 == SpellEffect::BStacker) && (!IsCastOnFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SpellEffect::CStacker)))
 					return -1;
 			}
 
 			if (spellbonuses.DStacker[SBIndex::BUFFSTACKER_EXISTS]) {
-				if ((effect2 == SE_DStacker) && (sp2.effect_id[i] <= spellbonuses.DStacker[SBIndex::BUFFSTACKER_VALUE]))
+				if ((effect2 == SpellEffect::DStacker) && (sp2.effect_id[i] <= spellbonuses.DStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
-				if ((effect2 == SE_CStacker) && (!IsCastOnFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
+				if ((effect2 == SpellEffect::CStacker) && (!IsCastOnFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SpellEffect::DStacker)))
 					return -1;
 			}
 
-			if(effect2 == SE_StackingCommand_Overwrite)
+			if(effect2 == SpellEffect::StackingCommand_Overwrite)
 			{
 				overwrite_effect = sp2.base_value[i];
 				overwrite_slot = sp2.formula[i] - 201;	//they use base 1 for slots, we use base 0
@@ -3247,7 +3247,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 						sp2.name, spellid2, overwrite_effect, overwrite_slot, overwrite_below_value);
 
 				}
-			} else if (effect1 == SE_StackingCommand_Block)
+			} else if (effect1 == SpellEffect::StackingCommand_Block)
 			{
 				blocked_effect = sp1.base_value[i];
 				blocked_slot = sp1.formula[i] - 201;
@@ -3324,7 +3324,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		// negative AC affects are skipped. Ex. Sun's Corona and Glacier Breath should stack
 		// There may be more SPAs we need to add here ....
 		// The client does just check base rather than calculating the affect change value.
-		if ((effect1 == SE_ArmorClass || effect1 == SE_ACv2) && sp2.base_value[i] < 0)
+		if ((effect1 == SpellEffect::ArmorClass || effect1 == SpellEffect::ACv2) && sp2.base_value[i] < 0)
 			continue;
 
 		/*
@@ -3332,13 +3332,13 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		If Caster1 isn't the same as Caster2 and the effect is a DoT then ignore it.
 		*/
 		if(IsNPC() && caster1 && caster2 && caster1 != caster2) {
-			if(effect1 == SE_CurrentHP && sp1_detrimental && sp2_detrimental) {
+			if(effect1 == SpellEffect::CurrentHP && sp1_detrimental && sp2_detrimental) {
 				LogSpells("Both casters exist and are not the same, the effect is a detrimental dot, moving on");
 				continue;
 			}
 		}
 
-		if(effect1 == SE_CompleteHeal){ //SE_CompleteHeal never stacks or overwrites ever, always block.
+		if(effect1 == SpellEffect::CompleteHeal){ //SE_CompleteHeal never stacks or overwrites ever, always block.
 			LogSpells("Blocking spell because complete heal never stacks or overwries");
 			return (-1);
 		}
@@ -3347,7 +3347,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		If the spells aren't the same
 		and the effect is a dot we can go ahead and stack it
 		*/
-		if(effect1 == SE_CurrentHP && spellid1 != spellid2 && sp1_detrimental && sp2_detrimental) {
+		if(effect1 == SpellEffect::CurrentHP && spellid1 != spellid2 && sp1_detrimental && sp2_detrimental) {
 			LogSpells("The spells are not the same and it is a detrimental dot, passing");
 			continue;
 		}
@@ -3356,7 +3356,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		sp2_value = CalcSpellEffectValue(spellid2, i, caster_level2);
 
 		// Spells like SoW won't stack if a snare effect is already in place.
-		if (effect2 == SE_MovementSpeed && effect1 == SE_MovementSpeed) {
+		if (effect2 == SpellEffect::MovementSpeed && effect1 == SpellEffect::MovementSpeed) {
 			if (sp1_value < 0 && sp2_value > 0) {
 				return -1;
 			} else if (sp2_value < 0 && sp1_value > 0) {
@@ -3366,7 +3366,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 		// DoTs won't overwrite regeneration but will block regeneration spells.
 		if (spells[spellid1].buff_duration > 0 && spells[spellid2].buff_duration > 0 &&
-			effect1 == SE_CurrentHP && effect2 == SE_CurrentHP) {
+			effect1 == SpellEffect::CurrentHP && effect2 == SpellEffect::CurrentHP) {
 			if (!sp1_detrimental && sp2_detrimental) {
 				continue;
 			} else if (sp1_detrimental && !sp2_detrimental) {
@@ -3378,8 +3378,8 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		// have a value that's a percentage for instance
 		if
 		(
-			effect1 == SE_AttackSpeed ||
-			effect1 == SE_AttackSpeed2
+			effect1 == SpellEffect::AttackSpeed ||
+			effect1 == SpellEffect::AttackSpeed2
 		)
 		{
 			sp1_value -= 100;
@@ -3929,7 +3929,7 @@ bool Mob::SpellOnTarget(
 		IsDetrimentalSpell(spell_id) &&
 		!IsAttackAllowed(spelltar, true) &&
 		!IsResurrectionEffects(spell_id) &&
-		!IsEffectInSpell(spell_id, SE_BindSight)
+		!IsEffectInSpell(spell_id, SpellEffect::BindSight)
 	) {
 		if (!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
@@ -3997,7 +3997,7 @@ bool Mob::SpellOnTarget(
 	// select target
 	uint16 target_id = 0;
 
-	if (IsEffectInSpell(spell_id, SE_BindSight)) {
+	if (IsEffectInSpell(spell_id, SpellEffect::BindSight)) {
 		action->target = GetID();
 		target_id = GetID();
 	} else {
@@ -4151,7 +4151,7 @@ bool Mob::SpellOnTarget(
 	// Not sure if all 3 should be stacking
 	//This is not live like behavior (~Kayen confirmed 2/2/22)
 	if (!RuleB(Spells, AllowDoubleInvis) && !IsActiveBardSong(spell_id)) {
-		if (IsEffectInSpell(spell_id, SE_Invisibility)) {
+		if (IsEffectInSpell(spell_id, SpellEffect::Invisibility)) {
 			if (spelltar->invisible) {
 				spelltar->MessageString(Chat::SpellFailure, ALREADY_INVIS, GetCleanName());
 				safe_delete(action_packet);
@@ -4159,7 +4159,7 @@ bool Mob::SpellOnTarget(
 			}
 		}
 
-		if (IsEffectInSpell(spell_id, SE_InvisVsUndead)) {
+		if (IsEffectInSpell(spell_id, SpellEffect::InvisVsUndead)) {
 			if (spelltar->invisible_undead) {
 				spelltar->MessageString(Chat::SpellFailure, ALREADY_INVIS, GetCleanName());
 				safe_delete(action_packet);
@@ -4167,7 +4167,7 @@ bool Mob::SpellOnTarget(
 			}
 		}
 
-		if (IsEffectInSpell(spell_id, SE_InvisVsAnimals)) {
+		if (IsEffectInSpell(spell_id, SpellEffect::InvisVsAnimals)) {
 			if (spelltar->invisible_animals) {
 				spelltar->MessageString(Chat::SpellFailure, ALREADY_INVIS, GetCleanName());
 				safe_delete(action_packet);
@@ -4276,7 +4276,7 @@ bool Mob::SpellOnTarget(
 		} else if (
 			!IsAttackAllowed(spelltar, true) &&
 			!IsResurrectionEffects(spell_id) &&
-			!IsEffectInSpell(spell_id, SE_BindSight)
+			!IsEffectInSpell(spell_id, SpellEffect::BindSight)
 		) { // Detrimental spells - PVP check
 			LogSpells(
 				"Detrimental spell [{}] can't take hold [{}] -> [{}]",
@@ -4334,7 +4334,7 @@ bool Mob::SpellOnTarget(
 		int buff_count = GetMaxTotalSlots();
 		int focus = 0;
 		for (int b = 0; b < buff_count; b++) {
-			if (IsEffectInSpell(buffs[b].spellid, SE_BlockNextSpellFocus)) {
+			if (IsEffectInSpell(buffs[b].spellid, SpellEffect::BlockNextSpellFocus)) {
 				focus = CalcFocusEffect(focusBlockNextSpell, buffs[b].spellid, spell_id);
 				if (focus) {
 					CheckNumHitsRemaining(NumHit::MatchingSpells, b);
@@ -4629,7 +4629,7 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
-	//Check SE_Fc_Cast_Spell_On_Land SPA 481 on target, if hit by this spell and Conditions are Met then target will cast the specified spell.
+	//Check SpellEffect::Fc_Cast_Spell_On_Land SPA 481 on target, if hit by this spell and Conditions are Met then target will cast the specified spell.
 	if (spelltar) {
 		spelltar->CastSpellOnLand(this, spell_id);
 	}
@@ -4677,11 +4677,11 @@ bool Mob::SpellOnTarget(
 		}
 	}
 
-	if (spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep)) {
+	if (spelltar->IsClient() && IsEffectInSpell(spell_id, SpellEffect::ShadowStep)) {
 		spelltar->CastToClient()->cheat_manager.SetExemptStatus(ShadowStep, true);
 	}
 
-	if (!IsEffectInSpell(spell_id, SE_BindAffinity)) {
+	if (!IsEffectInSpell(spell_id, SpellEffect::BindAffinity)) {
 		if (spelltar != this && spelltar->IsClient()) {// send to target
 			spelltar->CastToClient()->QueuePacket(action_packet);
 		}
@@ -4704,7 +4704,7 @@ bool Mob::SpellOnTarget(
 
 	if (
 		!IsLifetapSpell(spell_id) &&
-		!IsEffectInSpell(spell_id, SE_BindAffinity) &&
+		!IsEffectInSpell(spell_id, SpellEffect::BindAffinity) &&
 		!IsAENukeSpell(spell_id) &&
 		!IsDamageSpell(spell_id)
 	) {
@@ -4727,7 +4727,7 @@ bool Mob::SpellOnTarget(
 		However due to server thinking your healed, you are unable to correct it by healing.
 		Solution: You need to resend the HP update after buff completed and action packet resent.
 	*/
-	if ((IsEffectInSpell(spell_id, SE_TotalHP) || IsEffectInSpell(spell_id, SE_MaxHPChange)) && (IsEffectInSpell(spell_id, SE_CurrentHPOnce) || IsEffectInSpell(spell_id, SE_CurrentHP))) {
+	if ((IsEffectInSpell(spell_id, SpellEffect::TotalHP) || IsEffectInSpell(spell_id, SpellEffect::MaxHPChange)) && (IsEffectInSpell(spell_id, SpellEffect::CurrentHPOnce) || IsEffectInSpell(spell_id, SpellEffect::CurrentHP))) {
 		SendHPUpdate(true);
 	}
 
@@ -5096,7 +5096,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		}
 
 		// check max level for spell
-		effect_index = GetSpellEffectIndex(spell_id, SE_Mez);
+		effect_index = GetSpellEffectIndex(spell_id, SpellEffect::Mez);
 		assert(effect_index >= 0);
 		// NPCs get to ignore the max level
 		if((GetLevel() > spells[spell_id].max_value[effect_index]) &&
@@ -5110,7 +5110,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	}
 
 	// slow and haste spells
-	if(GetSpecialAbility(SpecialAbility::SlowImmunity) && IsEffectInSpell(spell_id, SE_AttackSpeed))
+	if(GetSpecialAbility(SpecialAbility::SlowImmunity) && IsEffectInSpell(spell_id, SpellEffect::AttackSpeed))
 	{
 		LogSpells("We are immune to Slow spells");
 		caster->MessageString(Chat::Red, IMMUNE_ATKSPEED);
@@ -5124,9 +5124,9 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	}
 
 	// client vs client fear
-	if(IsEffectInSpell(spell_id, SE_Fear))
+	if(IsEffectInSpell(spell_id, SpellEffect::Fear))
 	{
-		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
+		effect_index = GetSpellEffectIndex(spell_id, SpellEffect::Fear);
 		if(GetSpecialAbility(SpecialAbility::FearImmunity)) {
 			LogSpells("We are immune to Fear spells");
 			caster->MessageString(Chat::Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
@@ -5190,7 +5190,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(!caster->IsNPC())
 		{
 			// check level limit of charm spell
-			effect_index = GetSpellEffectIndex(spell_id, SE_Charm);
+			effect_index = GetSpellEffectIndex(spell_id, SpellEffect::Charm);
 			assert(effect_index >= 0);
 			if(GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0)
 			{
@@ -5211,8 +5211,8 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	if
 	(
-		IsEffectInSpell(spell_id, SE_Root) ||
-		IsEffectInSpell(spell_id, SE_MovementSpeed)
+		IsEffectInSpell(spell_id, SpellEffect::Root) ||
+		IsEffectInSpell(spell_id, SpellEffect::MovementSpeed)
 	)
 	{
 		if(GetSpecialAbility(SpecialAbility::SnareImmunity)) {

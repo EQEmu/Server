@@ -603,7 +603,6 @@ SET(common_headers
     ipc_mutex.h
     ip_util.h
     item_data.h
-    item_fieldlist.h
     item_instance.h
     json_config.h
     light_source.h

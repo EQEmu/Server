@@ -82,7 +82,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	for (int x = 0; x < MAX_SWARM_PETS; x++)
 	{
-		if (spells[spell_id].effect_id[x] == SE_TemporaryPets)
+		if (spells[spell_id].effect_id[x] == SpellEffect::TemporaryPets)
 		{
 			pet.count = spells[spell_id].base_value[x];
 			pet.duration = spells[spell_id].max_value[x];
@@ -1376,7 +1376,7 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 		}
 
 		for(auto &effect : rank->effects) {
-			if(effect.effect_id == SE_HastenedAASkill && effect.limit_value == ability_in->id) {
+			if(effect.effect_id == SpellEffect::HastenedAASkill && effect.limit_value == ability_in->id) {
 				total_reduction += effect.base_value;
 			}
 		}
@@ -1619,7 +1619,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 
 	auto race = GetPlayerRaceValue(GetBaseRace());
 
-	race = race > PLAYER_RACE_COUNT ? Race::Human : race;
+	race = race > RaceIndex::Drakkin ? Race::Human : race;
 
 	if (!(a->races & (1 << (race - 1)))) {
 		return false;
@@ -1949,7 +1949,7 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 
 		Instructions for how to make the AA - assuming a basic level of knowledge of how AA's work.
 		- aa_abilities table : Create new ability with a hotkey, type 3, zero charges
-		- aa_ranks table :  [Disabled rank] First rank, should have a cost > 0 (this is what you buy), Set hotkeys, MUST SET A SPELL CONTAINING EFFECT SE_Buy_AA_Rank(SPA 472), set a short recast timer.
+		- aa_ranks table :  [Disabled rank] First rank, should have a cost > 0 (this is what you buy), Set hotkeys, MUST SET A SPELL CONTAINING EFFECT SpellEffect::Buy_AA_Rank(SPA 472), set a short recast timer.
 							[Enabled rank] Second rank, should have a cost = 0, Set hotkeys, Set any valid spell ID you want (it has to exist but does nothing), set a short recast timer.
 							*Recommend if doing custom, just make the hotkey titled 'Toggle <Ability Name>' and use for both.
 
@@ -1969,7 +1969,7 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 
 	*/
 
-	bool enable_next_rank = IsEffectInSpell(rank.spell, SE_Buy_AA_Rank);
+	bool enable_next_rank = IsEffectInSpell(rank.spell, SpellEffect::Buy_AA_Rank);
 
 	if (enable_next_rank) {
 
@@ -1980,7 +1980,7 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		AA::Rank *rank_next = zone->GetAlternateAdvancementRank(rank.next_id);
 
 		//Add checks for any special cases for toggle.
-		if (rank_next && IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
+		if (rank_next && IsEffectinAlternateAdvancementRankEffects(*rank_next, SpellEffect::Weapon_Stance)) {
 			weaponstance.aabonus_enabled = true;
 			ApplyWeaponsStance();
 		}
@@ -1994,7 +1994,7 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		Message(Chat::Spells, "You disable an ability."); //Message live gives you. Should come from spell.
 
 		//Add checks for any special cases for toggle.
-		if (IsEffectinAlternateAdvancementRankEffects(rank, SE_Weapon_Stance)) {
+		if (IsEffectinAlternateAdvancementRankEffects(rank, SpellEffect::Weapon_Stance)) {
 			weaponstance.aabonus_enabled = false;
 			BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
 		}
@@ -2005,8 +2005,8 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 
 	/*
-		Disabled rank needs a rank spell containing the SE_Buy_AA_Rank effect to return true.
-		Enabled rank checks to see if the prior rank contains a rank spell with SE_Buy_AA_Rank, if so true.
+		Disabled rank needs a rank spell containing the SpellEffect::Buy_AA_Rank effect to return true.
+		Enabled rank checks to see if the prior rank contains a rank spell with SpellEffect::Buy_AA_Rank, if so true.
 
 		Note: On live the enabled rank is Expendable with Charge 1.
 
@@ -2014,13 +2014,13 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 	*/
 
 
-	if (IsEffectInSpell(rank.spell, SE_Buy_AA_Rank)) {//Checked when is Disabled.
+	if (IsEffectInSpell(rank.spell, SpellEffect::Buy_AA_Rank)) {//Checked when is Disabled.
 		return true;
 	}
 	else if (rank.prev_id != -1) {//Check when effect is Enabled.
 		AA::Rank *rank_prev = zone->GetAlternateAdvancementRank(rank.prev_id);
 
-		if (rank_prev && IsEffectInSpell(rank_prev->spell, SE_Buy_AA_Rank)) {
+		if (rank_prev && IsEffectInSpell(rank_prev->spell, SpellEffect::Buy_AA_Rank)) {
 			return true;
 		}
 	}

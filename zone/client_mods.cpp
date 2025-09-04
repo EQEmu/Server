@@ -693,7 +693,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 	}
 
 	regen += aabonuses.ManaRegen;
-	// add in + 1 bonus for SE_CompleteHeal, but we don't do anything for it yet?
+	// add in + 1 bonus for SpellEffect::CompleteHeal, but we don't do anything for it yet?
 
 	int item_bonus = itembonuses.ManaRegen; // this is capped already
 	item_bonus += itembonuses.heroic_mana_regen;
@@ -1011,52 +1011,52 @@ int32	Client::CalcMR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Race::Human:
 			MR = 25;
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			MR = 25;
 			break;
-		case ERUDITE:
+		case Race::Erudite:
 			MR = 30;
 			break;
-		case WOOD_ELF:
+		case Race::WoodElf:
 			MR = 25;
 			break;
-		case HIGH_ELF:
+		case Race::HighElf:
 			MR = 25;
 			break;
-		case DARK_ELF:
+		case Race::DarkElf:
 			MR = 25;
 			break;
-		case HALF_ELF:
+		case Race::HalfElf:
 			MR = 25;
 			break;
-		case DWARF:
+		case Race::Dwarf:
 			MR = 30;
 			break;
-		case TROLL:
+		case Race::Troll:
 			MR = 25;
 			break;
-		case OGRE:
+		case Race::Ogre:
 			MR = 25;
 			break;
-		case HALFLING:
+		case Race::Halfling:
 			MR = 25;
 			break;
-		case GNOME:
+		case Race::Gnome:
 			MR = 25;
 			break;
-		case IKSAR:
+		case Race::Iksar:
 			MR = 25;
 			break;
-		case VAHSHIR:
+		case Race::VahShir:
 			MR = 25;
 			break;
-		case FROGLOK:
+		case Race::Froglok2:
 			MR = 30;
 			break;
-		case DRAKKIN:
+		case Race::Drakkin:
 		{
 			MR = 25;
 			if (GetDrakkinHeritage() == 2)
@@ -1085,52 +1085,52 @@ int32	Client::CalcFR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Race::Human:
 			FR = 25;
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			FR = 25;
 			break;
-		case ERUDITE:
+		case Race::Erudite:
 			FR = 25;
 			break;
-		case WOOD_ELF:
+		case Race::WoodElf:
 			FR = 25;
 			break;
-		case HIGH_ELF:
+		case Race::HighElf:
 			FR = 25;
 			break;
-		case DARK_ELF:
+		case Race::DarkElf:
 			FR = 25;
 			break;
-		case HALF_ELF:
+		case Race::HalfElf:
 			FR = 25;
 			break;
-		case DWARF:
+		case Race::Dwarf:
 			FR = 25;
 			break;
-		case TROLL:
+		case Race::Troll:
 			FR = 5;
 			break;
-		case OGRE:
+		case Race::Ogre:
 			FR = 25;
 			break;
-		case HALFLING:
+		case Race::Halfling:
 			FR = 25;
 			break;
-		case GNOME:
+		case Race::Gnome:
 			FR = 25;
 			break;
-		case IKSAR:
+		case Race::Iksar:
 			FR = 30;
 			break;
-		case VAHSHIR:
+		case Race::VahShir:
 			FR = 25;
 			break;
-		case FROGLOK:
+		case Race::Froglok2:
 			FR = 25;
 			break;
-		case DRAKKIN:
+		case Race::Drakkin:
 		{
 			FR = 25;
 			if (GetDrakkinHeritage() == 0)
@@ -1171,52 +1171,52 @@ int32	Client::CalcDR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Race::Human:
 			DR = 15;
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			DR = 15;
 			break;
-		case ERUDITE:
+		case Race::Erudite:
 			DR = 10;
 			break;
-		case WOOD_ELF:
+		case Race::WoodElf:
 			DR = 15;
 			break;
-		case HIGH_ELF:
+		case Race::HighElf:
 			DR = 15;
 			break;
-		case DARK_ELF:
+		case Race::DarkElf:
 			DR = 15;
 			break;
-		case HALF_ELF:
+		case Race::HalfElf:
 			DR = 15;
 			break;
-		case DWARF:
+		case Race::Dwarf:
 			DR = 15;
 			break;
-		case TROLL:
+		case Race::Troll:
 			DR = 15;
 			break;
-		case OGRE:
+		case Race::Ogre:
 			DR = 15;
 			break;
-		case HALFLING:
+		case Race::Halfling:
 			DR = 20;
 			break;
-		case GNOME:
+		case Race::Gnome:
 			DR = 15;
 			break;
-		case IKSAR:
+		case Race::Iksar:
 			DR = 15;
 			break;
-		case VAHSHIR:
+		case Race::VahShir:
 			DR = 15;
 			break;
-		case FROGLOK:
+		case Race::Froglok2:
 			DR = 15;
 			break;
-		case DRAKKIN:
+		case Race::Drakkin:
 		{
 			DR = 15;
 			if (GetDrakkinHeritage() == 1)
@@ -1263,52 +1263,52 @@ int32	Client::CalcPR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Race::Human:
 			PR = 15;
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			PR = 15;
 			break;
-		case ERUDITE:
+		case Race::Erudite:
 			PR = 15;
 			break;
-		case WOOD_ELF:
+		case Race::WoodElf:
 			PR = 15;
 			break;
-		case HIGH_ELF:
+		case Race::HighElf:
 			PR = 15;
 			break;
-		case DARK_ELF:
+		case Race::DarkElf:
 			PR = 15;
 			break;
-		case HALF_ELF:
+		case Race::HalfElf:
 			PR = 15;
 			break;
-		case DWARF:
+		case Race::Dwarf:
 			PR = 20;
 			break;
-		case TROLL:
+		case Race::Troll:
 			PR = 15;
 			break;
-		case OGRE:
+		case Race::Ogre:
 			PR = 15;
 			break;
-		case HALFLING:
+		case Race::Halfling:
 			PR = 20;
 			break;
-		case GNOME:
+		case Race::Gnome:
 			PR = 15;
 			break;
-		case IKSAR:
+		case Race::Iksar:
 			PR = 15;
 			break;
-		case VAHSHIR:
+		case Race::VahShir:
 			PR = 15;
 			break;
-		case FROGLOK:
+		case Race::Froglok2:
 			PR = 30;
 			break;
-		case DRAKKIN:
+		case Race::Drakkin:
 		{
 			PR = 15;
 			if (GetDrakkinHeritage() == 3)
@@ -1355,52 +1355,52 @@ int32	Client::CalcCR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Race::Human:
 			CR = 25;
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			CR = 35;
 			break;
-		case ERUDITE:
+		case Race::Erudite:
 			CR = 25;
 			break;
-		case WOOD_ELF:
+		case Race::WoodElf:
 			CR = 25;
 			break;
-		case HIGH_ELF:
+		case Race::HighElf:
 			CR = 25;
 			break;
-		case DARK_ELF:
+		case Race::DarkElf:
 			CR = 25;
 			break;
-		case HALF_ELF:
+		case Race::HalfElf:
 			CR = 25;
 			break;
-		case DWARF:
+		case Race::Dwarf:
 			CR = 25;
 			break;
-		case TROLL:
+		case Race::Troll:
 			CR = 25;
 			break;
-		case OGRE:
+		case Race::Ogre:
 			CR = 25;
 			break;
-		case HALFLING:
+		case Race::Halfling:
 			CR = 25;
 			break;
-		case GNOME:
+		case Race::Gnome:
 			CR = 25;
 			break;
-		case IKSAR:
+		case Race::Iksar:
 			CR = 15;
 			break;
-		case VAHSHIR:
+		case Race::VahShir:
 			CR = 25;
 			break;
-		case FROGLOK:
+		case Race::Froglok2:
 			CR = 25;
 			break;
-		case DRAKKIN:
+		case Race::Drakkin:
 		{
 			CR = 25;
 			if (GetDrakkinHeritage() == 4)
@@ -1482,24 +1482,24 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		Bard Spell Effects
 
 		Mod uses the highest bonus from either of these for each instrument
-		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
-		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
+		SPA 179 SpellEffect::AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
+		SPA 260 SpellEffect::AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
 			-Example usage: From AA a value of 4 = 40%
 
-		SPA 118 SE_Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
+		SPA 118 SpellEffect::Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
 			- Live Behavior: Amplifcation can be modified by singing mods and amplification itself, thus on the second cast of Amplification you will recieve
 			  the mod from the first cast, this continues until you reach the song mod cap.
 
-		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
-		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
+		SPA 261 SpellEffect::SongModCap raises song focus cap (No longer used on live)
+		SPA 270 SpellEffect::BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
 
-		SPA 413 SE_FcBaseEffects focus effect that replaced item instrument mods
+		SPA 413 SpellEffect::FcBaseEffects focus effect that replaced item instrument mods
 
 		Issues 10-15-21:
 		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues. -> Need to recode songs to recast when duration ends.
 
 		Formula Live Bards:
-		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
+		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SpellEffect::FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
 
 		TODO: Spell Table Fields that need to be implemented
 		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE
@@ -1567,7 +1567,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		else
 			effectmod = spellbonuses.singingMod;
 		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SE_Amplification
+			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SpellEffect::Amplification
 		break;
 	default:
 		effectmod = 10;
@@ -1584,7 +1584,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 
 	if (effectmodcap) {
 
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap (not used on live)
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SpellEffect::SongModCap (not used on live)
 
 		//Incase a negative modifier is used.
 		if (effectmodcap <= 0) {
@@ -1778,8 +1778,8 @@ int Client::GetRawACNoShield(int &shield_ac) const
 int32 Client::CalculateLungCapacity()
 {
 	// Iksar and Frogloks do not benefit from Innate Lung Capacity and do not have STA penalty
-	if (GetBaseRace() == IKSAR) return 127;
-	if (GetBaseRace() == FROGLOK) return 256;
+	if (GetBaseRace() == Race::Iksar) return 127;
+	if (GetBaseRace() == Race::Froglok2) return 256;
 
 	// Innate Lung Capacity AA gives 10%/25%/50% more
 	int base_lung_capacity = aabonuses.BreathLevel > 0 ? aabonuses.BreathLevel : 100;
