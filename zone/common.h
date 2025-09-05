@@ -575,6 +575,8 @@ struct StatBonuses {
 	int aura_slots;
 	int trap_slots;
 	bool hunger; // Song of Sustenance -- min caps to 3500
+	int32	BreathLevel;
+	bool	WaterBreathing;
 	int64 heroic_max_hp;
 	int64 heroic_max_mana;
 	int64 heroic_max_end;
