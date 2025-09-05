@@ -742,6 +742,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SpellEffect::TwoHandBash:
 			break;
 		case SpellEffect::SetBreathLevel:
+			newbon->BreathLevel += base_value;
 			break;
 		case SpellEffect::RaiseStatCap:
 			switch (limit_value) {
