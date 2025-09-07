@@ -3311,7 +3311,7 @@ struct BazaarInspect_Struct {
 	uint32 action;
 	uint32 unknown_004;
 	uint32 trader_id;
-	char   serial_number[17];
+	char   item_unique_id[17];
 	char   unknown_029[3];
 	uint32 item_id;
 	uint32 unknown_036;
@@ -3554,19 +3554,21 @@ struct	WhoAllPlayerPart4 {
 };
 
 struct TraderItemSerial_Struct {
-	char	serial_number[17];
+	char	item_unique_id[17];
 	uint8	unknown_018;
 
-	void operator=(uint32 a) {
-		auto _tmp = fmt::format("{:016}", a);
-		strn0cpy(this->serial_number, _tmp.c_str(), sizeof(this->serial_number));
+	TraderItemSerial_Struct& operator=(const char* a) {
+		strn0cpy(this->item_unique_id, a, sizeof(this->item_unique_id));
+		unknown_018 = 0;
+
+		return *this;
 	}
 };
 
 struct BeginTrader_Struct {
 /*0000*/    uint32                  action;
-/*0004*/    TraderItemSerial_Struct items[200];
-/*3604*/    uint32                  item_cost[200];
+/*0004*/    TraderItemSerial_Struct item_unique_ids[RoF2::invtype::BAZAAR_SIZE];
+/*3604*/    uint32                  item_cost[RoF2::invtype::BAZAAR_SIZE];
 /*4404*/
 };
 
@@ -3592,11 +3594,11 @@ struct BazaarWindowRemoveTrader_Struct {
 };
 
 struct TraderPriceUpdate_Struct {
-	uint32 action;
-	char   serial_number[17];
-	char   unknown_021[3];
-	uint32 unknown_024;
-	uint32 new_price;
+/*000*/	uint32 action;
+/*004*/	char   item_unique_id[17];
+/*021*/	char   unknown_021[3];
+/*024*/	uint32 unknown_024;
+/*028*/	uint32 new_price;
 };
 
 struct Trader_ShowItems_Struct {
@@ -3614,22 +3616,22 @@ struct TraderStatus_Struct {
 };
 
 struct TraderBuy_Struct {
-/*000*/ uint32	action;
-/*004*/	uint32	method;
-/*008*/ uint32	sub_action;
-/*012*/	uint32	unknown_012;
-/*016*/ uint32	trader_id;
-/*020*/ char	buyer_name[64];
-/*084*/ char	seller_name[64];
-/*148*/ char	unknown_148[32];
-/*180*/ char	item_name[64];
-/*244*/ char	serial_number[17];
-/*261*/ char	unknown_261[3];
-/*264*/ uint32	item_id;
-/*268*/ uint32	price;
-/*272*/ uint32	already_sold;
-/*276*/ uint32	unknown_276;
-/*280*/ uint32	quantity;
+/*000*/ uint32 action;
+/*004*/ uint32 method;
+/*008*/ uint32 sub_action;
+/*012*/ uint32 unknown_012;
+/*016*/ uint32 trader_id;
+/*020*/ char   buyer_name[64];
+/*084*/ char   seller_name[64];
+/*148*/ char   unknown_148[32];
+/*180*/ char   item_name[64];
+/*244*/ char   item_unique_id[17];
+/*261*/ char   unknown_261[3];
+/*264*/ uint32 item_id;
+/*268*/ uint32 price;
+/*272*/ uint32 already_sold;
+/*276*/ uint32 unknown_276;
+/*280*/ uint32 quantity;
 /*284*/
 };
 
@@ -3649,10 +3651,10 @@ struct MoneyUpdate_Struct{
 };
 
 struct TraderDelItem_Struct{
-	/*000*/ uint32 Unknown000;
-	/*004*/ uint32 TraderID;
-	/*008*/ char   SerialNumber[17];
-	/*024*/ uint32 Unknown012;
+	/*000*/ uint32 unknown_000;
+	/*004*/ uint32 trader_id;
+	/*008*/ char   item_unique_id[17];
+	/*025*/ uint32 unknown_025;
 	/*028*/
 };
 
@@ -3679,22 +3681,22 @@ struct SimpleMessage_Struct{
 // Size: 52 + strings
 // Other than the strings, all of this packet is network byte order (reverse from normal)
 struct GuildMemberEntry_Struct {
-	char	name[1];			// variable length
-	uint32	level;
-	uint32	banker;				// 1=yes, 0=no
-	uint32	class_;
-	uint32	rank;
-	uint32	time_last_on;
-	uint32	tribute_enable;
-	uint32	unknown01;			// Seen 0
-	uint32	total_tribute;		// total guild tribute donated, network byte order
-	uint32	last_tribute;		// unix timestamp
-	uint32	unknown_one;		// unknown, set to 1
-	char	public_note[1];		// variable length.
-	uint16	zoneinstance;		// Seen 0s or -1 in RoF2
-	uint16	zone_id;			// Seen 0s or -1 in RoF2
-	uint32	unknown_one2;		// unknown, set to 1
-	uint32	unknown04;			// Seen 0
+	char   name[1];        // variable length
+	uint32 level;
+	uint32 banker;         // 1=yes, 0=no
+	uint32 class_;
+	uint32 rank;
+	uint32 time_last_on;
+	uint32 tribute_enable;
+	uint32 unknown01;      // Seen 0
+	uint32 total_tribute;  // total guild tribute donated, network byte order
+	uint32 last_tribute;   // unix timestamp
+	uint32 unknown_one;    // unknown, set to 1
+	char   public_note[1]; // variable length.
+	uint16 zoneinstance;   // Seen 0s or -1 in RoF2
+	uint16 zone_id;        // Seen 0s or -1 in RoF2
+	uint32 unknown_one2;   // unknown, set to 1
+	uint32 offline_mode;   // Displays OFFLINE MODE instead of Zone Name
 };
 
 //just for display purposes, this is not actually used in the message encoding other than for size.
@@ -3729,13 +3731,12 @@ struct GuildStatus_Struct
 };
 
 struct GuildMemberUpdate_Struct {
-/*00*/	uint32	GuildID;
-/*04*/	char	MemberName[64];
-/*68*/	uint16	ZoneID;
-/*70*/	uint16	InstanceID;	//speculated
-/*72*/	uint32	LastSeen;	//unix timestamp
-/*76*/	uint32	Unknown76;
-/*80*/
+	/*00*/	uint32	guild_id;
+	/*04*/	char	member_name[64];
+	/*68*/	uint16	zone_id;
+	/*70*/	uint16	instance_id;	//speculated
+	/*72*/	uint32	last_seen;	    //unix timestamp
+	/*76*/	uint32	offline_mode;
 };
 
 struct GuildMemberLevelUpdate_Struct {

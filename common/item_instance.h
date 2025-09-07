@@ -23,6 +23,10 @@
 
 #ifndef COMMON_ITEM_INSTANCE_H
 #define COMMON_ITEM_INSTANCE_H
+#include <array>
+#include <random>
+
+
 #include "evolving_items.h"
 
 
@@ -36,6 +40,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/deity.h"
 #include "../common/memory_buffer.h"
 #include "../common/repositories/character_evolving_items_repository.h"
+#include <thread>
 
 #include <map>
 
@@ -79,6 +84,8 @@ namespace EQ
 		ItemInstance(const ItemData* item = nullptr, int16 charges = 0);
 
 		ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges = 0);
+
+		ItemInstance(const ItemData *item, const std::string &item_unique_id, int16 charges = 0);
 
 		ItemInstance(ItemInstTypes use_type);
 
@@ -163,6 +170,14 @@ namespace EQ
 
 		int16 GetCharges() const				{ return m_charges; }
 		void SetCharges(int16 charges)			{ m_charges = charges; }
+		int16 GetQuantityFromCharges() const
+		{
+			if (GetCharges() > 0 || IsStackable() || GetItem()->MaxCharges > 0) {
+				return GetCharges();
+			}
+
+			return 1;
+		}
 
 		uint32 GetPrice() const					{ return m_price; }
 		void SetPrice(uint32 price)				{ m_price = price; }
@@ -228,8 +243,11 @@ namespace EQ
 		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
 		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 
-		inline int32 GetSerialNumber() const { return m_SerialNumber; }
-		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
+		int32              GetSerialNumber() const { return m_SerialNumber; }
+		void               SetSerialNumber(int32 id) { m_SerialNumber = id; }
+		const std::string &GetUniqueID() const { return m_unique_id; }
+		void               SetUniqueID(std::string sn) { m_unique_id = std::move(sn); }
+		void               CreateUniqueID() const { m_unique_id = GenerateUniqueID(); }
 
 		std::map<std::string, ::Timer>& GetTimers() const { return m_timers; }
 		void SetTimer(std::string name, uint32 time);
@@ -346,34 +364,77 @@ namespace EQ
 		std::map<uint8, ItemInstance*>::const_iterator _cbegin() { return m_contents.cbegin(); }
 		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
 
-		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
+		void               _PutItem(uint8 index, ItemInstance *inst) { m_contents[index] = inst; }
+		static std::string GenerateUniqueID();
 
-		ItemInstTypes    m_use_type{ItemInstNormal};// Usage type for item
-		const ItemData * m_item{nullptr};           // Ptr to item data
-		int16            m_charges{0};              // # of charges for chargeable items
-		uint32           m_price{0};                // Bazaar /trader price
-		uint32           m_color{0};
-		uint32           m_merchantslot{0};
-		int16            m_currentslot{0};
-		bool             m_attuned{false};
-		int32            m_merchantcount{1};//number avaliable on the merchant, -1=unlimited
-		int32            m_SerialNumber{0}; // Unique identifier for this instance of an item. Needed for Bazaar.
-		uint32           m_exp{0};
-		int8             m_evolveLvl{0};
-		ItemData *       m_scaledItem{nullptr};
-		bool             m_scaling{false};
-		uint32           m_ornamenticon{0};
-		uint32           m_ornamentidfile{0};
-		uint32           m_new_id_file{0};
-		uint32           m_ornament_hero_model{0};
-		uint32           m_recast_timestamp{0};
-		int              m_task_delivered_count{0};
+		ItemInstTypes       m_use_type{ ItemInstNormal }; // Usage type for item
+		const ItemData     *m_item{ nullptr };            // Ptr to item data
+		int16               m_charges{ 0 };               // # of charges for chargeable items
+		uint32              m_price{ 0 };                 // Bazaar /trader price
+		uint32              m_color{ 0 };
+		uint32              m_merchantslot{ 0 };
+		int16               m_currentslot{ 0 };
+		bool                m_attuned{ false };
+		int32               m_merchantcount{ 1 }; // number avaliable on the merchant, -1=unlimited
+		int32               m_SerialNumber{ 0 };  // Unique identifier for this instance of an item. Needed for Bazaar.
+		mutable std::string m_unique_id{};        // unique serial number across all zones/world TESTING March 2025
+		uint32              m_exp{ 0 };
+		int8                m_evolveLvl{ 0 };
+		ItemData           *m_scaledItem{ nullptr };
+		bool                m_scaling{ false };
+		uint32              m_ornamenticon{ 0 };
+		uint32              m_ornamentidfile{ 0 };
+		uint32              m_new_id_file{ 0 };
+		uint32              m_ornament_hero_model{ 0 };
+		uint32              m_recast_timestamp{ 0 };
+		int                 m_task_delivered_count{ 0 };
 		mutable CharacterEvolvingItemsRepository::CharacterEvolvingItems  m_evolving_details{};
 
 		// Items inside of this item (augs or contents) {};
 		std::map<uint8, ItemInstance*>         m_contents {}; // Zero-based index: min=0, max=9
 		std::map<std::string, std::string>     m_custom_data {};
 		mutable std::map<std::string, ::Timer> m_timers {};
+	};
+
+	class UniqueHashGenerator
+	{
+	private:
+		static constexpr char   ALPHANUM[]    = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		static constexpr size_t ALPHANUM_SIZE = sizeof(ALPHANUM) - 1;
+		static std::mutex       mtx;
+
+		// Generate machine-specific seed
+		static uint64_t getMachineSeed()
+		{
+			std::random_device rd;
+			return (static_cast<uint64_t>(rd()) << 32) | rd();
+		}
+
+	public:
+		static std::string generate()
+		{
+			std::lock_guard<std::mutex> lock(mtx);
+
+			// Get current timestamp in nanoseconds
+			auto now   = std::chrono::high_resolution_clock::now();
+			auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+
+			// Combine timestamp with machine-specific data
+			static const uint64_t machine_seed = getMachineSeed();
+			uint64_t seed = nanos ^ machine_seed ^ std::hash<std::thread::id>{}(std::this_thread::get_id());
+
+			// Generate random component
+			std::mt19937_64                       rng(seed);
+			std::uniform_int_distribution<size_t> dist(0, ALPHANUM_SIZE - 1);
+
+			// Create 16-byte result
+			std::array<char, 16> result;
+			for (int i = 0; i < 16; ++i) {
+				result[i] = ALPHANUM[dist(rng)];
+			}
+
+			return std::string(result.begin(), result.end());
+		}
 	};
 }
 #endif /*COMMON_ITEM_INSTANCE_H*/

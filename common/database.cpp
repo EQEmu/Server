@@ -52,6 +52,7 @@
 #include "../common/repositories/variables_repository.h"
 #include "../common/repositories/character_pet_name_repository.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/sharedbank_repository.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -210,7 +211,7 @@ void Database::LoginIP(uint32 account_id, const std::string& login_ip)
 	QueryDatabase(query);
 }
 
-int16 Database::GetAccountStatus(uint32 account_id)
+AccountStatus::StatusRecord Database::GetAccountStatus(uint32 account_id)
 {
 	auto e = AccountRepository::FindOne(*this, account_id);
 
@@ -222,7 +223,11 @@ int16 Database::GetAccountStatus(uint32 account_id)
 		AccountRepository::UpdateOne(*this, e);
 	}
 
-	return e.status;
+	AccountStatus::StatusRecord result{};
+	result.status  = e.status;
+	result.offline = e.offline;
+
+	return result;
 }
 
 uint32 Database::CreateAccount(
@@ -2265,6 +2270,7 @@ void Database::ClearGuildOnlineStatus()
 void Database::ClearTraderDetails()
 {
 	TraderRepository::Truncate(*this);
+	AccountRepository::ClearAllOfflineStatus(*this);
 }
 
 void Database::ClearBuyerDetails()
@@ -2287,4 +2293,72 @@ uint64_t Database::GetNextTableId(const std::string &table_name)
 	}
 
 	return 1;
+}
+
+void Database::ConvertInventoryToNewUniqueId()
+{
+	LogInfo("Converting inventory entries with NULL item_unique_id");
+	auto results = InventoryRepository::GetWhere(*this, "`item_unique_id` IS NULL");
+
+	if (results.empty()) {
+		return;
+	}
+
+	TransactionBegin();
+	uint32                                      index      = 0;
+	const uint32                                batch_size = 1000;
+	std::vector<InventoryRepository::Inventory> queue{};
+	queue.reserve(batch_size);
+
+	for (auto &r: results) {
+		r.item_unique_id = EQ::UniqueHashGenerator::generate();
+		queue.push_back(r);
+		index++;
+		if (index >= batch_size) {
+			InventoryRepository::ReplaceMany(*this, queue);
+			index = 0;
+			queue.clear();
+		}
+	}
+
+	if (!queue.empty()) {
+		InventoryRepository::ReplaceMany(*this, queue);
+	}
+
+	TransactionCommit();
+	LogInfo("Converted {} records", results.size());
+}
+
+void Database::ConvertSharedbankToNewUniqueId()
+{
+	LogInfo("Converting shared bank entries with NULL item_unique_id");
+	auto results = SharedbankRepository::GetWhere(*this, "`item_unique_id` IS NULL");
+
+	if (results.empty()) {
+		return;
+	}
+
+	TransactionBegin();
+	uint32                                      index      = 0;
+	const uint32                                batch_size = 1000;
+	std::vector<SharedbankRepository::Sharedbank> queue{};
+	queue.reserve(batch_size);
+
+	for (auto &r: results) {
+		r.item_unique_id = EQ::UniqueHashGenerator::generate();
+		queue.push_back(r);
+		index++;
+		if (index >= batch_size) {
+			SharedbankRepository::ReplaceMany(*this, queue);
+			index = 0;
+			queue.clear();
+		}
+	}
+
+	if (!queue.empty()) {
+		SharedbankRepository::ReplaceMany(*this, queue);
+	}
+
+	TransactionCommit();
+	LogInfo("Converted {} records", results.size());
 }
