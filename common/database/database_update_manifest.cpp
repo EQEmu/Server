@@ -7188,7 +7188,8 @@ CHANGE COLUMN `field221` `caster_requirement_id` int(11) NULL DEFAULT 0 AFTER `n
 CHANGE COLUMN `field222` `spell_class` int(11) NULL DEFAULT 0 AFTER `caster_requirement_id`,
 CHANGE COLUMN `field223` `spell_subclass` int(11) NULL DEFAULT 0 AFTER `spell_class`,
 CHANGE COLUMN `field232` `no_remove` int(11) NOT NULL DEFAULT 0 AFTER `min_range`;
-)"
+)",
+		.content_schema_update = true
 	}
 
 // -- template; copy/paste this when you need to create a new entry
