@@ -223,6 +223,18 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
+		if (underwater_timer.Check()) {
+			if ((IsUnderWater() || GetZoneID() == Zones::THEGREY) &&
+				!spellbonuses.WaterBreathing && !aabonuses.WaterBreathing && !itembonuses.WaterBreathing) {
+				if (m_pp.air_remaining > 0) {
+					--m_pp.air_remaining;
+				}
+			}
+			else {
+				m_pp.air_remaining = CalculateLungCapacity();
+			}
+		}
+
 		cheat_manager.ClientProcess();
 
 		if (bardsong_timer.Check() && bardsong != 0) {

@@ -700,7 +700,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->CHA += base_value;
 			break;
 		case SpellEffect::WaterBreathing:
-			// handled by client
+			newbon->WaterBreathing = base_value;
 			break;
 		case SpellEffect::CurrentMana:
 			newbon->ManaRegen += base_value;
@@ -742,6 +742,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SpellEffect::TwoHandBash:
 			break;
 		case SpellEffect::SetBreathLevel:
+			newbon->BreathLevel += base_value;
 			break;
 		case SpellEffect::RaiseStatCap:
 			switch (limit_value) {
