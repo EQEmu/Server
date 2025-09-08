@@ -53,7 +53,8 @@ Object::Object(
 	bool fix_z
 ) :
 respawn_timer(0),
-decay_timer(300000)
+decay_timer(RuleI(Groundspawns, DecayTime)),
+random_timer(0)
 {
 	user      = nullptr;
 	last_user = nullptr;
@@ -78,6 +79,7 @@ decay_timer(300000)
 	memset(m_display_name, 0, sizeof(m_display_name));
 
 	respawn_timer.Disable();
+	random_timer.Disable();
 
 	// Set drop_id to zero - it will be set when added to zone with SetID()
 	m_data.drop_id = 0;
@@ -104,7 +106,8 @@ Object::Object(
 	bool fix_z
 ) :
 respawn_timer(respawn_timer_ * 1000),
-decay_timer(300000)
+decay_timer(RuleI(Groundspawns, DecayTime)),
+random_timer(respawn_timer)
 {
 
 	user           = nullptr;
@@ -131,6 +134,12 @@ decay_timer(300000)
 	m_data.zone_id = zone->GetZoneID();
 
 	respawn_timer.Disable();
+	if (!RuleB(Groundspawns, RandomSpawn) || m_min_x == m_max_x || m_min_y == m_max_y) {
+		random_timer.Disable();
+	}
+	else {
+		random_timer.Start();
+	}
 
 	strcpy(m_data.object_name, name.c_str());
 
@@ -152,7 +161,8 @@ Object::Object(
 	const EQ::ItemInstance* inst
 ) :
 respawn_timer(0),
-decay_timer(300000)
+decay_timer(RuleI(Groundspawns, DecayTime)),
+random_timer(0)
 {
 	user = nullptr;
 	last_user = nullptr;
@@ -185,6 +195,7 @@ decay_timer(300000)
 
 	decay_timer.Start();
 	respawn_timer.Disable();
+	random_timer.Disable();
 
 	// Hardcoded portion for unknown members
 	m_data.unknown024 = 0x7f001194;
@@ -226,7 +237,8 @@ Object::Object(
 	bool fix_z
 ) :
 respawn_timer(0),
-decay_timer(decay_time)
+decay_timer(decay_time),
+random_timer(0)
 {
 	user      = nullptr;
 	last_user = nullptr;
@@ -255,6 +267,7 @@ decay_timer(decay_time)
 	}
 
 	respawn_timer.Disable();
+	random_timer.Disable();
 
 	// Hardcoded portion for unknown members
 	m_data.unknown024 = 0x7f001194;
@@ -298,7 +311,8 @@ Object::Object(
 	uint32 decay_time
 ) :
 respawn_timer(0),
-decay_timer(decay_time)
+decay_timer(decay_time),
+random_timer(0)
 {
 	user      = nullptr;
 	last_user = nullptr;
@@ -331,6 +345,7 @@ decay_timer(decay_time)
 	}
 
 	respawn_timer.Disable();
+	random_timer.Disable();
 
 	// Hardcoded portion for unknown members
 	m_data.unknown024 = 0x7f001194;
@@ -533,8 +548,24 @@ bool Object::Process(){
 		return false;
 	}
 
-	if (m_ground_spawn && respawn_timer.Check()){
-		RandomSpawn(true);
+	if (m_ground_spawn) {
+		if (respawn_timer.Enabled()) {
+			// respawn_timer is enabled if item was picked up, and waiting to respawn
+			if (respawn_timer.Check()) {
+				// when random_timer is enabled, RandomSpawn() will send a despawn packet
+				bool rand_respawn = random_timer.Enabled();
+				random_timer.Disable();
+				RandomSpawn(true);
+				respawn_timer.Disable();
+				// re-start random_timer if it was running
+				if (rand_respawn) {
+					random_timer.Start();
+				}
+			}
+		}
+		else if (random_timer.Check()) {
+			RandomSpawn(true);
+		}
 	}
 
 	if (user && !entity_list.GetClientByCharID(user->CharacterID())) {

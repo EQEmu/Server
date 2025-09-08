@@ -1178,6 +1178,12 @@ RULE_INT(EvolvingItems, DelayUponEquipping, 30000, "Delay in ms before an evolvi
 RULE_BOOL(EvolvingItems, DestroyAugmentsOnEvolve, false, "If this is enabled, any augments in an item will be destroyed when the item evolves. Otherwise, send augments to the player via the parcel system (requires that the Parcel System be enabled).")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Groundspawns)
+RULE_INT(Groundspawns, DecayTime, 300000, "Decay time of player dropped items.")
+RULE_INT(Groundspawns, DisarmDecayTime, 300000, "Decay time of weapons dropped due to disarm")
+RULE_BOOL(Groundspawns, RandomSpawn, true, "Determines if groundspawns with random spawn locs will periodically despawn and respawn elsewhere.")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
