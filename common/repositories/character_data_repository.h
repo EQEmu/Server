@@ -191,6 +191,22 @@ public:
 
 		return character_ids;
 	}
+
+	static uint32_t GetTotalTimePlayed(Database& db, uint32_t account_id)
+	{
+		auto query = fmt::format(
+			"SELECT SUM(time_played) FROM `character_data` WHERE `account_id` = {}",
+			account_id
+		);
+
+		auto results = db.QueryDatabase(query);
+		if (!results.Success()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+		return Strings::ToUnsignedInt(row[0]);
+	}
 };
 
 #endif //EQEMU_CHARACTER_DATA_REPOSITORY_H
