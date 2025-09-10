@@ -146,6 +146,8 @@ typedef enum {
 	EVENT_SPELL_BLOCKED,
 	EVENT_READ_ITEM,
 	EVENT_PET_COMMAND,
+	EVENT_CHARM_START,
+	EVENT_CHARM_END,
 
 	// Add new events before these or Lua crashes
 	EVENT_SPELL_EFFECT_BOT,
