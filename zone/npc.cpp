@@ -3387,62 +3387,55 @@ void NPC::DepopSwarmPets()
 	}
 }
 
-void NPC::ModifyStatsOnCharm(bool is_charm_removed)
+void NPC::ModifyStatsOnCharm(bool remove_charm, Mob* charmer)
 {
-	if (is_charm_removed) {
-		if (charm_ac) {
-			AC = default_ac;
-		}
-		if (charm_attack_delay) {
-			attack_delay = default_attack_delay;
-		}
-		if (charm_accuracy_rating) {
-			accuracy_rating = default_accuracy_rating;
-		}
-		if (charm_avoidance_rating) {
-			avoidance_rating = default_avoidance_rating;
-		}
-		if (charm_atk) {
-			ATK = default_atk;
-		}
-		if (charm_min_dmg || charm_max_dmg) {
-			base_damage = round((default_max_dmg - default_min_dmg) / 1.9);
-			min_damage  = default_min_dmg - round(base_damage / 10.0);
-		}
-		if (RuleB(Spells, CharmDisablesSpecialAbilities)) {
-			ProcessSpecialAbilities(default_special_abilities);
-		}
-
-		SetAttackTimer();
-		CalcAC();
-
-		return;
+	if (!remove_charm && parse->HasQuestSub(GetNPCTypeID(), EVENT_CHARM_START)) {
+		parse->EventNPC(EVENT_CHARM_START, this, charmer, "", 0);
+	} else if (remove_charm && parse->HasQuestSub(GetNPCTypeID(), EVENT_CHARM_END)) {
+		parse->EventNPC(EVENT_CHARM_END, this, charmer, "", 0);
 	}
 
-	if (charm_ac) {
-		AC = charm_ac;
+	const int new_ac               = remove_charm ? default_ac : charm_ac;
+	const int new_attack_delay     = remove_charm ? default_attack_delay : charm_attack_delay;
+	const int new_accuracy_rating  = remove_charm ? default_accuracy_rating : charm_accuracy_rating;
+	const int new_avoidance_rating = remove_charm ? default_avoidance_rating : charm_avoidance_rating;
+	const int new_atk              = remove_charm ? default_atk : charm_atk;
+	const int new_min_dmg          = remove_charm ? default_min_dmg : charm_min_dmg;
+	const int new_max_dmg          = remove_charm ? default_max_dmg : charm_max_dmg;
+
+	if (new_ac) {
+		AC = new_ac;
 	}
-	if (charm_attack_delay) {
-		attack_delay = charm_attack_delay;
+
+	if (new_attack_delay) {
+		attack_delay = new_attack_delay;
 	}
-	if (charm_accuracy_rating) {
-		accuracy_rating = charm_accuracy_rating;
+
+	if (new_accuracy_rating) {
+		accuracy_rating = new_accuracy_rating;
 	}
-	if (charm_avoidance_rating) {
-		avoidance_rating = charm_avoidance_rating;
+
+	if (new_avoidance_rating) {
+		avoidance_rating = new_avoidance_rating;
 	}
-	if (charm_atk) {
-		ATK = charm_atk;
+
+	if (new_atk) {
+		ATK = new_atk;
 	}
-	if (charm_min_dmg || charm_max_dmg) {
-		base_damage = round((charm_max_dmg - charm_min_dmg) / 1.9);
-		min_damage  = charm_min_dmg - round(base_damage / 10.0);
+
+	if (new_min_dmg || new_max_dmg) {
+		base_damage = std::round((new_max_dmg - new_min_dmg) / 1.9);
+		min_damage  = new_min_dmg - std::round(base_damage / 10.0);
 	}
+
 	if (RuleB(Spells, CharmDisablesSpecialAbilities)) {
-		ClearSpecialAbilities();
+		if (remove_charm) {
+			ProcessSpecialAbilities(default_special_abilities);
+		} else {
+			ClearSpecialAbilities();
+		}
 	}
 
-	// the rest of the stats aren't cached, so lets just do these two instead of full CalcBonuses()
 	SetAttackTimer();
 	CalcAC();
 }
