@@ -122,56 +122,37 @@ bool SharedDatabase::SetGMFlymode(uint32 account_id, uint8 flymode)
 	return a.id > 0;
 }
 
-void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
+void SharedDatabase::SetMailKey(uint32 character_id, int ip_address, int mail_key)
 {
-	char mail_key[17];
+	std::string full_mail_key;
 
-	if (RuleB(Chat, EnableMailKeyIPVerification) == true) {
-		sprintf(mail_key, "%08X%08X", IPAddress, MailKey);
+	if (RuleB(Chat, EnableMailKeyIPVerification)) {
+		full_mail_key = fmt::format("{:08X}{:08X}", ip_address, mail_key);
+	} else {
+		full_mail_key = fmt::format("{:08X}", mail_key);
 	}
-	else {
-		sprintf(mail_key, "%08X", MailKey);
-	}
 
-	const std::string query = StringFormat(
-		"UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
-		mail_key, CharID
-	);
+	auto e = CharacterDataRepository::FindOne(*this, character_id);
 
-	const auto        results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, mail_key, results.ErrorMessage().c_str());
+	e.mailkey = full_mail_key;
+
+	if (!CharacterDataRepository::UpdateOne(*this, e)) {
+		LogError("Failed to set mailkey to [{}] for character_id [{}]", full_mail_key, character_id);
 	}
 }
 
-SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
+SharedDatabase::MailKeys SharedDatabase::GetMailKey(uint32 character_id)
 {
-	const std::string query   = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", character_id);
-	auto              results = QueryDatabase(query);
-	if (!results.Success()) {
-		return MailKeys{};
+	auto e = CharacterDataRepository::FindOne(*this, character_id);
+
+	if (!e.id) {
+		return MailKeys{ };
 	}
 
-	if (!results.RowCount()) {
-		Log(Logs::General,
-			Logs::ClientLogin,
-			"Error: Mailkey for character id [%i] does not exist or could not be found",
-			character_id
-		);
-		return MailKeys{};
-	}
-
-	auto &row = results.begin();
-	if (row != results.end()) {
-		std::string mail_key = row[0];
-
-		return MailKeys{
-			.mail_key = mail_key.substr(8),
-			.mail_key_full = mail_key
-		};
-	}
-
-	return MailKeys{};
+	return MailKeys{
+		.mail_key = e.mailkey.substr(8),
+		.mail_key_full = e.mailkey
+	};
 }
 
 bool SharedDatabase::SaveCursor(
