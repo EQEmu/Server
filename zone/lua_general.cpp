@@ -6992,7 +6992,9 @@ luabind::scope lua_register_events() {
 			luabind::value("entity_variable_update", static_cast<int>(EVENT_ENTITY_VARIABLE_UPDATE)),
 			luabind::value("aa_loss", static_cast<int>(EVENT_AA_LOSS)),
 			luabind::value("read", static_cast<int>(EVENT_READ_ITEM)),
-			luabind::value("pet_command", static_cast<int>(EVENT_PET_COMMAND))
+			luabind::value("pet_command", static_cast<int>(EVENT_PET_COMMAND)),
+			luabind::value("charm_start", static_cast<int>(EVENT_CHARM_START)),
+			luabind::value("charm_end", static_cast<int>(EVENT_CHARM_END))
 		)];
 }
 
