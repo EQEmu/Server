@@ -82,7 +82,6 @@ public:
 	bool UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected);
 	bool UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned);
 	bool GetCommandSubSettings(std::vector<CommandSubsettingsRepository::CommandSubsettings> &command_subsettings);
-	uint32 GetTotalTimeEntitledOnAccount(uint32 AccountID);
 	bool SetGMInvul(uint32 account_id, bool gminvul);
 	bool SetGMFlymode(uint32 account_id, uint8 flymode);
 	void SetMailKey(int CharID, int IPAddress, int MailKey);
