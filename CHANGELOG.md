@@ -1,3 +1,67 @@
+## [23.10.0] 9/15/2025
+
+### Build
+
+* Fix Linking with GCC ([#4969](https://github.com/EQEmu/Server/pull/4969)) @solar984 2025-08-03
+
+### Code
+
+* Add #npcedit npc_tint_id Help Message ([#4982](https://github.com/EQEmu/Server/pull/4982)) @Kinglykrab 2025-08-17
+* Cleanup #show ip_lookup Message ([#5005](https://github.com/EQEmu/Server/pull/5005)) @Kinglykrab 2025-08-30
+* Fix #set race 0 Message ([#5004](https://github.com/EQEmu/Server/pull/5004)) @Kinglykrab 2025-08-30
+* Fix Issues with Strings::Commify and Mob::SendStatsWindow ([#4984](https://github.com/EQEmu/Server/pull/4984)) @Kinglykrab 2025-08-17
+* Remove Attributions ([#4988](https://github.com/EQEmu/Server/pull/4988)) @KimLS 2025-08-16
+* Remove Unused errorname Variable ([#5001](https://github.com/EQEmu/Server/pull/5001)) @Kinglykrab 2025-08-29
+
+### Commands
+
+* Add #find account Subcommand ([#4981](https://github.com/EQEmu/Server/pull/4981)) @Kinglykrab 2025-08-17
+* Add #show keyring Subcommand ([#4973](https://github.com/EQEmu/Server/pull/4973)) @Kinglykrab 2025-08-03
+* Add #task complete Saylink to #task show ([#4985](https://github.com/EQEmu/Server/pull/4985)) @Kinglykrab 2025-08-17
+
+### Constants
+
+* Change Race Changes to Race Namespace ([#5000](https://github.com/EQEmu/Server/pull/5000)) @Kinglykrab 2025-08-30
+* Convert SE Defines to SpellEffect Namespace ([#4999](https://github.com/EQEmu/Server/pull/4999)) @Kinglykrab 2025-08-30
+
+### Database
+
+* Add `heal_amount` to `character_stats_record` ([#4986](https://github.com/EQEmu/Server/pull/4986)) @Kinglykrab 2025-08-17
+
+### Fixes
+
+* Fix #show recipe uint16 Cap ([#4978](https://github.com/EQEmu/Server/pull/4978)) @Kinglykrab 2025-08-11
+* Fix Race 474 for Titanium ([#4979](https://github.com/EQEmu/Server/pull/4979)) @regneq 2025-08-11
+* Fix Recipe Inspect Bug ([#4994](https://github.com/EQEmu/Server/pull/4994)) @Kinglykrab 2025-08-30
+* Fix Several Evolving Item Bugs ([#4992](https://github.com/EQEmu/Server/pull/4992)) @neckkola 2025-09-08
+* Fix Task Reloading ([#5002](https://github.com/EQEmu/Server/pull/5002)) @Kinglykrab 2025-08-29
+
+### Loginserver
+
+* Fix Legacy World When Using Local DB ([#4970](https://github.com/EQEmu/Server/pull/4970)) @solar984 2025-08-03
+
+### Pets
+
+* Add Pet Constants and Methods ([#4987](https://github.com/EQEmu/Server/pull/4987)) @Kinglykrab 2025-08-17
+
+### Quest API
+
+* Add EVENT_CHARM_START and EVENT_CHARM_END ([#5013](https://github.com/EQEmu/Server/pull/5013)) @Kinglykrab 2025-09-15
+* Add GetKeyRing() to Perl/Lua ([#4980](https://github.com/EQEmu/Server/pull/4980)) @Kinglykrab 2025-08-17
+* Add GetNPCTintIndex() to Perl/Lua ([#4983](https://github.com/EQEmu/Server/pull/4983)) @Kinglykrab 2025-08-17
+* Add GetTimers() and GetPausedTimers() to Perl/Lua ([#4965](https://github.com/EQEmu/Server/pull/4965)) @Kinglykrab 2025-08-03
+* Add Identifiers to Get/Modify NPC Stat Methods ([#5012](https://github.com/EQEmu/Server/pull/5012)) @Kinglykrab 2025-09-15
+
+### Repositories
+
+* Convert Character Inspect Messages to Repositories ([#4997](https://github.com/EQEmu/Server/pull/4997)) @Kinglykrab 2025-08-30
+* Convert Damage Shield Types to Repositories ([#4995](https://github.com/EQEmu/Server/pull/4995)) @Kinglykrab 2025-08-30
+* Convert Item Loading to Repositories ([#4998](https://github.com/EQEmu/Server/pull/4998)) @Kinglykrab 2025-08-30
+* Convert Mail Key to Repositories ([#5007](https://github.com/EQEmu/Server/pull/5007)) @Kinglykrab 2025-09-15
+* Convert Shared Bank Platinum to Repositories ([#5006](https://github.com/EQEmu/Server/pull/5006)) @Kinglykrab 2025-09-02
+* Convert Spell Loading to Repositories ([#4996](https://github.com/EQEmu/Server/pull/4996)) @Kinglykrab 2025-08-30
+* Convert Total Time Played to Repositories ([#5008](https://github.com/EQEmu/Server/pull/5008)) @Kinglykrab 2025-09-15
+
 ## [23.9.1] 8/2/2025
 
 ### Hotfix
