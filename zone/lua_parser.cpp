@@ -189,7 +189,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_aa_loss",
 	"event_spell_blocked",
 	"event_read_item",
-	"event_pet_command"
+	"event_pet_command",
+	"event_charm_start",
+	"event_charm_end"
 };
 
 extern Zone *zone;
@@ -266,6 +268,8 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_npc_entity_variable;
 	NPCArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_npc_spell_blocked;
 	NPCArgumentDispatch[EVENT_PET_COMMAND]            = handle_npc_pet_command;
+	NPCArgumentDispatch[EVENT_CHARM_START]            = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_CHARM_END]              = handle_npc_single_mob;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;

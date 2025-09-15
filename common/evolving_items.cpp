@@ -74,6 +74,10 @@ void EvolvingItemsManager::DoLootChecks(const uint32 char_id, const uint16 slot_
 		e.item_id       = inst.GetID();
 		e.equipped      = inst.GetEvolveEquipped();
 		e.final_item_id = EvolvingItemsManager::Instance()->GetFinalItemID(inst);
+		if (inst.GetEvolveCurrentAmount() > 0) {
+			e.current_amount = inst.GetEvolveCurrentAmount();
+			inst.CalculateEvolveProgression();
+		}
 
 		auto r = CharacterEvolvingItemsRepository::InsertOne(*m_db, e);
 		e.id   = r.id;

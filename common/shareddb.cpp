@@ -429,27 +429,20 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id)
 	);
 }
 
-
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
-	const auto query   = fmt::format("SELECT sharedplat FROM account WHERE id = {}", account_id);
-	auto       results = QueryDatabase(query);
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
-
-	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	const auto& e = AccountRepository::FindOne(*this, account_id);
+	
+	return e.sharedplat;
 }
 
-bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
-	const std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
-	const auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
+bool SharedDatabase::AddSharedPlatinum(uint32 account_id, int amount)
+{
+	auto e = AccountRepository::FindOne(*this, account_id);
 
-	return true;
+	e.sharedplat += amount;
+
+	return AccountRepository::UpdateOne(*this, e);
 }
 
 bool SharedDatabase::SetStartingItems(
