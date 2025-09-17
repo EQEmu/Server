@@ -1,3 +1,9 @@
+## [23.10.2] 9/16/2025
+
+### Hotfix
+
+* Revert #4996 as it was causing critical issues with spells that needs to be further investigated. @Akkadius 2025-09-17
+
 ## [23.10.1] 9/16/2025
 
 ### Hotfix
