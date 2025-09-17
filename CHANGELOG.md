@@ -1,3 +1,8 @@
+## [23.10.1] 9/16/2025
+
+### Hotfix
+* Fixed Mail Key Bug ([#5015](https://github.com/EQEmu/Server/pull/5015)) @Kinglykrab 2025-09-16
+
 ## [23.10.0] 9/15/2025
 
 ### Build

@@ -142,10 +142,7 @@ void SharedDatabase::SetMailKey(uint32 character_id, uint32 ip_address, uint32 m
 
 	if (!CharacterDataRepository::UpdateOne(*this, e)) {
 		LogError("Failed to set mailkey to [{}] for character_id [{}]", full_mail_key, character_id);
-		return;
 	}
-
-	LogError("Set mailkey to [{}] for character_id [{}]", full_mail_key, character_id);
 }
 
 SharedDatabase::MailKeys SharedDatabase::GetMailKey(uint32 character_id)
