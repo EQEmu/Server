@@ -189,7 +189,8 @@ Client::Client() : Mob(
 				   tmSitting(0),
 				   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 				   lazy_load_bank_check_timer(1000),
-				   bandolier_throttle_timer(0)
+				   bandolier_throttle_timer(0),
+				   underwater_timer(1000)
 {
 	eqs = nullptr;
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
@@ -497,7 +498,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	tmSitting(0),
 	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
 	lazy_load_bank_check_timer(1000),
-	bandolier_throttle_timer(0)
+	bandolier_throttle_timer(0),
+	underwater_timer(1000)
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
@@ -13281,4 +13283,22 @@ bool Client::UncompleteTask(int task_id)
 	);
 
 	return task_state->UncompleteTask(task_id);
+}
+
+bool Client::IsUnderWater()
+{
+	if (!zone->watermap) {
+		return false;
+	}
+
+	if (zone->GetZoneID() == Zones::KEDGE) {
+		return true;
+	}
+
+	auto underwater = glm::vec3(GetX(), GetY(), GetZ() + GetZOffset());
+	if (zone->IsWaterZone(underwater.z) || zone->watermap->InLiquid(underwater)) {
+		return true;
+	}
+
+	return false;
 }

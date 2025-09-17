@@ -1707,8 +1707,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			m_pp.abilitySlotRefresh = 0;
 	}
 
-	/* Reset to max so they dont drown on zone in if its underwater */
-	m_pp.air_remaining = 60;
 	/* Check for PVP Zone status*/
 	if (zone->IsPVPZone())
 		m_pp.pvp = 1;
