@@ -84,7 +84,7 @@ public:
 	bool GetCommandSubSettings(std::vector<CommandSubsettingsRepository::CommandSubsettings> &command_subsettings);
 	bool SetGMInvul(uint32 account_id, bool gminvul);
 	bool SetGMFlymode(uint32 account_id, uint8 flymode);
-	void SetMailKey(uint32 character_id, int ip_address, int mail_key);
+	void SetMailKey(uint32 character_id, uint32 ip_address, uint32 mail_key);
 	struct MailKeys {
 		std::string mail_key;
 		std::string mail_key_full;

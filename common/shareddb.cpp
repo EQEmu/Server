@@ -122,7 +122,7 @@ bool SharedDatabase::SetGMFlymode(uint32 account_id, uint8 flymode)
 	return a.id > 0;
 }
 
-void SharedDatabase::SetMailKey(uint32 character_id, int ip_address, int mail_key)
+void SharedDatabase::SetMailKey(uint32 character_id, uint32 ip_address, uint32 mail_key)
 {
 	std::string full_mail_key;
 
@@ -133,6 +133,10 @@ void SharedDatabase::SetMailKey(uint32 character_id, int ip_address, int mail_ke
 	}
 
 	auto e = CharacterDataRepository::FindOne(*this, character_id);
+	if (!e.id) {
+		LogError("Failed to find character_id [{}] when setting mailkey", character_id);
+		return;
+	}
 
 	e.mailkey = full_mail_key;
 
@@ -422,7 +426,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id)
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
 	const auto& e = AccountRepository::FindOne(*this, account_id);
-	
+
 	return e.sharedplat;
 }
 
