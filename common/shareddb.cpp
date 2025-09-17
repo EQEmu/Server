@@ -56,19 +56,6 @@
 #include "repositories/damageshieldtypes_repository.h"
 #include "repositories/items_repository.h"
 
-namespace ItemField
-{
-	enum {
-		source = 0,
-#define F(x) x,
-#include "item_fieldlist.h"
-#undef F
-		updated,
-		minstatus,
-		comment,
-	};
-}
-
 SharedDatabase::SharedDatabase()
 : Database()
 {
