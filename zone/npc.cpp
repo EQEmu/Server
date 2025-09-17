@@ -1838,7 +1838,7 @@ void NPC::Disarm(Client* client, int chance) {
 					CalcBonuses();
 					if (inst) {
 						// create a ground item
-						Object* object = new Object(inst, GetX(), GetY(), GetZ(), 0.0f, 300000);
+						Object* object = new Object(inst, GetX(), GetY(), GetZ(), 0.0f, RuleI(Groundspawns, DisarmDecayTime));
 						entity_list.AddObject(object, true);
 						object->StartDecay();
 						safe_delete(inst);

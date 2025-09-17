@@ -221,6 +221,7 @@ public:
 	std::vector<std::string> GetEntityVariables();
 	void SetEntityVariable(std::string variable_name, std::string variable_value);
 	bool EntityVariableExists(std::string variable_name);
+	bool RespawnTimerEnabled() { return respawn_timer.Enabled(); };
 
 protected:
 	void	ResetState();	// Set state back to original
@@ -245,6 +246,7 @@ protected:
 	Client *user;
 	Client *last_user;
 
+	Timer random_timer;
 	Timer respawn_timer;
 	Timer decay_timer;
 	void FixZ();
