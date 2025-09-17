@@ -7173,26 +7173,6 @@ ADD COLUMN `heal_amount` int(11) NULL DEFAULT 0 AFTER `spell_damage`;
 	},
 	ManifestEntry{
 		.version = 9328,
-		.description = "2025_08_27_spells_new_column_names.sql",
-		.check = "SHOW COLUMNS FROM `spells_new` LIKE 'feedbackable'",
-		.condition = "empty",
-		.match = "",
-		.sql = R"(
-ALTER TABLE `spells_new`
-CHANGE COLUMN `field160` `feedbackable` int(11) NOT NULL DEFAULT 0 AFTER `npc_no_los`,
-CHANGE COLUMN `field198` `no_detrimental_spell_aggro` int(11) NOT NULL DEFAULT 0 AFTER `not_extendable`,
-CHANGE COLUMN `field209` `no_resist` int(11) NULL DEFAULT 0 AFTER `rank`,
-CHANGE COLUMN `field217` `override_crit_chance` int(11) NULL DEFAULT 0 AFTER `field216`,
-CHANGE COLUMN `field220` `no_heal_damage_item_mod` int(11) NULL DEFAULT 0 AFTER `maxtargets`,
-CHANGE COLUMN `field221` `caster_requirement_id` int(11) NULL DEFAULT 0 AFTER `no_heal_damage_item_mod`,
-CHANGE COLUMN `field222` `spell_class` int(11) NULL DEFAULT 0 AFTER `caster_requirement_id`,
-CHANGE COLUMN `field223` `spell_subclass` int(11) NULL DEFAULT 0 AFTER `spell_class`,
-CHANGE COLUMN `field232` `no_remove` int(11) NOT NULL DEFAULT 0 AFTER `min_range`;
-)",
-		.content_schema_update = true
-	},
-	ManifestEntry{
-		.version = 9329,
 		.description = "2025_08_22_character_parcel_updates.sql",
 		.check = "SHOW COLUMNS FROM `character_parcels` LIKE 'evolve_amount'",
 		.condition = "empty",
