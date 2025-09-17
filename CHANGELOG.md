@@ -1,3 +1,9 @@
+## [23.10.3] 9/16/2025
+
+### Hotfix
+
+* Hotfix crashes occurring in #4987. @Akkadius 2025-09-17
+
 ## [23.10.2] 9/16/2025
 
 ### Hotfix
