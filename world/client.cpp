@@ -985,7 +985,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	safe_delete(outapp);
 
 	// set mailkey - used for duration of character session
-	int mail_key = EQ::Random::Instance()->Int(1, INT_MAX);
+	uint32 mail_key = EQ::Random::Instance()->Int(1, INT_MAX);
 
 	database.SetMailKey(charid, GetIP(), mail_key);
 	if (UCSServerAvailable_) {
