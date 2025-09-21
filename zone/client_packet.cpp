@@ -14404,6 +14404,8 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 
 				inst2->SetPrice(price);
 				inst2->SetMerchantSlot(freeslot);
+				inst2->SetEvolveCurrentAmount(0);
+				inst2->CalculateEvolveProgression();
 
 				uint32 merchant_quantity = zone->GetTempMerchantQuantity(vendor->GetNPCTypeID(), freeslot);
 

@@ -6499,7 +6499,7 @@ struct PickZone_Struct {
 
 struct EvolveItemToggle {
 	uint32 action;
-	uint32 unknown_004;
+	uint32 item_id;
 	uint64 unique_id;
 	uint32 percentage;
 	uint32 activated;

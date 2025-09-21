@@ -286,9 +286,9 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket *app)
 {
 	const auto in        = reinterpret_cast<EvolveItemToggle *>(app->pBuffer);
 
-	const uint32 item_id = static_cast<uint32>(in->unique_id & 0xFFFFFFFF);
+	const uint32 item_id = in->item_id;
 	if (item_id == 0) {
-		LogEvolveItem("Error - Item ID of final evolve item is blank.");
+		LogEvolveItem("Error - Item ID of evolve item display final request is blank.");
 		return;
 	}
 
@@ -297,19 +297,23 @@ void Client::DoEvolveItemDisplayFinalResult(const EQApplicationPacket *app)
 		return;
 	}
 
+	auto final_id = EvolvingItemsManager::Instance()->GetFinalItemID(*inst);
+	std::unique_ptr<EQ::ItemInstance> const final_inst(database.CreateItem(final_id));
+	if (!final_inst) {
+		return;
+	}
+
 	LogEvolveItemDetail(
 		"Character ID <green>[{}] requested to view final evolve item id <yellow>[{}] for evolve item id <yellow>[{}]",
 		CharacterID(),
-		item_id,
-		EvolvingItemsManager::Instance()->GetFirstItemInLoreGroupByItemID(item_id)
+		final_id,
+		item_id
 	);
-
-	inst->SetEvolveProgression(100);
 
 	LogEvolveItemDetail(
 		"Sending final result for item id <yellow>[{}] to Character ID <green>[{}]", item_id, CharacterID()
 	);
-	SendItemPacket(0, inst.get(), ItemPacketViewLink);
+	SendItemPacket(0, final_inst.get(), ItemPacketViewLink);
 }
 
 bool Client::DoEvolveCheckProgression(EQ::ItemInstance &inst)

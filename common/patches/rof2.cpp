@@ -6499,10 +6499,9 @@ namespace RoF2
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
 		if (item->EvolvingItem > 0) {
-			RoF2::structs::EvolvingItem_Struct evotop;
+			RoF2::structs::EvolvingItem_Struct evotop{};
 			inst->CalculateEvolveProgression();
 
-			evotop.final_item_id    = inst->GetEvolveFinalItemID();
 			evotop.evolve_level     = item->EvolvingLevel;
 			evotop.progress         = inst->GetEvolveProgression();
 			evotop.activated        = inst->GetEvolveActivated();

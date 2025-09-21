@@ -134,20 +134,21 @@ void Client::SendParcel(Parcel_Struct &parcel_in)
 
 	CharacterParcelsRepository::CharacterParcels p{};
 
-	p.from_name  = r.from_name;
-	p.id         = r.id;
-	p.note       = r.note;
-	p.quantity   = r.quantity;
-	p.sent_date  = r.sent_date;
-	p.item_id    = r.item_id;
-	p.aug_slot_1 = r.aug_slot_1;
-	p.aug_slot_2 = r.aug_slot_2;
-	p.aug_slot_3 = r.aug_slot_3;
-	p.aug_slot_4 = r.aug_slot_4;
-	p.aug_slot_5 = r.aug_slot_5;
-	p.aug_slot_6 = r.aug_slot_6;
-	p.slot_id    = r.slot_id;
-	p.char_id    = r.char_id;
+	p.from_name     = r.from_name;
+	p.id            = r.id;
+	p.note          = r.note;
+	p.quantity      = r.quantity;
+	p.sent_date     = r.sent_date;
+	p.item_id       = r.item_id;
+	p.aug_slot_1    = r.aug_slot_1;
+	p.aug_slot_2    = r.aug_slot_2;
+	p.aug_slot_3    = r.aug_slot_3;
+	p.aug_slot_4    = r.aug_slot_4;
+	p.aug_slot_5    = r.aug_slot_5;
+	p.aug_slot_6    = r.aug_slot_6;
+	p.slot_id       = r.slot_id;
+	p.char_id       = r.char_id;
+	p.evolve_amount = r.evolve_amount;
 
 	auto item = database.GetItem(p.item_id);
 	if (item) {
