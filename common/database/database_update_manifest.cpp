@@ -7272,7 +7272,7 @@ ALTER TABLE `sharedbank`
  ENGINE=InnoDB;
  )",
 		.content_schema_update = false
-		},
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
