@@ -69,3 +69,8 @@ compile_flags.txt
 # CMake Files
 cmake-build-relwithdebinfo/*
 skill-caps.diff
+submodules/cereal
+submodules/fmt
+submodules/libuv
+submodules/recastnavigation
+submodules/websocketpp
