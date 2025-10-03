@@ -843,6 +843,11 @@ ENDIF (UNIX)
 
 IF (EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/std-pch.h)
+    # Avoid PCH/__OPTIMIZE__ mismatch when compiling certain patch sources with -O0
+    # These files are compiled with -O0 on UNIX (see COMPILE_FLAGS above), which
+    # disables the __OPTIMIZE__ predefined macro. Disabling PCH for them prevents
+    # Clang from erroring due to macro state differences between the PCH and TU.
+    SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp" "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 ENDIF ()
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
