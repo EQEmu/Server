@@ -106,7 +106,7 @@ endif
 maps:
 	@echo "Downloading maps..."
 	@mkdir -p base/maps
-	@cd base/maps && wget -nc https://github.com/Akkadius/eqemu-maps/archive/refs/heads/master.zip
+	@cd base/maps && wget -nc https://gitlab.com/TheGrandLibrary/akkadius/eqemu-maps/-/archive/master/eqemu-maps-master.zip
 	@cd base/maps && unzip -o master.zip
 	@cd base/maps && mv eqemu-maps-master/* .
 	@cd base/maps && rm -rf eqemu-maps-master
@@ -117,7 +117,7 @@ ifeq ($(findstring .devcontainer,$(CURDIR)),.devcontainer)
 	@make -C ../ -f .devcontainer/Makefile quests --no-print-directory
 	exit
 endif
-	@cd build/bin && git clone https://github.com/ProjectEQ/projecteqquests.git quests
+	@cd build/bin && git clone https://gitlab.com/TheGrandLibrary/projecteq/projecteqquests.git quests
 
 # Runs tests
 .PHONY: test
@@ -201,18 +201,24 @@ mariadb:
 .PHONY: inject-mariadb
 inject-mariadb:
 	-sudo service mariadb start
-	-mkdir -p base/db/
+	-mkdir -p .devcontainer/base/db/
 	-sudo mariadb -e 'DROP DATABASE IF EXISTS peq;'
 	-sudo mariadb -e 'CREATE DATABASE peq;'
-	-sudo mariadb -e "CREATE USER 'peq'@'127.0.0.1' IDENTIFIED BY 'peqpass';"
+	-sudo mariadb -e "CREATE USER IF NOT EXISTS 'peq'@'127.0.0.1' IDENTIFIED BY 'peqpass';"
 	-sudo mariadb -e "GRANT ALL PRIVILEGES ON *.* TO 'peq'@'127.0.0.1';"
-ifeq (,$(wildcard base/db/db.sql.zip))
-	@echo "base/db.sql.zip not found. Downloading latest from https://db.projecteq.net/"
-	wget -nc https://db.projecteq.net/latest -O base/db/db.sql.zip
-	-cd base/db && unzip db.sql.zip
+ifeq (,$(wildcard .devcontainer/base/db/db.sql.zip))
+	@echo ".devcontainer/base/db.sql.zip not found. Downloading latest database from https://db.eqemu.dev/latest ..."
+	wget -nc https://db.eqemu.dev/latest -O .devcontainer/base/db/db.sql.zip
+	-cd .devcontainer/base/db && unzip db.sql.zip
 endif
 	@echo "Sourcing db may take a while, please wait..."
-	@cd base/db/peq-dump && sudo mariadb --database peq -e "source create_all_tables.sql"
+	@cd .devcontainer/base/db/peq-dump && sudo mariadb --database peq -e "source create_tables_content.sql"
+	@cd .devcontainer/base/db/peq-dump && sudo mariadb --database peq -e "source create_tables_login.sql"
+	@cd .devcontainer/base/db/peq-dump && sudo mariadb --database peq -e "source create_tables_player.sql"
+	@# deprecated cd .devcontainer/base/db/peq-dump && sudo mariadb --database peq -e "source create_tables_queryserv.sql"
+	@cd .devcontainer/base/db/peq-dump && sudo mariadb --database peq -e "source create_tables_state.sql"
+	@cd .devcontainer/base/db/peq-dump && sudo mariadb --database peq -e "source create_tables_system.sql"
+
 	@echo "MariaDB is now injected."
 
 .PHONY: gm-%
