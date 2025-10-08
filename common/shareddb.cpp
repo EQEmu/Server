@@ -1757,22 +1757,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].environment_type=Strings::ToInt(row[102]);
 		sp[tempid].time_of_day=Strings::ToInt(row[103]);
 
-		sp[tempid].classes[1] = Strings::ToInt(row[104]);
-		sp[tempid].classes[2] = Strings::ToInt(row[105]);
-		sp[tempid].classes[3] = Strings::ToInt(row[106]);
-		sp[tempid].classes[4] = Strings::ToInt(row[107]);
-		sp[tempid].classes[5] = Strings::ToInt(row[108]);
-		sp[tempid].classes[6] = Strings::ToInt(row[109]);
-		sp[tempid].classes[7] = Strings::ToInt(row[110]);
-		sp[tempid].classes[8] = Strings::ToInt(row[111]);
-		sp[tempid].classes[9] = Strings::ToInt(row[112]);
-		sp[tempid].classes[10] = Strings::ToInt(row[113]);
-		sp[tempid].classes[11] = Strings::ToInt(row[114]);
-		sp[tempid].classes[12] = Strings::ToInt(row[115]);
-		sp[tempid].classes[13] = Strings::ToInt(row[116]);
-		sp[tempid].classes[14] = Strings::ToInt(row[117]);
-		sp[tempid].classes[15] = Strings::ToInt(row[118]);
-		sp[tempid].classes[16] = Strings::ToInt(row[119]);
+		for(y=0; y < Class::PLAYER_CLASS_COUNT;y++)
+			sp[tempid].classes[y]=Strings::ToInt(row[104+y]);
 
 		sp[tempid].casting_animation=Strings::ToInt(row[120]);
 		sp[tempid].spell_affect_index=Strings::ToInt(row[123]);
@@ -1852,7 +1838,6 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].min_range = Strings::ToFloat(row[231]);
 		sp[tempid].no_remove = Strings::ToBool(row[232]);
 		sp[tempid].damage_shield_type = 0;
-		sp[tempid].class17 = Strings::ToInt(row[237]);
 	}
 
 	LoadDamageShieldTypes(sp);
