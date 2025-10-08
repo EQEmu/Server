@@ -120,22 +120,6 @@ class EQEmuConfig
 		const std::string &GetUCSHost() const;
 		uint16 GetUCSPort() const;
 
-		std::vector<std::string> GetQuestDirectories() const
-		{
-			return m_quest_directories;
-		}
-
-		std::vector<std::string> GetPluginsDirectories() const
-		{
-			return m_plugin_directories;
-		}
-
-		std::vector<std::string> GetLuaModuleDirectories() const
-		{
-			return m_lua_module_directories;
-		}
-
-
 //	uint16 DynamicCount;
 
 //	map<string,uint16> StaticZones;
@@ -149,11 +133,6 @@ class EQEmuConfig
 		Json::Value _root;
 		static std::string ConfigFile;
 
-		std::vector<std::string> m_quest_directories = {};
-		std::vector<std::string> m_plugin_directories = {};
-		std::vector<std::string> m_lua_module_directories = {};
-
-	protected:
 		void parse_config();
 
 		EQEmuConfig()
@@ -191,7 +170,7 @@ class EQEmuConfig
 
 			std::string file = fmt::format(
 				"{}/{}",
-				(file_path.empty() ? PathManager::Instance()->GetServerPath() : file_path),
+				(file_path.empty() ? path.GetServerPath() : file_path),
 				EQEmuConfig::ConfigFile
 			);
 

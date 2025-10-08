@@ -117,7 +117,7 @@ ifeq ($(findstring .devcontainer,$(CURDIR)),.devcontainer)
 	@make -C ../ -f .devcontainer/Makefile quests --no-print-directory
 	exit
 endif
-	@cd build/bin && git clone https://gitlab.com/TheGrandLibrary/projecteq/projecteqquests.git quests
+	@cd build/bin && git clone https://github.com/ProjectEQ/projecteqquests.git quests
 
 # Runs tests
 .PHONY: test
@@ -207,7 +207,7 @@ inject-mariadb:
 	-sudo mariadb -e "CREATE USER IF NOT EXISTS 'peq'@'127.0.0.1' IDENTIFIED BY 'peqpass';"
 	-sudo mariadb -e "GRANT ALL PRIVILEGES ON *.* TO 'peq'@'127.0.0.1';"
 ifeq (,$(wildcard .devcontainer/base/db/db.sql.zip))
-	@echo ".devcontainer/base/db.sql.zip not found. Downloading latest database from https://db.eqemu.dev/latest ..."
+	@echo ".devcontainer/base/db.sql.zip not found. Downloading latest database from https://db.eqemu.dev/"
 	wget -nc https://db.eqemu.dev/latest -O .devcontainer/base/db/db.sql.zip
 	-cd .devcontainer/base/db && unzip db.sql.zip
 endif

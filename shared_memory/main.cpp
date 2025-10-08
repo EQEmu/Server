@@ -35,6 +35,13 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/evolving_items.h"
 
+EQEmuLogSys          LogSys;
+WorldContentService  content_service;
+ZoneStore            zone_store;
+PathManager          path;
+PlayerEventLogs      player_event_logs;
+EvolvingItemsManager evolving_items_manager;
+
 #ifdef _WINDOWS
 #include <direct.h>
 #else
@@ -77,7 +84,7 @@ int main(int argc, char **argv)
 	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	PathManager::Instance()->Init();
+	path.LoadPaths();
 
 	LogInfo("Shared Memory Loader Program");
 	if (!EQEmuConfig::LoadConfig()) {
@@ -120,7 +127,7 @@ int main(int argc, char **argv)
 	}
 
 	EQEmuLogSys::Instance()->SetDatabase(&database)
-		->SetLogPath(PathManager::Instance()->GetLogPath())
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

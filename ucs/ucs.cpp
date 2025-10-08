@@ -102,7 +102,7 @@ int main() {
 	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	PathManager::Instance()->Init();
+	path.LoadPaths();
 
 	// Check every minute for unused channels we can delete
 	//
@@ -136,7 +136,7 @@ int main() {
 
 	EQEmuLogSys::Instance()
 		->SetDatabase(&database)
-		->SetLogPath(PathManager::Instance()->GetLogPath())
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

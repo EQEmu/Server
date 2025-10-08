@@ -1127,7 +1127,7 @@ void LuaParser::ReloadQuests() {
 	std::string module_path = lua_tostring(L, -1);
 	lua_pop(L, 1);
 
-	for (const auto& dir : PathManager::Instance()->GetLuaModulePaths()) {
+	for (const auto& dir : path.GetLuaModulesPath()) {
 		module_path += fmt::format(";{}/?.lua", dir);
 		module_path += fmt::format(";{}/?/init.lua", dir);
 		module_path += fmt::format(";{}/share/lua/{}/?.lua", dir, lua_version);
@@ -1143,7 +1143,7 @@ void LuaParser::ReloadQuests() {
 	module_path = lua_tostring(L, -1);
 	lua_pop(L, 1);
 
-	for (const auto& dir : PathManager::Instance()->GetLuaModulePaths()) {
+	for (const auto& dir : path.GetLuaModulesPath()) {
 		module_path += fmt::format(";{}/?{}", dir, libext);
 		module_path += fmt::format(";{}/lib/lua/{}/?{}", dir, lua_version, libext);
 	}
@@ -1155,7 +1155,7 @@ void LuaParser::ReloadQuests() {
 	MapFunctions(L);
 
 	// load init
-	for (auto& dir : PathManager::Instance()->GetQuestPaths()) {
+	for (auto& dir : path.GetQuestsPath()) {
 		std::string filename = fmt::format("{}/{}/script_init.lua", dir, QUEST_GLOBAL_DIRECTORY);
 
 		FILE* f = fopen(filename.c_str(), "r");
@@ -1171,7 +1171,7 @@ void LuaParser::ReloadQuests() {
 
 	//zone init - always loads after global
 	if (zone) {
-		for (auto& dir : PathManager::Instance()->GetQuestPaths()) {
+		for (auto& dir : path.GetQuestsPath()) {
 			std::string zone_script = fmt::format(
 				"{}/{}/script_init_v{}.lua",
 				dir,
@@ -1204,7 +1204,7 @@ void LuaParser::ReloadQuests() {
 		}
 	}
 
-	FILE *load_order = fopen(fmt::format("{}/load_order.txt", PathManager::Instance()->GetLuaModsPath()).c_str(), "r");
+	FILE *load_order = fopen(fmt::format("{}/load_order.txt", path.GetLuaModsPath()).c_str(), "r");
 	if (load_order) {
 		char file_name[256] = { 0 };
 		while (fgets(file_name, 256, load_order) != nullptr) {
@@ -1216,7 +1216,7 @@ void LuaParser::ReloadQuests() {
 				}
 			}
 
-			LoadScript(fmt::format("{}/{}", PathManager::Instance()->GetLuaModsPath(), std::string(file_name)), file_name);
+			LoadScript(fmt::format("{}/{}", path.GetLuaModsPath(), std::string(file_name)), file_name);
 			mods_.emplace_back(L, this, file_name);
 		}
 

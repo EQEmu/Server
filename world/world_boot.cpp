@@ -83,7 +83,7 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 	// command handler
 	if (argc > 1) {
 		EQEmuLogSys::Instance()->SilenceConsoleLogging();
-		PathManager::Instance()->Init();
+		path.LoadPaths();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		RuleManager::Instance()->LoadRules(&database, "default", false);
@@ -227,7 +227,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 {
 	// logging system init
 	auto logging = EQEmuLogSys::Instance()->SetDatabase(&database)
-		->SetLogPath(PathManager::Instance()->GetLogPath())
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings();
 
 	EQEmuLogSys::Instance()->SetDiscordHandler(&WorldBoot::DiscordWebhookMessageHandler);

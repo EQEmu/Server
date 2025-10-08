@@ -198,7 +198,7 @@ void QuestManager::summonitem(uint32 itemid, int16 charges) {
 
 void QuestManager::write(const char *file, const char *str) {
 	FILE * pFile;
-	pFile = fopen (fmt::format("{}/{}", PathManager::Instance()->GetServerPath(), file).c_str(), "a");
+	pFile = fopen (fmt::format("{}/{}", path.GetServerPath(), file).c_str(), "a");
 	if(!pFile)
 		return;
 	fprintf(pFile, "%s\n", str);
@@ -1352,7 +1352,6 @@ void QuestManager::permaclass(int class_id) {
 
 	initiator->SetBaseClass(class_id);
 	initiator->Save(2);
-	initiator->Kick("Base class change by QuestManager");
 }
 
 void QuestManager::permarace(int race_id) {
@@ -1364,7 +1363,6 @@ void QuestManager::permarace(int race_id) {
 
 	initiator->SetBaseRace(race_id);
 	initiator->Save(2);
-	initiator->Kick("Base race change by QuestManager");
 }
 
 void QuestManager::permagender(int gender_id) {
@@ -1376,7 +1374,6 @@ void QuestManager::permagender(int gender_id) {
 
 	initiator->SetBaseGender(gender_id);
 	initiator->Save(2);
-	initiator->Kick("Base gender change by QuestManager");
 }
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {

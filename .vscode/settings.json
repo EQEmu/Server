@@ -114,7 +114,10 @@
 		"charconv": "cpp",
 		"format": "cpp",
 		"ranges": "cpp",
-		"span": "cpp"
+		"span": "cpp",
+		"shared_mutex": "cpp",
+		"stdfloat": "cpp",
+		"text_encoding": "cpp"
 	},
 	"cmake.statusbar.advanced": {
 		"kit": {

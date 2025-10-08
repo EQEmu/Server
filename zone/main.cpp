@@ -88,10 +88,12 @@ extern volatile bool is_zone_loaded;
 #include "../common/path_manager.h"
 #include "../common/database/database_update.h"
 #include "../common/skill_caps.h"
+#include "zone_event_scheduler.h"
 #include "zone_cli.h"
 
 EntityList  entity_list;
 WorldServer worldserver;
+ZoneStore   zone_store;
 uint32      numclients = 0;
 char        errorname[32];
 extern Zone *zone;
@@ -99,8 +101,17 @@ extern Zone *zone;
 npcDecayTimes_Struct  npcCorpseDecayTimes[100];
 TitleManager          title_manager;
 QueryServ             *QServ        = 0;
+TaskManager           *taskmanager  = 0;
 NpcScaleManager       *npc_scale_manager;
 QuestParserCollection *parse        = 0;
+EQEmuLogSys           LogSys;
+ZoneEventScheduler    event_scheduler;
+WorldContentService   content_service;
+PathManager		      path;
+PlayerEventLogs       player_event_logs;
+DatabaseUpdate        database_update;
+SkillCaps             skill_caps;
+EvolvingItemsManager  evolving_items_manager;
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -126,7 +137,7 @@ int main(int argc, char **argv)
 		EQEmuLogSys::Instance()->SilenceConsoleLogging();
 	}
 
-	PathManager::Instance()->Init();
+	path.LoadPaths();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
@@ -293,8 +304,8 @@ int main(int argc, char **argv)
 		ZoneCLI::CommandHandler(argc, argv);
 	}
 
-	EQEmuLogSys::Instance()->SetDatabase(&database)
-		->SetLogPath(PathManager::Instance()->GetLogPath())
+	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings(ZoneCLI::RanTestCommand(argc, argv))
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
@@ -732,7 +743,7 @@ bool CheckForCompatibleQuestPlugins()
 {
 	const std::vector<std::pair<std::string, bool *>> directories = {
 		{"lua_modules", nullptr},
-		{"plugins",     nullptr}
+		{"plugins", nullptr}
 	};
 
 	bool lua_found  = false;
@@ -740,7 +751,15 @@ bool CheckForCompatibleQuestPlugins()
 
 	try {
 		for (const auto &[directory, flag]: directories) {
-			std::string dir_path = PathManager::Instance()->GetServerPath() + "/" + directory;
+
+			auto dir_path = path.GetLuaModulesPath();
+			if (directory == "plugins") {
+				dir_path = path.GetPluginsPath();
+			}
+			if (dir_path == "") {
+				dir_path = path.GetServerPath() + "/" + directory;
+			}
+
 			if (!File::Exists(dir_path)) { continue; }
 
 			for (const auto &file: fs::directory_iterator(dir_path)) {

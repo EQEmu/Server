@@ -81,7 +81,7 @@ namespace RoF2
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
 
-			std::string opfile = fmt::format("{}/patch_{}.conf", PathManager::Instance()->GetPatchPath(), name);
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
 
 			//load up the opcode manager.
 			//TODO: figure out how to support shared memory with multiple patches...
@@ -123,7 +123,7 @@ namespace RoF2
 		//we need to go to every stream and replace it's manager.
 
 		if (opcodes != nullptr) {
-			std::string opfile = fmt::format("{}/patch_{}.conf", PathManager::Instance()->GetPatchPath(), name);
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
 				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
@@ -180,7 +180,7 @@ namespace RoF2
 		}
 
 		eq->class_entry_count = emu->class_entry_count;
-		for (uint32 i = 0; i < emu->class_entry_count; ++i) // 15
+		for (uint32 i = 0; i < emu->class_entry_count; ++i) // 16
 		{
 			OUT(membership_classes[i].purchase_id);
 			OUT(membership_classes[i].bitwise_entry);

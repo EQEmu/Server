@@ -177,21 +177,6 @@ void EQEmuConfig::parse_config()
 	SharedMemDir = _root["server"]["directories"].get("shared_memory", "shared/").asString();
 	LogDir       = _root["server"]["directories"].get("logs", "logs/").asString();
 
-	auto load_paths = [&](const std::string& key, std::vector<std::string>& target) {
-		const auto& paths = _root["server"]["directories"][key];
-		if (paths.isArray()) {
-			for (const auto& dir : paths) {
-				if (dir.isString()) {
-					target.push_back(dir.asString());
-				}
-			}
-		}
-	};
-
-	load_paths("quest_paths", m_quest_directories);
-	load_paths("plugin_paths", m_plugin_directories);
-	load_paths("lua_module_paths", m_lua_module_directories);
-
 	/**
 	 * Logs
 	 */
@@ -436,11 +421,11 @@ void EQEmuConfig::CheckUcsConfigConversion()
 		LogInfo("Migrating old [eqemu_config] UCS configuration to new configuration");
 
 		std::string config_file_path = std::filesystem::path{
-			PathManager::Instance()->GetServerPath() + "/eqemu_config.json"
+			path.GetServerPath() + "/eqemu_config.json"
 		}.string();
 
 		std::string config_file_bak_path = std::filesystem::path{
-			PathManager::Instance()->GetServerPath() + "/eqemu_config.ucs-migrate-json.bak"
+			path.GetServerPath() + "/eqemu_config.ucs-migrate-json.bak"
 		}.string();
 
 		// copy eqemu_config.json to eqemu_config.json.bak

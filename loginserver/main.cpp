@@ -48,7 +48,7 @@ void LoadDatabaseConnection()
 void LoadServerConfig()
 {
 	server.config = EQ::JsonConfigFile::Load(
-		fmt::format("{}/login.json", PathManager::Instance()->GetServerPath())
+		fmt::format("{}/login.json", path.GetServerPath())
 	);
 	LogInfo("Config System Init");
 
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 		EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	}
 
-	PathManager::Instance()->Init();
+	path.LoadPaths();
 
 	// command handler
 	if (argc > 1) {

@@ -8,6 +8,8 @@ extern bool        run_server;
 #include "../common/path_manager.h"
 #include "../common/file.h"
 
+PathManager path;
+
 void CheckTitaniumOpcodeFile(const std::string &path)
 {
 	if (File::Exists(path)) {
@@ -94,7 +96,7 @@ ClientManager::ClientManager()
 
 	std::string opcodes_path = fmt::format(
 		"{}/{}",
-		PathManager::Instance()->GetOpcodePath(),
+		path.GetOpcodePath(),
 		"login_opcodes.conf"
 	);
 
@@ -131,7 +133,7 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		PathManager::Instance()->GetOpcodePath(),
+		path.GetOpcodePath(),
 		"login_opcodes_sod.conf"
 	);
 
@@ -169,7 +171,7 @@ ClientManager::ClientManager()
 
 	opcodes_path = fmt::format(
 		"{}/{}",
-		PathManager::Instance()->GetOpcodePath(),
+		path.GetOpcodePath(),
 		"login_opcodes_larion.conf"
 	);
 

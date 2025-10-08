@@ -33,6 +33,9 @@
 #include <signal.h>
 #include <time.h>
 
+EQEmuLogSys LogSys;
+PathManager path;
+
 bool RunLoops = false;
 
 void CatchSignal(int sig_num);
@@ -42,7 +45,7 @@ int main(int argc, char *argv[]) {
 	EQEmuLogSys::Instance()->LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	PathManager::Instance()->Init();
+	path.LoadPaths();
 
 	std::string launcher_name;
 	if(argc == 2) {

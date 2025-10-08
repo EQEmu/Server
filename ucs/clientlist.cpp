@@ -42,6 +42,8 @@ extern Clientlist *g_Clientlist;
 extern uint32 ChatMessagesSent;
 extern uint32 MailMessagesSent;
 
+PathManager path;
+
 int LookupCommand(const char *ChatCommand) {
 
 	if (!ChatCommand) return -1;
@@ -482,7 +484,7 @@ Clientlist::Clientlist(int ChatPort) {
 	const ucsconfig *Config = ucsconfig::get();
 
 
-	std::string opcodes_file = fmt::format("{}/{}", PathManager::Instance()->GetServerPath(), Config->MailOpCodesFile);
+	std::string opcodes_file = fmt::format("{}/{}", path.GetServerPath(), Config->MailOpCodesFile);
 
 	LogInfo("Loading [{}]", opcodes_file);
 	if (!ChatOpMgr->LoadOpcodes(opcodes_file.c_str()))

@@ -8,7 +8,7 @@
 
 namespace fs = std::filesystem;
 
-void PathManager::Init()
+void PathManager::LoadPaths()
 {
 	m_server_path = File::FindEqemuConfigPath();
 
@@ -48,23 +48,10 @@ void PathManager::Init()
 		return dir;
 	};
 
-	auto load_many_paths_fallback = [&](const std::vector<std::string>& dirs, const std::string& fallback, std::vector<std::string>& target) {
-		target.clear();
-		if (!dirs.empty()) {
-			for (const auto& path : dirs) {
-				target.push_back(resolve_path(path));
-			}
-		} else {
-			target.push_back(resolve_path(fallback));
-		}
-	};
-
-	load_many_paths_fallback(c->GetQuestDirectories(), c->QuestDir, m_quests_paths);
-	load_many_paths_fallback(c->GetPluginsDirectories(), c->PluginDir, m_plugin_paths);
-	load_many_paths_fallback(c->GetLuaModuleDirectories(), c->LuaModuleDir, m_lua_module_paths);
-
-	// resolve all paths
 	m_maps_path          = resolve_path(c->MapDir, {"maps", "Maps"});
+	m_quests_path        = resolve_path(c->QuestDir);
+	m_plugins_path       = resolve_path(c->PluginDir);
+	m_lua_modules_path   = resolve_path(c->LuaModuleDir);
 	m_lua_mods_path      = resolve_path("mods");
 	m_patch_path         = resolve_path(c->PatchDir);
 	m_opcode_path        = resolve_path(c->OpcodeDir);
@@ -75,10 +62,13 @@ void PathManager::Init()
 	std::vector<std::pair<std::string, std::string>> paths = {
 		{"server", m_server_path},
 		{"logs", m_log_path},
-		{"maps", m_maps_path},
 		{"lua mods", m_lua_mods_path},
+		{"lua_modules", m_lua_modules_path},
+		{"maps", m_maps_path},
 		{"patches", m_patch_path},
 		{"opcode", m_opcode_path},
+		{"plugins", m_plugins_path},
+		{"quests", m_quests_path},
 		{"shared_memory", m_shared_memory_path}
 	};
 
@@ -93,17 +83,6 @@ void PathManager::Init()
 			LogInfo("{:>{}} > [{:<{}}]", name, name_width, in_path, path_width);
 		}
 	}
-
-	auto log_paths = [&](const std::string& label, const std::vector<std::string>& paths) {
-		if (!paths.empty()) {
-			LogInfo("{:>{}} > [{:<{}}]", label, name_width - 1, Strings::Join(paths, ";"), path_width);
-		}
-	};
-
-	log_paths("quests", m_quests_paths);
-	log_paths("plugins", m_plugin_paths);
-	log_paths("lua_modules", m_lua_module_paths);
-
 	LogInfo("{}", Strings::Repeat("-", break_length));
 }
 
@@ -117,24 +96,19 @@ const std::string &PathManager::GetMapsPath() const
 	return m_maps_path;
 }
 
+const std::string &PathManager::GetQuestsPath() const
+{
+	return m_quests_path;
+}
+
+const std::string &PathManager::GetPluginsPath() const
+{
+	return m_plugins_path;
+}
+
 const std::string &PathManager::GetSharedMemoryPath() const
 {
 	return m_shared_memory_path;
-}
-
-std::vector<std::string> PathManager::GetQuestPaths() const
-{
-	return m_quests_paths;
-}
-
-std::vector<std::string> PathManager::GetPluginPaths() const
-{
-	return m_plugin_paths;
-}
-
-std::vector<std::string> PathManager::GetLuaModulePaths() const
-{
-	return m_lua_module_paths;
 }
 
 const std::string &PathManager::GetLogPath() const
@@ -150,6 +124,11 @@ const std::string &PathManager::GetPatchPath() const
 const std::string &PathManager::GetOpcodePath() const
 {
 	return m_opcode_path;
+}
+
+const std::string &PathManager::GetLuaModulesPath() const
+{
+	return m_lua_modules_path;
 }
 
 const std::string &PathManager::GetLuaModsPath() const

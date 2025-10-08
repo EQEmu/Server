@@ -537,9 +537,9 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 {
 	EQEmuLogSys::CloseFileLogs();
 
-	if (!File::Exists(PathManager::Instance()->GetLogPath())) {
-		LogInfo("Logs directory not found, creating [{}]", PathManager::Instance()->GetLogPath());
-		File::Makedir(PathManager::Instance()->GetLogPath());
+	if (!File::Exists(path.GetLogPath())) {
+		LogInfo("Logs directory not found, creating [{}]", path.GetLogPath());
+		File::Makedir(path.GetLogPath());
 	}
 
 	/**
@@ -656,7 +656,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings(bool silent_load)
 		// If we go through this whole loop and nothing is set to any debug level, there
 		// is no point to create a file or keep anything open
 		if (log_settings[c.log_category_id].log_to_file > 0) {
-			m_file_logs_enabled = true;
+			EQEmuLogSys::Instance()->m_file_logs_enabled = true;
 		}
 
 		db_categories.emplace_back(c.log_category_id);
@@ -682,33 +682,14 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings(bool silent_load)
 		if (is_missing_in_database && !is_deprecated_category) {
 			LogInfo("Automatically adding new log category [{}] ({})", Logs::LogCategoryName[i], i);
 
-			auto e = LogsysCategoriesRepository::NewEntity();
-			e.log_category_id          = i;
-			e.log_category_description = Strings::Escape(Logs::LogCategoryName[i]);
-			e.log_to_console           = log_settings[i].log_to_console;
-			e.log_to_gmsay             = log_settings[i].log_to_gmsay;
-			e.log_to_file              = log_settings[i].log_to_file;
-			e.log_to_discord           = log_settings[i].log_to_discord;
-			db_categories_to_add.emplace_back(e);
-		}
-
-		// look to see if the category name is different in the database
-		auto it = std::find_if(
-			categories.begin(),
-			categories.end(),
-			[i](const auto &c) { return c.log_category_id == i; }
-		);
-		if (it != categories.end()) {
-			if (it->log_category_description != Logs::LogCategoryName[i]) {
-				LogInfo(
-					"Updating log category [{}] ({}) to new name [{}]",
-					it->log_category_description,
-					i,
-					Logs::LogCategoryName[i]
-				);
-				it->log_category_description = Logs::LogCategoryName[i];
-				LogsysCategoriesRepository::ReplaceOne(*m_database, *it);
-			}
+			auto new_category = LogsysCategoriesRepository::NewEntity();
+			new_category.log_category_id          = i;
+			new_category.log_category_description = Strings::Escape(Logs::LogCategoryName[i]);
+			new_category.log_to_console           = log_settings[i].log_to_console;
+			new_category.log_to_gmsay             = log_settings[i].log_to_gmsay;
+			new_category.log_to_file              = log_settings[i].log_to_file;
+			new_category.log_to_discord           = log_settings[i].log_to_discord;
+			db_categories_to_add.emplace_back(new_category);
 		}
 	}
 

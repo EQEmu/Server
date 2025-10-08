@@ -6,14 +6,9 @@
 		"dockerfile": "Dockerfile.debian.dev"
 	},
 	"appPort": [
-		"5998:5998/udp",
-		"7000:7000/udp",
-		"7001:7001/udp",
-		"7002:7002/udp",
-		"7003:7003/udp",
-		"7004:7004/udp",
-		"7005:7005/udp",
-		"9000:9000/udp",
+		"5998-5999:5998-5999/udp", // loginserver
+		"7000-7374:7000-7374/udp", //zone
+		"9000:9000/udp", // world
 		"9001:9001/udp"
 	],
 	"forwardPorts": [
