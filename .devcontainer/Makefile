@@ -117,7 +117,7 @@ ifeq ($(findstring .devcontainer,$(CURDIR)),.devcontainer)
 	@make -C ../ -f .devcontainer/Makefile quests --no-print-directory
 	exit
 endif
-	@cd build/bin && git clone https://gitlab.com/TheGrandLibrary/projecteq/projecteqquests.git quests
+	@cd build/bin && git clone https://github.com/ProjectEQ/projecteqquests.git quests
 
 # Runs tests
 .PHONY: test
