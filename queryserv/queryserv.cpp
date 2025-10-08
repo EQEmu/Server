@@ -20,23 +20,16 @@
 #include "../common/net/console_server.h"
 #include "../queryserv/zonelist.h"
 #include "../queryserv/zoneserver.h"
-#include "../common/discord/discord_manager.h"
 
 volatile bool RunLoops = true;
 
 QSDatabase            qs_database;
 Database              database;
-LFGuildManager        lfguildmanager;
 std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
 EQEmuLogSys           LogSys;
 PathManager           path;
-ZoneStore             zone_store;
-PlayerEventLogs       player_event_logs;
-ZSList                zs_list;
-uint32                numzones     = 0;
-DiscordManager        discord_manager;
 
 void CatchSignal(int sig_num)
 {
