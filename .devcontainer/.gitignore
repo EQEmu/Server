@@ -1,6 +1,5 @@
-!Makefile
-base/*.sql
-base/*.zip
-base/db/
-base/maps/
-!base/expansion/Makefile
+base/
+!base/*.json
+override/
+repo/
+cache/
