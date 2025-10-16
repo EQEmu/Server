@@ -21,14 +21,6 @@
 		"${workspaceFolder}/dependencies/zlibng"
 	],
 	"telemetry.enableTelemetry": false,
-	"cmake.buildDirectory": "${workspaceFolder}/build",
-	"cmake.configureArgs": [
-		"-DEQEMU_BUILD_LOGIN=ON",
-		"-DEQEMU_BUILD_TESTS=ON",
-		"-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
-		"-DEQEMU_ADD_PROFILER=ON",
-		"Ninja"
-	],
 	"cmake.skipConfigureIfCachePresent": true,
 	"cmake.configureOnOpen": false,
 	"files.associations": {
