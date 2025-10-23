@@ -107,22 +107,5 @@
 		"format": "cpp",
 		"ranges": "cpp",
 		"span": "cpp"
-	},
-	"cmake.statusbar.advanced": {
-		"kit": {
-			"visibility": "hidden",
-		},
-		"debug": {
-			"visibility": "hidden",
-		},
-		"buildTarget": {
-			"visibility": "hidden",
-		},
-		"launch": {
-			"visibility": "hidden",
-		},
-		"ctest": {
-			"visibility": "icon",
-		}
 	}
 }

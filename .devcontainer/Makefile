@@ -6,28 +6,6 @@
 # in game, stop loot spam #logs set gmsay 69 0
 NAME := eqemu-server
 
-is-vscode:
-	@if [ -z "$$REMOTE_CONTAINERS" ]; then \
-		echo "Not running in VS Code devcontainer"; \
-		exit 1; \
-	fi
-
-.PHONY: build
-build: is-vscode
-	@cd patch && make patch --no-print-directory
-	cd build$$BUILD_SUFFIX && cmake --build . --config Release --target all --
-
-.PHONY: cmake
-cmake: is-vscode
-	@echo "working directory: $$PWD"
-	mkdir -p build$$BUILD_SUFFIX
-	@cd build$$BUILD_SUFFIX && cmake -DEQEMU_BUILD_LOGIN=ON \
-			-DEQEMU_BUILD_TESTS=ON \
-			-DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G Ninja ..
-
-clean: is-vscode
-	rm -rf build
-
 .PHONY: prep
 prep: is-vscode
 	@echo "Preparing build/bin for usage..."
@@ -73,6 +51,15 @@ prep: is-vscode
 
 	@echo "Eqemu is prepared. Edit build/bin/eqemu_config.json to configure."
 
+is-vscode:
+	@if [ -z "$$REMOTE_CONTAINERS" ]; then \
+		echo "Not running in VS Code devcontainer"; \
+		exit 1; \
+	fi
+
+clean: is-vscode
+	rm -rf build
+
 .PHONY: maps
 maps: is-vscode
 	@echo "Downloading maps..."
@@ -104,7 +91,7 @@ shared: is-vscode check-mariadb
 # Runs zone binary
 .PHONY: zone
 zone: is-vscode check-mariadb
-	@-rm build/bin/logs/zone/zone*.log
+	@find build/bin/logs/zone/ -type f -name 'zone*.log' -exec rm -f {} +
 	cd build/bin && ./zone
 
 check-mariadb: is-vscode
@@ -115,19 +102,19 @@ check-mariadb: is-vscode
 # Runs world binary
 .PHONY: world
 world: is-vscode check-mariadb
-	@-rm build/bin/logs/world*.log
+	@find build/bin/logs/ -type f -name 'world*.log' -exec rm -f {} +
 	cd build/bin && ./world
 
 # Runs ucs binary
 .PHONY: ucs
 ucs: is-vscode check-mariadb
-	@-rm build/bin/logs/ucs*.log
+	@find build/bin/logs/ -type f -name 'ucs*.log' -exec rm -f {} +
 	cd build/bin && ./ucs
 
 # Runs queryserv binary
 .PHONY: queryserv
 queryserv: is-vscode check-mariadb
-	@-rm build/bin/logs/query_server*.log
+	@find build/bin/logs/ -type f -name 'query_server*.log' -exec rm -f {} +
 	cd build/bin && ./queryserv
 
 reset-content:
