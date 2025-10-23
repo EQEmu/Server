@@ -1019,8 +1019,16 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				break;
 		}
 
+		std::string ucs_addr = config->GetUCSHost();
+		if (cle && cle->IsLocalClient()) {
+			const char* local_addr = config->LocalAddress.c_str();
+			if (local_addr[0]) {
+				ucs_addr = local_addr;
+			}
+		}
+
 		buffer = fmt::format("{},{},{}.{},{}{:08X}",
-			config->GetUCSHost(),
+			ucs_addr,
 			config->GetUCSPort(),
 			config->ShortName,
 			GetCharName(),
@@ -1046,7 +1054,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 
 		buffer = fmt::format("{},{},{}.{},{}{:08X}",
-			config->GetUCSHost(),
+			ucs_addr,
 			config->GetUCSPort(),
 			config->ShortName,
 			GetCharName(),
