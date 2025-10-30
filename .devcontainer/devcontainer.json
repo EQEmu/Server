@@ -40,10 +40,41 @@
 				"GitHub.copilot",
 				"xackery.make-magic",
 				"Gruntfuggly.todo-tree",
-				"ms-vscode.cmake-tools"
-			]
+				"ms-vscode.cmake-tools",
+				"sumneko.lua"
+			],
+			"settings": {
+				"Lua.runtime.version": "Lua 5.1",
+			    "Lua.workspace.library": [
+			        "/src/repo/eqemu-definitions"
+			    ],
+			    "Lua.diagnostics.disable": [
+			        "lowercase-global"
+			    ],
+				"cmake.statusbar.advanced": {
+					"kit": {
+						"visibility": "hidden"
+					},
+					"debug": {
+						"visibility": "hidden"
+					},
+					"buildTarget": {
+						"visibility": "compact"
+					},
+					"launch": {
+						"visibility": "hidden"
+					},
+					"ctest": {
+						"visibility": "icon"
+					}
+				}
+			}
 		}
 	},
+	"mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/Makefile,target=/src/Makefile,type=bind,consistency=cached"
+	],
+
 	"workspaceFolder": "/src",
 	"workspaceMount": "source=${localWorkspaceFolder},target=/src,type=bind,consistency=cached"
 }
