@@ -37,6 +37,7 @@ public:
 	explicit SelectorState(Config config);
 
 	bool AddSelection(const ControlSelection &selection, TimePoint now);
+	bool HasExactPendingSelection(const ClientEndpoint &client) const;
 	std::optional<SessionRoute> AssignSession(const ClientEndpoint &client, TimePoint now);
 	std::optional<SessionRoute> GetSession(const ClientEndpoint &client) const;
 	void TouchSession(const ClientEndpoint &client, TimePoint now);

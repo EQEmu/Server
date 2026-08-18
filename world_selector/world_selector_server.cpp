@@ -395,10 +395,18 @@ void WorldSelectorServer::ProcessWorldDatagram(const char *data, std::size_t siz
 	}
 
 	auto upstream = m_upstreams.find(client);
+	const bool is_session_request = size >= 14 && static_cast<std::uint8_t>(data[0]) == 0 &&
+		static_cast<std::uint8_t>(data[1]) == 0x01;
+	if (upstream != m_upstreams.end() && is_session_request && m_state.HasExactPendingSelection(client)) {
+		std::cout << "Replacing existing World route for reselected client "
+			<< client.address << ':' << client.port << '\n';
+		CloseSession(client);
+		upstream = m_upstreams.end();
+	}
+
 	if (upstream == m_upstreams.end()) {
 		// Only an EQ session request may consume a pending login selection.
-		if (size < 14 || static_cast<std::uint8_t>(data[0]) != 0 ||
-			static_cast<std::uint8_t>(data[1]) != 0x01) {
+		if (!is_session_request) {
 			return;
 		}
 

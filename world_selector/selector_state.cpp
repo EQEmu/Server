@@ -28,6 +28,22 @@ bool SelectorState::AddSelection(const ControlSelection &selection, TimePoint no
 	return true;
 }
 
+bool SelectorState::HasExactPendingSelection(const ClientEndpoint &client) const
+{
+	const auto pending_by_ip = m_pending.find(client.address);
+	if (pending_by_ip == m_pending.end()) {
+		return false;
+	}
+
+	return std::any_of(
+		pending_by_ip->second.begin(),
+		pending_by_ip->second.end(),
+		[&client](const PendingSelection &selection) {
+			return selection.login_source_port == client.port;
+		}
+	);
+}
+
 std::optional<SessionRoute> SelectorState::AssignSession(const ClientEndpoint &client, TimePoint now)
 {
 	if (const auto existing = m_sessions.find(client); existing != m_sessions.end()) {
