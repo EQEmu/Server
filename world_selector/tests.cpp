@@ -203,6 +203,80 @@ void TestMultipleClientsAndReselection()
 	Expect(state.AssignSession(reselected, now)->world_short_name == "world_b", "reselection route failed");
 }
 
+void TestSessionRouteContinuation()
+{
+	SelectorState state(TestConfig());
+	const auto now = SelectorState::Clock::now();
+	const ClientEndpoint initial{"198.51.100.50", 46000};
+	const ClientEndpoint zoning{"198.51.100.50", 46001};
+	const ClientEndpoint second_client{"198.51.100.50", 46002};
+
+	Expect(state.AddSelection({initial.address, initial.port, "world_a"}, now),
+		"initial explicit selection rejected");
+	const auto initial_route = state.AssignSession(initial, now);
+	Expect(initial_route && initial_route->world_short_name == "world_a",
+		"initial explicit selection did not create a route");
+
+	const auto zoning_route = state.AssignSession(zoning, now + std::chrono::seconds(1));
+	Expect(zoning_route && zoning_route->world_short_name == "world_a",
+		"same-IP zoning reconnect did not inherit its route");
+
+	const auto second_client_route = state.AssignSession(second_client, now + std::chrono::seconds(2));
+	Expect(second_client_route && second_client_route->world_short_name == "world_a",
+		"multiple same-IP sessions on one backend did not allow route inheritance");
+	Expect(state.SessionCount() == 3, "continued sessions did not retain distinct UDP endpoints");
+}
+
+void TestAmbiguousRouteContinuation()
+{
+	SelectorState state(TestConfig());
+	const auto now = SelectorState::Clock::now();
+	const std::string address = "203.0.113.50";
+
+	Expect(state.AddSelection({address, 47000, "world_a"}, now), "world_a selection rejected");
+	Expect(state.AssignSession({address, 47000}, now)->world_short_name == "world_a",
+		"world_a session assignment failed");
+	Expect(state.AddSelection({address, 47001, "world_b"}, now), "world_b selection rejected");
+	Expect(state.AssignSession({address, 47001}, now)->world_short_name == "world_b",
+		"explicit world_b selection did not override same-IP inheritance");
+
+	Expect(!state.AssignSession({address, 47002}, now + std::chrono::seconds(1)),
+		"ambiguous same-IP routes were inherited");
+}
+
+void TestExplicitSelectionPrecedesContinuation()
+{
+	SelectorState state(TestConfig());
+	const auto now = SelectorState::Clock::now();
+	const std::string address = "203.0.113.60";
+
+	Expect(state.AddSelection({address, 48000, "world_a"}, now), "initial world_a selection rejected");
+	Expect(state.AssignSession({address, 48000}, now)->world_short_name == "world_a",
+		"initial world_a route failed");
+	Expect(state.AddSelection({address, 48001, "world_b"}, now), "explicit world_b selection rejected");
+	const auto selected = state.AssignSession({address, 48001}, now + std::chrono::seconds(1));
+	Expect(selected && selected->world_short_name == "world_b",
+		"same-IP route inheritance overrode an explicit selection");
+}
+
+void TestExpiredAndExactSessionContinuation()
+{
+	auto config = TestConfig();
+	config.session_timeout_seconds = 3;
+	SelectorState state(config);
+	const auto now = SelectorState::Clock::now();
+	const ClientEndpoint exact{"198.51.100.60", 49000};
+
+	Expect(state.AddSelection({exact.address, exact.port, "world_a"}, now), "exact route selection rejected");
+	Expect(state.AssignSession(exact, now)->world_short_name == "world_a", "exact route assignment failed");
+	const auto stable = state.AssignSession(exact, now + std::chrono::seconds(1));
+	Expect(stable && stable->world_short_name == "world_a", "exact active endpoint route changed");
+	Expect(state.SessionCount() == 1, "exact active endpoint created a duplicate session");
+
+	Expect(!state.AssignSession({exact.address, 49001}, now + std::chrono::seconds(4)),
+		"expired session allowed same-IP route inheritance");
+}
+
 void TestExpiryAndRestart()
 {
 	auto config = TestConfig();
@@ -255,6 +329,10 @@ int main()
 		TestControlPacketValidation();
 		TestWorldRoutingAndNatFallback();
 		TestMultipleClientsAndReselection();
+		TestSessionRouteContinuation();
+		TestAmbiguousRouteContinuation();
+		TestExplicitSelectionPrecedesContinuation();
+		TestExpiredAndExactSessionContinuation();
 		TestExpiryAndRestart();
 		TestNotificationFailureIsolation();
 	}

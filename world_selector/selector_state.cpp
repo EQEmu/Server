@@ -3,6 +3,15 @@
 #include <algorithm>
 
 namespace EQ::Net::MultiWorldSelector {
+namespace {
+
+bool SameRoute(const SessionRoute &left, const SessionRoute &right)
+{
+	return left.world_short_name == right.world_short_name && left.backend.host == right.backend.host &&
+		left.backend.port == right.backend.port;
+}
+
+} // namespace
 
 SelectorState::SelectorState(Config config)
 :	m_config(std::move(config))
@@ -51,41 +60,61 @@ std::optional<SessionRoute> SelectorState::AssignSession(const ClientEndpoint &c
 		return existing->second.route;
 	}
 
-	auto pending_by_ip = m_pending.find(client.address);
-	if (pending_by_ip == m_pending.end() || pending_by_ip->second.empty()) {
-		return std::nullopt;
-	}
+	if (auto pending_by_ip = m_pending.find(client.address);
+		pending_by_ip != m_pending.end() && !pending_by_ip->second.empty()) {
+		auto &pending = pending_by_ip->second;
+		auto selection = std::find_if(
+			pending.begin(),
+			pending.end(),
+			[&client](const PendingSelection &entry) {
+				return entry.login_source_port == client.port;
+			}
+		);
 
-	auto &pending = pending_by_ip->second;
-	auto selection = std::find_if(
-		pending.begin(),
-		pending.end(),
-		[&client](const PendingSelection &entry) {
-			return entry.login_source_port == client.port;
+		// UDP NAT mappings can differ between login and World. If the source-port
+		// hint does not match, selection order is the only correlation exposed by
+		// the unmodified client and login protocol.
+		if (selection == pending.end()) {
+			selection = pending.begin();
 		}
-	);
 
-	// UDP NAT mappings can differ between login and World. If the source-port
-	// hint does not match, selection order is the only correlation exposed by
-	// the unmodified client and login protocol.
-	if (selection == pending.end()) {
-		selection = pending.begin();
+		const auto backend = m_config.worlds.find(selection->world_short_name);
+		if (backend == m_config.worlds.end()) {
+			pending.erase(selection);
+			return std::nullopt;
+		}
+
+		SessionRoute route{selection->world_short_name, backend->second};
+		pending.erase(selection);
+		if (pending.empty()) {
+			m_pending.erase(pending_by_ip);
+		}
+
+		m_sessions.emplace(client, Session{route, now});
+		return route;
 	}
 
-	const auto backend = m_config.worlds.find(selection->world_short_name);
-	if (backend == m_config.worlds.end()) {
-		pending.erase(selection);
+	const auto session_timeout = std::chrono::seconds(m_config.session_timeout_seconds);
+	std::optional<SessionRoute> continuation_route;
+	for (const auto &[endpoint, session] : m_sessions) {
+		if (endpoint.address != client.address || now - session.last_activity >= session_timeout) {
+			continue;
+		}
+
+		if (!continuation_route) {
+			continuation_route = session.route;
+		}
+		else if (!SameRoute(*continuation_route, session.route)) {
+			return std::nullopt;
+		}
+	}
+
+	if (!continuation_route) {
 		return std::nullopt;
 	}
 
-	SessionRoute route{selection->world_short_name, backend->second};
-	pending.erase(selection);
-	if (pending.empty()) {
-		m_pending.erase(pending_by_ip);
-	}
-
-	m_sessions.emplace(client, Session{route, now});
-	return route;
+	m_sessions.emplace(client, Session{*continuation_route, now});
+	return continuation_route;
 }
 
 std::optional<SessionRoute> SelectorState::GetSession(const ClientEndpoint &client) const
