@@ -294,7 +294,8 @@ void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 	std::string reason;
 
 	if (p.Length() > 1) {
-		error = fmt::format("{}", (const char *) p.Data());
+		error.assign(reinterpret_cast<const char *>(p.Data()), p.Length());
+		error = error.c_str(); // trim at the first embedded null, if any
 	}
 
 	if (error.find("Worldserver Account / Password INVALID") != std::string::npos) {

@@ -124,52 +124,18 @@ namespace MyBots
 	}
 
 	static void PopulateSBL_ByMyGroupedBots(Client *bot_owner, std::vector<Bot*> &sbl, bool clear_list = true) {
-		if (clear_list) {
+		if (clear_list)
 			sbl.clear();
+
+		if (bot_owner != nullptr && bot_owner->IsGrouped()) {
+			bot_owner->GetGroup()->ForEachBot([&sbl, &bot_owner](Bot* bot) {
+				if (IsMyBot(bot_owner, bot))
+					sbl.push_back(bot);
+			});
 		}
 
-		if (!bot_owner) {
-			return;
-		}
-
-		if (!bot_owner->GetGroup() && !bot_owner->GetRaid()) {
-			return;
-		}
-
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_owner->GetRaid();
-			if (!raid) {
-				return;
-			}
-
-			uint32 raid_group = raid->GetGroup(bot_owner);
-			if (raid_group >= MAX_RAID_GROUPS) {
-				return;
-			}
-
-			for (const auto& m : raid->members) {
-				if (m.member && m.group_number == raid_group) {
-					if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-						continue;
-					}
-
-					sbl.push_back(m.member->CastToBot());
-				}
-			}
-		}
-		else {
-			std::list<Bot*> group_list;
-			bot_owner->GetGroup()->GetBotList(group_list);
-			for (auto member_iter : group_list) {
-				if (IsMyBot(bot_owner, member_iter)) {
-					sbl.push_back(member_iter);
-				}
-			}
-		}
-
-		if (!clear_list) {
+		if (!clear_list)
 			UniquifySBL(sbl);
-		}
 	}
 
 	static void PopulateSBL_ByMyRaidBots(Client* bot_owner, std::vector<Bot*>& sbl, bool clear_list = true) {
@@ -190,15 +156,11 @@ namespace MyBots
 			return;
 		}
 
-		for (const auto& m : raid->members) {
-			if (m.member) {
-				if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-					continue;
-				}
-
+		raid->ForEachLocalMember([&](const auto& m) {
+			if (m.member->IsBot() && MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
 				sbl.push_back(m.member->CastToBot());
 			}
-		}
+		});
 
 		if (!clear_list) {
 			UniquifySBL(sbl);
@@ -206,113 +168,37 @@ namespace MyBots
 	}
 
 	static void PopulateSBL_ByTargetsGroupedBots(Client *bot_owner, std::vector<Bot*> &sbl, bool clear_list = true) {
-		if (clear_list) {
+		if (clear_list)
 			sbl.clear();
-		}
-
-		if (!bot_owner) {
-			return;
-		}
 
 		auto target_mob = bot_owner->GetTarget();
-		if (!target_mob || (!target_mob->GetGroup() && !target_mob->GetRaid()) || (!target_mob->IsClient() && !target_mob->IsBot())) {
-			return;
+		if (bot_owner != nullptr && target_mob != nullptr && target_mob->IsGrouped()) {
+			target_mob->GetGroup()->ForEachBot([&sbl, &bot_owner](Bot* bot) {
+				if (IsMyBot(bot_owner, bot))
+					sbl.push_back(bot);
+			});
 		}
 
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_owner->GetRaid();
-			if (!raid) {
-				return;
-			}
-
-			if (MyBots::IsMyBot(bot_owner, target_mob)) {
-				uint32 raid_group = raid->GetGroup(target_mob->CastToClient());
-				if (raid_group >= MAX_RAID_GROUPS) {
-					return;
-				}
-
-				for (const auto& m : raid->members) {
-					if (m.member && m.group_number == raid_group) {
-						if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-							continue;
-						}
-
-						sbl.push_back(m.member->CastToBot());
-					}
-				}
-			}
-		}
-		else {
-			std::list<Bot*> group_list;
-			bot_owner->GetGroup()->GetBotList(group_list);
-			for (auto member_iter : group_list) {
-				if (IsMyBot(bot_owner, member_iter)) {
-					sbl.push_back(member_iter);
-				}
-			}
-		}
-
-		if (!clear_list) {
+		if (!clear_list)
 			UniquifySBL(sbl);
-		}
 	}
 
 	static void PopulateSBL_ByNamesGroupedBots(Client *bot_owner, std::vector<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list) {
+		if (clear_list)
 			sbl.clear();
-		}
 
-		if (!bot_owner || !name) {
-			return;
-		}
+		if (bot_owner != nullptr && name != nullptr && name[0] != '\0') {
+			Mob* named_mob = entity_list.GetBotByBotName(name);
 
-		Mob* named_mob = nullptr;
-		std::list<Mob*> l_mob_list;
-		entity_list.GetMobList(l_mob_list);
-		for (auto mob_iter : l_mob_list) {
-			if (!strcasecmp(mob_iter->GetCleanName(), name)) {
-				named_mob = mob_iter;
-				break;
-			}
-		}
-
-		if (!named_mob || !MyBots::IsMyBot(bot_owner, named_mob) || (!named_mob->GetGroup() && !named_mob->GetRaid()) || (!named_mob->IsClient() && !named_mob->IsBot())) {
-			return;
-		}
-
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_owner->GetRaid();
-			if (!raid) {
-				return;
+			if (IsMyBot(bot_owner, named_mob) && named_mob->IsGrouped()) {
+				named_mob->GetGroup()->ForEachBot([&sbl, &bot_owner](Bot* bot) {
+					if (IsMyBot(bot_owner, bot))
+						sbl.push_back(bot);
+				});
 			}
 
-			uint32 raid_group = raid->GetGroup(named_mob->CastToClient());
-			if (raid_group >= MAX_RAID_GROUPS) {
-				return;
-			}
-
-			for (const auto& m : raid->members) {
-				if (m.member && m.group_number == raid_group) {
-					if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-						continue;
-					}
-
-					sbl.push_back(m.member->CastToBot());
-				}
-			}
-		}
-		else {
-			std::list<Bot*> group_list;
-			bot_owner->GetGroup()->GetBotList(group_list);
-			for (auto member_iter : group_list) {
-				if (IsMyBot(bot_owner, member_iter)) {
-					sbl.push_back(member_iter);
-				}
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
+			if (!clear_list)
+				UniquifySBL(sbl);
 		}
 	}
 
@@ -765,90 +651,6 @@ namespace ActionableBots
 		}
 
 		return ab_type;
-	}
-
-	static Bot* AsGroupMember_ByClass(Client *bot_owner, Client *bot_grouped_player, uint8 cls, bool petless = false) {
-		if (!bot_owner || !bot_grouped_player) {
-			return nullptr;
-		}
-
-		if (!bot_grouped_player->GetGroup() && !bot_grouped_player->GetRaid()) {
-			return nullptr;
-		}
-
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_grouped_player->GetRaid();
-			if (!raid) {
-				return nullptr;
-			}
-
-			uint32 raid_group = raid->GetGroup(bot_grouped_player);
-			if (raid_group >= MAX_RAID_GROUPS) {
-				return nullptr;
-			}
-
-			for (const auto& m : raid->members) {
-				if (m.member && m.group_number == raid_group) {
-					if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-						continue;
-					}
-
-					if (m.member->GetClass() != cls) {
-						continue;
-					}
-
-					if (petless && m.member->GetPet()) {
-						continue;
-					}
-
-					return static_cast<Bot*>(m.member->CastToBot());
-				}
-			}
-		}
-		else {
-			std::list<Mob*> group_list;
-			bot_grouped_player->GetGroup()->GetMemberList(group_list);
-			for (auto member_iter : group_list) {
-				if (!MyBots::IsMyBot(bot_owner, member_iter)) {
-					continue;
-				}
-
-				if (member_iter->GetClass() != cls) {
-					continue;
-				}
-
-				if (petless && member_iter->GetPet()) {
-					continue;
-				}
-
-				return static_cast<Bot*>(member_iter);
-			}
-		}
-
-		return nullptr;
-	}
-
-	static Bot* AsGroupMember_ByMinLevelAndClass(Client *bot_owner, Client *bot_grouped_player, uint8 minlvl, uint8 cls, bool petless = false) {
-		// This function can be nixed if we can enforce bot level as owner level..and the level check can then be moved to the spell loop in the command function
-		if (!bot_owner || !bot_grouped_player)
-			return nullptr;
-		if (!bot_grouped_player->GetGroup())
-			return nullptr;
-
-		std::list<Mob*> group_list;
-		bot_grouped_player->GetGroup()->GetMemberList(group_list);
-		for (auto member_iter : group_list) {
-			if (!MyBots::IsMyBot(bot_owner, member_iter))
-				continue;
-			if (member_iter->GetLevel() < minlvl || member_iter->GetClass() != cls)
-				continue;
-			if (petless && member_iter->GetPet())
-				continue;
-
-			return static_cast<Bot*>(member_iter);
-		}
-
-		return nullptr;
 	}
 
 	static Bot* AsSpawned_ByClass(Client *bot_owner, std::vector<Bot*> &sbl, uint8 cls, bool petless = false) {

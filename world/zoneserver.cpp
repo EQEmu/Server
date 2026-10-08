@@ -42,6 +42,7 @@
 #include "world/lfplist.h"
 #include "world/login_server_list.h"
 #include "world/login_server.h"
+#include "world/party_state.h"
 #include "world/queryserv.h"
 #include "world/shared_task_manager.h"
 #include "world/shared_task_world_messaging.h"
@@ -203,24 +204,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			ClientList::Instance()->SendPacket(gis->invitee_name, pack);
 			break;
 		}
-		case ServerOP_GroupFollow: {
-			if (pack->size != sizeof(ServerGroupFollow_Struct)) {
-				break;
-			}
-
-			auto sgfs = (ServerGroupFollow_Struct*) pack->pBuffer;
-			ClientList::Instance()->SendPacket(sgfs->gf.name1, pack);
-			break;
-		}
-		case ServerOP_GroupFollowAck: {
-			if (pack->size != sizeof(ServerGroupFollowAck_Struct)) {
-				break;
-			}
-
-			auto sgfas = (ServerGroupFollowAck_Struct*) pack->pBuffer;
-			ClientList::Instance()->SendPacket(sgfas->Name, pack);
-			break;
-		}
 		case ServerOP_GroupCancelInvite: {
 			if (pack->size != sizeof(GroupCancel_Struct)) {
 				break;
@@ -234,124 +217,38 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			SendGroupIDs();
 			break;
 		}
-		case ServerOP_GroupLeave: {
-			if (pack->size != sizeof(ServerGroupLeave_Struct)) {
+		case ServerOP_PartyStateRequest: {
+			if (pack->size != sizeof(ServerPartyStateRequest_Struct)) {
 				break;
 			}
 
-			ZSList::Instance()->SendPacket(pack);
+			auto psr = (ServerPartyStateRequest_Struct*) pack->pBuffer;
+			PartyStateManager::Instance().HandleGroupStateRequest(psr->character_name, this);
+			PartyStateManager::Instance().HandleRaidStateRequest(psr->character_name, this);
 			break;
 		}
-		case ServerOP_GroupJoin: {
-			if (pack->size != sizeof(ServerGroupJoin_Struct)) {
+		case ServerOP_GroupAction: {
+			if (pack->size < sizeof(ServerGroupActionHeader_Struct)) {
 				break;
 			}
 
-			ZSList::Instance()->SendPacket(pack);
+			// Payload shape varies by header->action (see GroupActionType in
+			// common/servertalk.h) -- HandleGroupAction reads the header
+			// first and re-casts per action, checking that action's exact
+			// struct size itself.
+			PartyStateManager::Instance().HandleGroupAction(pack);
 			break;
 		}
-		case ServerOP_ForceGroupUpdate: {
-			if (pack->size != sizeof(ServerForceGroupUpdate_Struct)) {
+		case ServerOP_RaidAction: {
+			if (pack->size < sizeof(ServerRaidActionHeader_Struct)) {
 				break;
 			}
 
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_DisbandGroup: {
-			if (pack->size != sizeof(ServerDisbandGroup_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidAdd: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidRemove: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidDisband: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidLockFlag: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidChangeGroup: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_UpdateGroup: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidGroupDisband: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidGroupAdd: {
-			if (pack->size != sizeof(ServerRaidGroupAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidGroupRemove: {
-			if (pack->size != sizeof(ServerRaidGroupAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidGroupLeader: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidLeader: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
+			// Payload shape varies by header->action (see RaidActionType in
+			// common/servertalk.h) -- HandleRaidAction reads the header
+			// first and re-casts per action, checking that action's exact
+			// struct size itself.
+			PartyStateManager::Instance().HandleRaidAction(pack);
 			break;
 		}
 		case ServerOP_PlayerEvent: {
@@ -376,30 +273,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				UCSConnection::Instance()->SendPacket(pack);
 			}
 
-			break;
-		}
-		case ServerOP_DetailsChange: {
-			if (pack->size != sizeof(ServerRaidGeneralAction_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidMOTD: {
-			if (pack->size < sizeof(ServerRaidMOTD_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
-			break;
-		}
-		case ServerOP_RaidNote: {
-			if (pack->size < sizeof(ServerRaidNote_Struct)) {
-				break;
-			}
-
-			ZSList::Instance()->SendPacket(pack);
 			break;
 		}
 		case ServerOP_SpawnCondition: {
@@ -1378,7 +1251,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_OOCMute:
 		case ServerOP_OOZGroupMessage:
 		case ServerOP_Petition:
-		case ServerOP_RaidGroupSay:
 		case ServerOP_RaidSay:
 		case ServerOP_RefreshCensorship:
 		case ServerOP_RezzPlayerAccept:

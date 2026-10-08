@@ -145,7 +145,7 @@ void Client::ProcessEvolvingItem(const uint64 exp, const Mob *mob)
 					evolve_amount = exp * RuleR(EvolvingItems, PercentOfGroupExperience) / 100;
 				}
 				else if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||
-						 (has_sub_type(EvolvingItems::SubTypes::RAID_EXP) && IsRaidGrouped())) {
+						 (has_sub_type(EvolvingItems::SubTypes::RAID_EXP) && IsRaided())) {
 					evolve_amount = exp * RuleR(EvolvingItems, PercentOfRaidExperience) / 100;
 				}
 				else if (has_sub_type(EvolvingItems::SubTypes::ALL_EXP) ||

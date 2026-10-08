@@ -25,7 +25,10 @@
 #include "zone/mob.h"
 #include "zone/quest_parser_collection.h"
 #include "zone/string_ids.h"
+#include "zone/worldserver.h"
 #include "zone/zone.h"
+
+extern WorldServer worldserver;
 
 extern volatile bool is_zone_loaded;
 
@@ -38,7 +41,7 @@ extern volatile bool is_zone_loaded;
 #endif
 
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
-: NPC(d, nullptr, glm::vec4(x, y, z, heading), GravityBehavior::Water, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
+: Mixed<NPC, HasGroup>(d, nullptr, glm::vec4(x, y, z, heading), GravityBehavior::Water, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
 {
 	base_hp = d->max_hp;
 	base_mana = d->Mana;
@@ -67,7 +70,6 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 	_medding = false;
 	_suspended = false;
-	p_depop = false;
 	_check_confidence = false;
 	_lost_confidence = false;
 	_hatedCount = 0;
@@ -870,10 +872,6 @@ bool Merc::Process()
 		return false;
 	}
 
-	if (HasGroup() && GetMercenaryOwner() && GetFollowID() == 0) {
-		SetFollowID(GetMercenaryOwner()->GetID());
-	}
-
 	SpellProcess();
 
 	if(tic_timer.Check())
@@ -952,7 +950,7 @@ void Merc::AI_Process() {
 		return;
 
 	// A merc wont start its AI if not grouped
-	if(!HasGroup()) {
+	if(!IsGrouped()) {
 		return;
 	}
 
@@ -1540,7 +1538,7 @@ bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, 
 
 	int8 mercCasterClass = caster->GetClass();
 
-	if(caster->HasGroup()) {
+	if(caster->IsGrouped()) {
 		if( mercCasterClass == HEALER) {
 			if( iSpellTypes == SpellType_Heal )     {
 				if(caster->AICastSpell(100, SpellType_Heal))
@@ -1641,7 +1639,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 	bool castedSpell = false;
 	bool isDiscipline = false;
 
-	if(HasGroup()) {
+	if(IsGrouped()) {
 		Group *g = GetGroup();
 
 		if(g) {
@@ -1673,40 +1671,40 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 
 								//todo: check stance to determine healing spell selection
 
-								for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-									if(g->members[i] && !g->members[i]->qglobal) {
-										int8 hpr = (int8)g->members[i]->GetHPRatio();
+								g->ForEachMember([&](Mob *m) {
+									if(m && !m->qglobal) {
+										int8 hpr = (int8)m->GetHPRatio();
 
-										if(g->members[i]->HasPet() && g->members[i]->GetPet()->GetHPRatio() < checkHPR) {
-											if(!tar || ((g->members[i]->GetPet()->GetHPRatio() + 25) < tar->GetHPRatio())) {
-												tar = g->members[i]->GetPet();
-												checkPetHPR = g->members[i]->GetPet()->GetHPRatio() + 25;
+										if(m->HasPet() && m->GetPet()->GetHPRatio() < checkHPR) {
+											if(!tar || ((m->GetPet()->GetHPRatio() + 25) < tar->GetHPRatio())) {
+												tar = m->GetPet();
+												checkPetHPR = m->GetPet()->GetHPRatio() + 25;
 											}
 										}
 
 										if(hpr > checkHPR) {
-											continue;
+											return;
 										}
 
-										if(IsEngaged() && (g->members[i]->GetClass() == Class::Necromancer && hpr >= 50)
-											|| (g->members[i]->GetClass() == Class::Shaman && hpr >= 80)) {
+										if(IsEngaged() && (m->GetClass() == Class::Necromancer && hpr >= 50)
+											|| (m->GetClass() == Class::Shaman && hpr >= 80)) {
 												//allow necros to lifetap & shaman to canni without wasting mana
-												continue;
+												return;
 										}
 
-										if(hpr < checkHPR && g->members[i] == GetMercenaryOwner()) {
+										if(hpr < checkHPR && m == GetMercenaryOwner()) {
 											if(!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))
-												tar = g->members[i];            //check owner first
+												tar = m;            //check owner first
 										}
-										else if(hpr < checkHPR && g->HasRole(g->members[i], RoleTank)){
+										else if(hpr < checkHPR && g->HasRole(m, GroupBitmaskMainTank)){
 											if(!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))
-												tar = g->members[i];
+												tar = m;
 										}
 										else if( hpr < checkHPR && (!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))) {
-											tar = g->members[i];
+											tar = m;
 										}
 									}
-								}
+								});
 
 								if(numToHeal > 2) {
 									selectedMercSpell = GetBestMercSpellForGroupHeal(this);
@@ -1815,15 +1813,15 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 										}
 									}
 									else {
-										for( int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-											if(g->members[i]) {
-												Mob* tar = g->members[i];
+										g->ForEachMember([&](Mob *m) {
+											if(m) {
+												Mob* tar = m;
 
 												if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
 													&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
 														if( tar->GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SpellEffect::IncreaseSpellHaste)) {
-															continue;
+															return;
 														}
 
 														uint32 TempDontBuffMeBeforeTime = tar->DontBuffMeBefore();
@@ -1847,7 +1845,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 													if(IsGroupSpell(selectedMercSpell.spellid)
 														|| spells[selectedMercSpell.spellid].target_type == ST_Group
 														|| spells[selectedMercSpell.spellid].target_type == ST_GroupTeleport ) {
-															continue;
+															return;
 													}
 
 													if(!tar->GetPet()->IsImmuneToSpell(selectedMercSpell.spellid, this)
@@ -1869,7 +1867,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 													}
 												}
 											}
-										}
+										});
 									}
 								}
 								break;
@@ -1974,13 +1972,13 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 														 }
 							case SpellType_Cure: {
 								Mob* tar = nullptr;
-								for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-									if(g->members[i] && !g->members[i]->qglobal) {
-										if(GetNeedsCured(g->members[i]) && (g->members[i]->DontCureMeBefore() < Timer::GetCurrentTime())) {
-											tar = g->members[i];
+								g->ForEachMember([&](Mob *m) {
+									if(m && !m->qglobal) {
+										if(GetNeedsCured(m) && (m->DontCureMeBefore() < Timer::GetCurrentTime())) {
+											tar = m;
 										}
 									}
-								}
+								});
 
 								if(tar && !(g->GetNumberNeedingHealedInGroup(IsEngaged() ? 25 : 40, false) > 0) && !(g->GetNumberNeedingHealedInGroup(IsEngaged() ? 40 : 60, false) > 2))
 								{
@@ -1996,16 +1994,16 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 									if(castedSpell) {
 										if(IsGroupSpell(selectedMercSpell.spellid)){
 
-											if(HasGroup()) {
+											if(IsGrouped()) {
 												Group *g = GetGroup();
 
 												if(g) {
-													for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
-														if(g->members[i] && !g->members[i]->qglobal) {
+													g->ForEachMember([&](Mob *m) {
+														if(m && !m->qglobal) {
 															if(TempDontCureMeBeforeTime != tar->DontCureMeBefore())
-																g->members[i]->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
+																m->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
 														}
-													}
+													});
 												}
 											}
 										}
@@ -2077,7 +2075,7 @@ void Merc::CheckHateList() {
 			if(g) {
 				Mob* MercOwner = GetOwner();
 				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
-					float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+					float range = g->HasRole(MercOwner, GroupBitmaskPuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 					range = range * range;
 					if(DistanceSquaredNoZ(m_Position, MercOwner->GetTarget()->GetPosition()) < range) {
 						AddToHateList(MercOwner->GetTarget(), 1);
@@ -2094,20 +2092,21 @@ void Merc::CheckHateList() {
 						radius *= radius;
 						if(dist <= radius) {
 
-							for(int counter = 0; counter < g->GroupCount(); counter++) {
-								Mob* groupMember = g->members[counter];
+							g->ForEachMember([&](Mob *groupMember) -> bool {
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
 										if(!hate_list.IsEntOnHateList(npc)) {
-											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+											float range = g->HasRole(groupMember, GroupBitmaskPuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
 											if(DistanceSquaredNoZ(m_Position, npc->GetPosition()) < range) {
 												hate_list.AddEntToHateList(npc, 1);
+												return false;
 											}
 										}
 									}
 								}
-							}
+								return true;
+							});
 						}
 					}
 				}
@@ -3066,12 +3065,12 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 			Group *g = tar->GetGroup();
 
 			if(g) {
-				for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
-					if(g->members[i] && !g->members[i]->qglobal) {
-						if(caster->GetNeedsCured(g->members[i]))
+				g->ForEachMember([&](Mob *m) {
+					if(m && !m->qglobal) {
+						if(caster->GetNeedsCured(m))
 							countNeedsCured++;
 					}
-				}
+				});
 			}
 		}
 
@@ -3709,16 +3708,16 @@ bool Merc::CheckAETaunt() {
 
 			if(dist <= range) {
 				if(!npc->IsMezzed()) {
-					if(HasGroup()) {
+					if(IsGrouped()) {
 						Group* g = GetGroup();
 
 						if(g) {
-							for(int i = 0; i < g->GroupCount(); i++) {
-								//if(npc->IsOnHatelist(g->members[i]) && g->members[i]->GetTarget() != npc && g->members[i]->IsEngaged()) {
-								if(GetTarget() != npc && g->members[i] && g->members[i]->GetTarget() != npc && npc->IsOnHatelist(g->members[i])) {
+							g->ForEachMember([&](Mob *m) {
+								//if(npc->IsOnHatelist(m) && m->GetTarget() != npc && m->IsEngaged()) {
+								if(GetTarget() != npc && m && m->GetTarget() != npc && npc->IsOnHatelist(m)) {
 									result++;
 								}
-							}
+							});
 						}
 					}
 				}
@@ -3736,18 +3735,21 @@ bool Merc::CheckAETaunt() {
 Corpse* Merc::GetGroupMemberCorpse() {
 	Corpse* corpse = nullptr;
 
-	if(HasGroup()) {
+	if(IsGrouped()) {
 		Group* g = GetGroup();
 
 		if(g) {
-			for(int i = 0; i < g->GroupCount(); i++) {
-				if(g->members[i] && g->members[i]->IsClient()) {
-					corpse = entity_list.GetCorpseByOwnerWithinRange(g->members[i]->CastToClient(), this, RuleI(Mercs, ResurrectRadius));
+			g->ForEachClient([&](Client *m) -> bool {
+				corpse = entity_list.GetCorpseByOwnerWithinRange(m, this, RuleI(Mercs, ResurrectRadius));
 
-					if(corpse && !corpse->IsRezzed()) {
-						return corpse;
-					}
+				if(corpse && !corpse->IsRezzed()) {
+					return false;
 				}
+				return true;
+			});
+
+			if(corpse && !corpse->IsRezzed()) {
+				return corpse;
 			}
 		}
 	}
@@ -4965,7 +4967,7 @@ bool Client::CheckCanSpawnMerc(uint32 template_id) {
 	}
 
 	// Check for raid
-	if(HasRaid())
+	if(IsGrouped())
 	{
 		SendMercResponsePackets(4);
 		return false;
@@ -5301,28 +5303,29 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		if(!mercOwner->GetPTimers().Expired(&database, pTimerMercSuspend, false))
 			mercOwner->GetPTimers().Clear(&database, pTimerMercSuspend);
 
-		if (MercJoinClientGroup())
-		{
-			if(setMaxStats)
-			{
-				RestoreHealth();
-				RestoreMana();
-				RestoreEndurance();
-			}
+		// There is currently no way for merc to have a group when this is called
+		// TODO: tighten up the spawn controls so that we can actually guarantee this state
+		Group::RequestAddMember(mercOwner, this);
 
-			//check for sufficient funds and remove them last
-			if(RuleB(Mercs, ChargeMercUpkeepCost))
-			{
-				uint32 cost = CalcUpkeepCost(GetMercenaryTemplateID(), GetLevel()) * 100;    // Cost is in gold
-				if(cost > 0 && !mercOwner->HasMoney(cost))
-				{
-					mercOwner->SendMercResponsePackets(1);
-					Suspend();
-					return false;
-				}
-			}
-			Save();
+		if(setMaxStats)
+		{
+			RestoreHealth();
+			RestoreMana();
+			RestoreEndurance();
 		}
+
+		//check for sufficient funds and remove them last
+		if(RuleB(Mercs, ChargeMercUpkeepCost))
+		{
+			uint32 cost = CalcUpkeepCost(GetMercenaryTemplateID(), GetLevel()) * 100;	// Cost is in gold
+			if(cost > 0 && !mercOwner->HasMoney(cost))
+			{
+				mercOwner->SendMercResponsePackets(1);
+				Suspend();
+				return false;
+			}
+		}
+		Save();
 	}
 
 	return true;
@@ -5366,201 +5369,53 @@ void Merc::Zone() {
 	Depop();
 }
 
-void Merc::Depop() {
-
+void Merc::Depop()
+{
 	WipeHateList();
 
-	if(IsCasting())
-	{
+	if (IsCasting())
 		InterruptSpell();
-	}
 
 	entity_list.RemoveFromHateLists(this);
 
-	if(GetGroup())
-	{
-		RemoveMercFromGroup(this, GetGroup());
+	if (const Group* group = GetGroup()) {
+		// if the merc somehow became leader, not setting this will send disband all
+		group->RequestDisband(
+			owner != nullptr ? owner->CharacterID() : 0,
+			group->GetLeaderName(),
+			group->IsLeader(this) ? "" : GetCleanName());
 	}
 
 	entity_list.RemoveMerc(GetID());
 
-	if(HasPet())
-	{
+	if (HasPet())
 		GetPet()->Depop();
-	}
-
-	p_depop = true;
 
 	NPC::Depop(false);
 }
 
-bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
+void Merc::OnAddToGroup()
+{
+	Mob* owner = GetOwner();
+	if (owner != nullptr)
+		SetFollowID(owner->GetID());
 
-	bool Result = false;
-
-	if(merc && group)
-	{
-		uint32 groupID = group->GetID();
-		if(merc->HasGroup())
-		{
-			if(!group->IsLeader(merc))
-			{
-				merc->SetFollowID(0);
-
-				if (group->GroupCount() <= 2 && merc->GetGroup() == group && is_zone_loaded)
-				{
-					group->DisbandGroup();
-				}
-				else if(group->DelMember(merc, true))
-				{
-					if(merc->GetMercenaryCharacterID() != 0)
-					{
-						Group::RemoveFromGroup(merc);
-					}
-				}
-			}
-			else
-			{
-				// A merc is group leader - Disband and re-group each member with their mercs
-				for(int i = 0; i < MAX_GROUP_MEMBERS; i++)
-				{
-					if(!group->members[i])
-						continue;
-
-					if(!group->members[i]->IsClient())
-						continue;
-
-					Client *groupMember = group->members[i]->CastToClient();
-					groupMember->LeaveGroup();
-					if (groupMember->GetMerc())
-					{
-						groupMember->GetMerc()->MercJoinClientGroup();
-					}
-				}
-				// Group should be removed by now, but just in case:
-				Group *oldGroup = entity_list.GetGroupByID(groupID);
-				if (oldGroup != nullptr)
-				{
-					oldGroup->DisbandGroup();
-				}
-			}
-
-			Result = true;
-		}
-	}
-
-	return Result;
+	HasGroup::OnAddToGroup();
 }
 
-bool Merc::MercJoinClientGroup() {
-
-	Client* mercOwner = nullptr;
-
-	if(GetMercenaryOwner())
-	{
-		mercOwner = GetMercenaryOwner();
-	}
-
-	if(!mercOwner)
-	{
-		Suspend();
-		return false;
-	}
-
-	if(GetID())
-	{
-		if (HasGroup())
-		{
-			RemoveMercFromGroup(this, GetGroup());
-		}
-
-		Group* g = entity_list.GetGroupByClient(mercOwner);
-
-		//nobody from our group is here... start a new group
-		if(!g)
-		{
-			g = new Group(mercOwner);
-
-			if(!g)
-			{
-				delete g;
-				g = nullptr;
-				return false;
-			}
-
-			entity_list.AddGroup(g);
-
-			if(g->GetID() == 0)
-			{
-
-				delete g;
-				g = nullptr;
-				return false;
-			}
-
-			if (AddMercToGroup(this, g))
-			{
-				g->AddToGroup(mercOwner);
-				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
-				database.RefreshGroupFromDB(mercOwner);
-				g->SaveGroupLeaderAA();
-				Log(Logs::General, Logs::Mercenaries, "Mercenary joined new group: %s (%s).", GetName(), mercOwner->GetName());
-			}
-			else
-			{
-				g->DisbandGroup();
-				Suspend();
-				Log(Logs::General, Logs::Mercenaries, "Mercenary disbanded new group: %s (%s).", GetName(), mercOwner->GetName());
-			}
-
-		}
-		else if (AddMercToGroup(this, mercOwner->GetGroup()))
-		{
-			// Group already exists
-			database.RefreshGroupFromDB(mercOwner);
-			// Update members that are out of zone
-			GetGroup()->SendGroupJoinOOZ(this);
-			Log(Logs::General, Logs::Mercenaries, "Mercenary %s joined existing group with %s.", GetName(), mercOwner->GetName());
-		}
-		else
-		{
-			Suspend();
-			Log(Logs::General, Logs::Mercenaries, "Mercenary failed to join the group - Suspending %s for (%s).", GetName(), mercOwner->GetName());
-		}
-	}
-
-	return true;
+void Merc::OnRemoveFromGroup()
+{
+	SetFollowID(0);
+	HasGroup::OnRemoveFromGroup();
 }
 
-bool Merc::AddMercToGroup(Merc* merc, Group* group) {
-	bool Result = false;
+void Merc::OnZonedInWithGroup()
+{
+	Mob* owner = GetOwner();
+	if (owner != nullptr)
+		SetFollowID(owner->GetID());
 
-	if(merc && group) {
-		// Remove merc from current group if it's not the destination group
-		if(merc->HasGroup())
-		{
-			if(merc->GetGroup() == group && merc->GetMercenaryOwner())
-			{
-				// Merc is already in the destination group
-				merc->SetFollowID(merc->GetMercenaryOwner()->GetID());
-				return true;
-			}
-			merc->RemoveMercFromGroup(merc, merc->GetGroup());
-		}
-		//Try and add the member, followed by checking if the merc owner exists.
-		if(group->AddMember(merc) && merc->GetMercenaryOwner())
-		{
-			merc->SetFollowID(merc->GetMercenaryOwner()->GetID());
-			Result = true;
-		}
-		else
-		{
-			//Suspend it if the member is not added or the merc's owner is not valid.
-			merc->Suspend();
-		}
-	}
-
-	return Result;
+	HasGroup::OnZonedInWithGroup();
 }
 
 void Client::InitializeMercInfo() {

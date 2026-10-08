@@ -1003,7 +1003,7 @@ int lua_get_guild_id_by_char_id(uint32 char_id) {
 }
 
 int lua_get_group_id_by_char_id(uint32 char_id) {
-	return database.GetGroupIDByCharID(char_id);
+	return quest_manager.getgroupidbycharid(char_id);
 }
 
 std::string lua_get_npc_name_by_id(uint32 npc_id) {
@@ -1011,7 +1011,7 @@ std::string lua_get_npc_name_by_id(uint32 npc_id) {
 }
 
 int lua_get_raid_id_by_char_id(uint32 char_id) {
-	return database.GetRaidIDByCharID(char_id);
+	return quest_manager.getraididbycharid(char_id);
 }
 
 uint32 lua_create_instance(const char *zone, uint32 version, uint32 duration) {

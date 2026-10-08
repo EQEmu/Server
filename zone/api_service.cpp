@@ -503,7 +503,7 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["is_pet_regroup"]              = mob->IsPetRegroup();
 		row["is_pet_stop"]                 = mob->IsPetStop();
 		row["is_pseudo_rooted"]            = mob->IsPseudoRooted();
-		row["is_raid_grouped"]             = mob->IsRaidGrouped();
+		row["is_raid_grouped"]             = mob->IsRaided();
 		row["is_rare_spawn"]               = mob->IsRareSpawn();
 		row["is_roamer"]                   = mob->IsRoamer();
 		row["is_rooted"]                   = mob->IsRooted();

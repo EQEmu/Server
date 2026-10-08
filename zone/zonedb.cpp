@@ -2586,64 +2586,6 @@ bool ZoneDatabase::SetZoneTimezone(uint32 zone_id, uint32 instance_version, uint
 	return ZoneRepository::SetTimeZone(*this, zone_id, instance_version, timezone);
 }
 
-void ZoneDatabase::RefreshGroupFromDB(Client *client){
-	if (!client) {
-		return;
-	}
-
-	Group *group = client->GetGroup();
-
-	if (!group) {
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
-	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
-	gu->action = groupActUpdate;
-
-	strcpy(gu->yourname, client->GetName());
-	GetGroupLeadershipInfo(group->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
-	gu->NPCMarkerID = group->GetNPCMarkerID();
-
-	int index = 0;
-
-	auto query = fmt::format(
-		"SELECT name FROM group_id WHERE group_id = {}",
-		group->GetID()
-	);
-	auto results = QueryDatabase(query);
-
-	if (results.Success()) {
-		for (auto row : results) {
-			if (index >= 6) {
-				continue;
-			}
-
-            if (!strcmp(client->GetName(), row[0])) {
-				continue;
-			}
-
-			strcpy(gu->membername[index], row[0]);
-			index++;
-		}
-	}
-
-	client->QueuePacket(outapp);
-	safe_delete(outapp);
-
-	if (client->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
-		group->NotifyMainTank(client, 1);
-		group->NotifyPuller(client, 1);
-	}
-
-	group->NotifyMainAssist(client, 1);
-	group->NotifyMarkNPC(client);
-	group->NotifyAssistTarget(client);
-	group->NotifyTankTarget(client);
-	group->NotifyPullerTarget(client);
-	group->SendMarkedNPCsToMember(client);
-}
-
 int64 ZoneDatabase::GetBlockedSpellsCount(uint32 zone_id)
 {
 	return BlockedSpellsRepository::Count(

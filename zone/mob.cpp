@@ -155,7 +155,7 @@ Mob::Mob(
 	lastname[0]   = 0;
 
 	if (in_name) {
-		strn0cpy(name, in_name, 64);
+		SetName(in_name);
 		strn0cpy(orig_name, in_name, 64);
 	}
 
@@ -328,9 +328,6 @@ Mob::Mob(
 
 	m_Delta   = glm::vec4();
 	animation = 0;
-
-	isgrouped     = false;
-	israidgrouped = false;
 
 	is_horse = false;
 
@@ -1582,8 +1579,6 @@ void Mob::SendHPUpdate(bool force_update_all)
 	}
 
 	EQApplicationPacket hp_packet;
-	Group               *group = nullptr;
-
 	CreateHPPacket(&hp_packet);
 
 	// update those who have us targeted
@@ -1597,49 +1592,26 @@ void Mob::SendHPUpdate(bool force_update_all)
 
 	// Group
 	if (IsGrouped()) {
-		group = entity_list.GetGroupByMob(this);
-		if (group) {
-			group->SendHPPacketsFrom(this);
-		}
-	}
-
-	// Raid
-	if (IsClient()) {
-		Raid *raid = entity_list.GetRaidByClient(CastToClient());
-		if (raid) {
-			raid->SendHPManaEndPacketsFrom(this);
-		}
+		GetGroup()->SendHPManaEndPacketsFrom(this);
 	}
 
 	// Pet
 	if (GetOwner() && GetOwner()->IsClient()) {
 		GetOwner()->CastToClient()->QueuePacket(&hp_packet, false);
-		group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
 
-		if (group) {
-			group->SendHPPacketsFrom(this);
-		}
-
-		Raid *raid = entity_list.GetRaidByClient(GetOwner()->CastToClient());
-		if (raid) {
-			raid->SendHPManaEndPacketsFrom(this);
-		}
+		Group* group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
+		if (group != nullptr)
+			group->SendHPManaEndPacketsFrom(this);
 	}
 
 	if (RuleB(Bots, Enabled) && GetOwner() && GetOwner()->IsBot() && GetOwner()->CastToBot()->GetBotOwner() && GetOwner()->CastToBot()->GetBotOwner()->IsClient()) {
 		auto bot_owner = GetOwner()->CastToBot()->GetBotOwner()->CastToClient();
 		if (bot_owner) {
 			bot_owner->QueuePacket(&hp_packet, false);
-			group = entity_list.GetGroupByClient(bot_owner);
 
-			if (group) {
-				group->SendHPPacketsFrom(this);
-			}
-
-			Raid *raid = entity_list.GetRaidByClient(bot_owner);
-			if (raid) {
-				raid->SendHPManaEndPacketsFrom(this);
-			}
+			Group*	group = entity_list.GetGroupByClient(bot_owner);
+			if (group != nullptr)
+				group->SendHPManaEndPacketsFrom(this);
 		}
 	}
 
@@ -5153,13 +5125,11 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::O
 	entity_list.QuestJournalledSayClose(this, 200, GetCleanName(), str, opts);
 }
 
-const char *Mob::GetCleanName()
-{
-	if (!strlen(clean_name)) {
-		CleanMobName(GetName(), clean_name);
+void Mob::SetName(const char *new_name) {
+	if (new_name != nullptr) {
+		strn0cpy(name, new_name, 64);
+		CleanMobName(name, clean_name);
 	}
-
-	return clean_name;
 }
 
 std::string Mob::GetTargetDescription(Mob* target, uint8 description_type, uint16 entity_id_override)
@@ -5545,6 +5515,9 @@ void Mob::SetTarget(Mob *mob)
 			r->SendRaidAssistTarget();
 		}
 	}
+
+	if (Group* g = GetGroup())
+		g->UpdateMemberTarget(this, mob);
 }
 
 // For when we want a Ground Z at a location we are not at yet
@@ -6657,40 +6630,6 @@ int16 Mob::GetCritDmgMod(uint16 skill, Mob* owner)
 		critDmg_mod += owner->aabonuses.Pet_Crit_Melee_Damage_Pct_Owner + owner->itembonuses.Pet_Crit_Melee_Damage_Pct_Owner + owner->spellbonuses.Pet_Crit_Melee_Damage_Pct_Owner;
 
 	return critDmg_mod;
-}
-
-void Mob::SetGrouped(bool v)
-{
-	if (v) {
-		israidgrouped = false;
-	}
-
-	isgrouped = v;
-
-	if (IsClient()) {
-		if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE)) {
-			parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
-		}
-
-		if (!v) {
-			CastToClient()->RemoveGroupXTargets();
-		}
-	}
-}
-
-void Mob::SetRaidGrouped(bool v)
-{
-	if (v) {
-		isgrouped = false;
-	}
-
-	israidgrouped = v;
-
-	if (IsClient()) {
-		if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE)) {
-			parse->EventPlayer(EVENT_GROUP_CHANGE, CastToClient(), "", 0);
-		}
-	}
 }
 
 int Mob::GetCriticalChanceBonus(uint16 skill)
@@ -8639,46 +8578,16 @@ void Mob::ClearDataBucketCache()
 	}
 }
 
-bool Mob::IsInGroupOrRaid(Mob* other, bool same_raid_group) {
-	if (!other || !IsOfClientBotMerc() || !other->IsOfClientBotMerc()) {
-		return false;
-	}
+bool Mob::IsInGroup(const Mob* other) const
+{
+	return other != nullptr && IsGrouped() && GetGroupID() == other->GetGroupID();
+}
 
-	if (this == other) {
-		return true;
-	}
-
-	Raid* raid = IsBot() ? CastToBot()->GetStoredRaid() : (IsRaidGrouped() ? GetRaid() : nullptr);
-
-	if (raid) {
-		if (!other->IsRaidGrouped()) {
-			return false;
-		}
-
-		Raid* other_raid = other->IsBot() ? other->CastToBot()->GetStoredRaid() : other->GetRaid();
-
-		if (!other_raid) {
-			return false;
-		}
-
-		auto raid_group = raid->GetGroup(GetCleanName());
-		auto other_raid_group = other_raid->GetGroup(other->GetCleanName());
-
-		if (
-			raid_group == RAID_GROUPLESS ||
-			other_raid_group == RAID_GROUPLESS ||
-			(same_raid_group && raid_group != other_raid_group)
-		) {
-			return false;
-		}
-
-		return true;
-	}
-
-	Group* group = GetGroup();
-	Group* other_group = other->GetGroup();
-
-	return group && group == other_group;
+bool Mob::IsInGroupOrRaid(const Mob* other) const
+{
+	return other != nullptr && (
+		(IsRaided() && GetRaidID() == other->GetRaidID()) ||
+		(IsGrouped() && GetGroupID() == other->GetGroupID()));
 }
 
 bool Mob::DoLosChecks(Mob* other) {

@@ -645,9 +645,6 @@ public:
 	uint32	GetZoneTimezone(uint32 zoneid, uint32 version);
 	bool	SetZoneTimezone(uint32 zoneid, uint32 version, uint32 tz);
 
-	/* Group   */
-	void RefreshGroupFromDB(Client *c);
-
 	/* Instancing   */
 	void ListAllInstances(Client* c, uint32 character_id);
 

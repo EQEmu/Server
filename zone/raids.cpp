@@ -1,4 +1,4 @@
-/*	EQEmu: EQEmulator
+﻿/*	EQEmu: EQEmulator
 
 	Copyright (C) 2001-2026 EQEmu Development Team
 
@@ -19,9 +19,6 @@
 #include "common/events/player_event_logs.h"
 #include "common/raid.h"
 #include "common/repositories/character_expedition_lockouts_repository.h"
-#include "common/repositories/raid_details_repository.h"
-#include "common/repositories/raid_leaders_repository.h"
-#include "common/repositories/raid_members_repository.h"
 #include "common/strings.h"
 #include "zone/bot.h"
 #include "zone/client.h"
@@ -31,1182 +28,765 @@
 #include "zone/mob.h"
 #include "zone/queryserv.h"
 #include "zone/raids.h"
-#include "zone/string_ids.h"
 #include "zone/worldserver.h"
 
-extern EntityList  entity_list;
-extern WorldServer worldserver;
 extern QueryServ  *QServ;
 
 Raid::Raid(uint32 raidID)
-: GroupIDConsumer(raidID)
 {
-	for (auto& gm : group_mentor) {
-		gm.mentor_percent = 0;
-		gm.mentoree = nullptr;
-	}
-	leader = nullptr;
-	memset(leadername, 0, 64);
-	locked = false;
-	LootType = 4;
-
-	m_autohatermgr.SetOwner(nullptr, nullptr, this);
-
-	for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-		memset(main_assister_pcs[i], 0, 64);
-		memset(main_marker_pcs[i], 0, 64);
-		marked_npcs[i].entity_id = 0;
-		marked_npcs[i].zone_id = 0;
-		marked_npcs[i].instance_id = 0;
-	}
+	SetID(raidID);
+	loot_type = 4; // matches world/raid_state.cpp's own default for a freshly-created raid
 }
 
 Raid::Raid(Client* nLeader)
-: GroupIDConsumer()
+	: leader(nLeader)
 {
-	for (auto& gm : group_mentor) {
-		gm.mentor_percent = 0;
-		gm.mentoree = nullptr;
-	}
-	leader = nLeader;
-	memset(leadername, 0, 64);
-	strn0cpy(leadername, nLeader->GetName(), 64);
-	locked = false;
-	LootType = 4;
-
-	m_autohatermgr.SetOwner(nullptr, nullptr, this);
-
-	for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-		memset(main_assister_pcs[i], 0, 64);
-		memset(main_marker_pcs[i], 0, 64);
-		marked_npcs[i].entity_id = 0;
-		marked_npcs[i].zone_id = 0;
-		marked_npcs[i].instance_id = 0;
-	}
+	leader_name = nLeader->GetName();
+	loot_type = 4;
 }
 
 Raid::~Raid()
 {
-	for (auto &g : subgroups) {
-		if (g != nullptr) {
-			entity_list.RemoveGroup(g->GetID());  // safe no-op if already null via OnGroupDestroyed()
-			g = nullptr;
+	for (auto gid : subgroup_group_ids)
+		if (gid != 0)
+			if (const Group *g = entity_list.GetGroupByID(gid))
+				entity_list.RemoveGroup(g->GetID());
+}
+
+void Raid::Process() {}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Raid Game Functionality
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Passthrough to world
+// ---------------------------------------------------------------------------------------------------------------------
+
+template <typename T>
+static void SendRaidAction(const Client* requestor, T&& payload, uint32 raid_id, RaidActionType action)
+{
+	if (requestor != nullptr) {
+		payload.header.rid = raid_id;
+		payload.header.requestor_character_id = requestor->CharacterID();
+		strn0cpy(payload.header.requestor_name, requestor->GetCleanName(), sizeof(payload.header.requestor_name));
+
+		payload.header.action = static_cast<uint8>(action);
+		payload.header.zoneid = zone->GetZoneID();
+		payload.header.instance_id = zone->GetInstanceID();
+
+		auto pack = new ServerPacket(ServerOP_RaidAction, sizeof(T));
+		memcpy(pack->pBuffer, &payload, sizeof(T));
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+template <typename T>
+void Raid::RequestAction(const Client* requestor, T&& payload, RaidActionType action) const
+{
+	SendRaidAction(requestor, std::forward<T>(payload), GetID(), action);
+}
+
+static ServerRaidActionBasic_Struct ActionPayload() { return ServerRaidActionBasic_Struct{}; }
+
+static ServerRaidActionValue_Struct ActionPayload(uint32 value)
+{
+	return ServerRaidActionValue_Struct{.value = value};
+}
+
+static ServerRaidActionTarget_Struct ActionPayload(const std::string& target_name)
+{
+	ServerRaidActionTarget_Struct payload{};
+	strn0cpy(payload.target_name, target_name.c_str(), sizeof(payload.target_name));
+	return payload;
+}
+
+static ServerRaidActionTargetValue_Struct ActionPayload(const std::string& target_name, uint32 value)
+{
+	ServerRaidActionTargetValue_Struct payload{.value = value};
+	strn0cpy(payload.target_name, target_name.c_str(), sizeof(payload.target_name));
+	return payload;
+}
+
+void Raid::RequestLock(const Client* requestor) const
+{
+	RequestAction(requestor, ActionPayload(), RaidLeadershipLock);
+}
+
+void Raid::RequestUnlock(const Client* requestor) const
+{
+	RequestAction(requestor, ActionPayload(), RaidLeadershipUnlock);
+}
+
+void Raid::RequestSetLootType(const Client* requestor, uint32 loot_type) const
+{
+	RequestAction(requestor, ActionPayload(loot_type), RaidLeadershipSetLootType);
+}
+
+void Raid::RequestSetLooter(const Client* requestor, const std::string& target_name, bool adding) const
+{
+	RequestAction(requestor, ActionPayload(target_name), adding ? RaidLeadershipAddLooter : RaidLeadershipRemoveLooter);
+}
+
+void Raid::RequestMakeLeader(const Client* requestor, const std::string& target_name) const
+{
+	RequestAction(requestor, ActionPayload(target_name), RaidLeadershipMakeLeader);
+}
+
+void Raid::RequestSetMotd(const Client* requestor, const std::string& new_motd) const
+{
+	ServerRaidActionMotd_Struct payload{};
+	strn0cpy(payload.motd, new_motd.c_str(), sizeof(payload.motd));
+	RequestAction(requestor, payload, RaidRoleSetMotd);
+}
+
+void Raid::RequestSetNote(const Client* requestor, const std::string& target_name, const std::string& note) const
+{
+	ServerRaidActionNote_Struct payload{};
+	strn0cpy(payload.target_name, target_name.c_str(), sizeof(payload.target_name));
+	strn0cpy(payload.note, note.c_str(), sizeof(payload.note));
+	RequestAction(requestor, payload, RaidRoleSetNote);
+}
+
+void Raid::RequestSetGroupOnInvite(const Client* requestor, bool enabled) const
+{
+	RequestAction(requestor, ActionPayload(enabled ? 1u : 0u), RaidLeadershipSetGroupOnInvite);
+}
+
+void Raid::RequestDelegateRole(const Client* requestor, RaidActionType action, const std::string& target_name) const
+{
+	RequestAction(requestor, ActionPayload(target_name), action);
+}
+
+void Raid::RequestRemoveMember(const Client* requestor, const std::string& target_name) const
+{
+	RequestAction(requestor, ActionPayload(target_name), RaidActionRemoveMember);
+}
+
+void Raid::RequestMoveGroup(const Client* requestor, const std::string& target_name, uint32 dest_group_number) const
+{
+	RequestAction(requestor, ActionPayload(target_name, dest_group_number), RaidActionMoveGroup);
+}
+
+void Raid::RequestRaidAAs() const
+{
+	RequestAction(GetLeader(), ActionPayload(), RaidLeadershipUpdateAA);
+}
+
+void Raid::RequestUpdateLevel(const Client* requestor, const std::string& target_name, int level) const
+{
+	RequestAction(requestor, ActionPayload(target_name, level), RaidLeadershipUpdateLevel);
+}
+
+// The invitee is typed by name, not targeted, so unlike every other raid
+// action's target (always something already resolved locally) they might
+// not be anywhere near this zone -- or, for a bot, might not even be
+// spawned anywhere. Resolve them here when possible and hand world a fully
+// populated struct; leave it zeroed (`resolved` stays false) when not, so
+// world knows to fall back to its own live data (ClientList/bot_data)
+// instead of silently treating "not found" as "is a player with no info."
+static ServerRaidActionInvite_Struct InviteActionPayload(const std::string& target_name)
+{
+	ServerRaidActionInvite_Struct payload{};
+	strn0cpy(payload.target_name, target_name.c_str(), sizeof(payload.target_name));
+
+	if (const Client* local_client = entity_list.GetClientByName(target_name.c_str())) {
+		payload.resolved     = true;
+		payload.kind         = RaidMemberKind::RaidMemberPlayer;
+		payload.target_class = local_client->GetClass();
+		payload.target_level = local_client->GetLevel();
+	} else if (Bot* local_bot = entity_list.GetBotByBotName(target_name)) {
+		payload.resolved           = true;
+		payload.kind               = RaidMemberKind::RaidMemberBot;
+		payload.owner_character_id = local_bot->GetOwnerCharacterID();
+		payload.target_class       = local_bot->GetClass();
+		payload.target_level       = local_bot->GetLevel();
+		if (const Mob* bot_owner = local_bot->GetBotOwner())
+			strn0cpy(payload.owner_name, bot_owner->GetCleanName(), sizeof(payload.owner_name));
+	}
+
+	return payload;
+}
+
+void Raid::RequestInvite(const Client* inviter, const std::string& invitee_name)
+{
+	SendRaidAction(inviter, InviteActionPayload(invitee_name), 0, RaidActionInvite);
+}
+
+void Raid::RequestFollow(const Client* accepter, const std::string& inviter_name)
+{
+	SendRaidAction(accepter, ActionPayload(inviter_name), 0, RaidActionAcceptInvite);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Apply State From World
+// ---------------------------------------------------------------------------------------------------------------------
+
+void Raid::ApplyFullFromWorld(const ServerRaidFull_Struct &rs)
+{
+	leader_name = rs.leader_name;
+	SetLeader(entity_list.GetClientByName(leader_name.c_str()));
+
+	locked    = rs.locked;
+	loot_type = rs.loot_type;
+	motd      = rs.motd;
+
+	for (int i = 0; i < MAX_RAID_MAIN_ASSISTERS; ++i)
+		main_assist_names[i] = rs.main_assist_names[i];
+	for (int i = 0; i < MAX_RAID_MAIN_MARKERS; ++i)
+		main_marker_names[i] = rs.main_marker_names[i];
+
+	master_looter_name = rs.master_looter_name;
+	for (int i = 0; i < MAX_RAID_LOOTERS; ++i)
+		looter_names[i] = rs.looter_names[i];
+
+	leadership_aa = rs.raid_aa;
+
+	// Diff against the roster as it stood before this call -- only a name
+	// that's genuinely new or genuinely gone fires OnAddToRaid/
+	// OnRemoveFromRaid via AttachLocalMember/entity_list.SetRaid; anyone
+	// still present just gets re-resolved via AttachLocalMember's Zoned
+	// path, since their membership itself didn't change.
+	std::vector<std::string> previous_names;
+	for (const auto &m : members)
+		if (m.InUse())
+			previous_names.push_back(m.name);
+
+	std::vector<std::string> incoming_names;
+
+	for (uint8 i = 0; i < rs.member_count && i < MAX_RAID_MEMBERS; ++i) {
+		const auto &mf = rs.members[i];
+		RaidMember &slot = members[i];
+		incoming_names.push_back(mf.member_name);
+
+		// Captured before AttachLocalMember re-resolves slot.member below --
+		// this is how we tell "just became locally resolvable this call"
+		// apart from "was already resolved, nothing changed for them" below,
+		// without needing any per-client pending-sync flag.
+		Mob* previously_resolved = slot.member;
+
+		slot.name           = mf.member_name;
+		slot.group_number   = mf.group_number;
+		slot.class_         = mf._class;
+		slot.level          = mf.level;
+		slot.note           = mf.note;
+		slot.is_group_leader  = mf.is_group_leader;
+		slot.roles            = mf.roles;
+		slot.main_marker      = mf.main_marker;
+		slot.main_assister    = mf.main_assister;
+		slot.kind             = mf.kind;
+		slot.offline          = mf.is_offline;
+
+		const bool was_present = std::ranges::any_of(previous_names, [&mf](const std::string& n) {
+			return Strings::EqualFold(n, mf.member_name);
+		});
+
+		AttachLocalMember(slot, !was_present);
+
+		// Only notify (and spawn raid bots for) a member that just became
+		// locally resolvable this call -- an already-resolved member's raid
+		// info hasn't changed just because some OTHER member's connect
+		// triggered this Full. This is also this member's one-time,
+		// exactly-once-per-zone-entry signal (MemberZoned nulls slot.member
+		// back out on zone-out, so the next zone-in sees this transition
+		// again) -- no p_pending_raid_sync flag needed.
+		if (previously_resolved == nullptr && slot.member != nullptr && slot.member->IsClient()) {
+			Client* c = slot.member->CastToClient();
+			SendBulkRaidInfoTo(c);
+
+			if (RuleB(Bots, Enabled))
+				c->SpawnRaidBotsOnConnect(this);
+		}
+	}
+
+	// Anyone who was here before but isn't in the new roster at all
+	// genuinely left the raid.
+	for (const auto& name : previous_names) {
+		const bool still_present = std::ranges::any_of(incoming_names, [&name](const std::string& n) {
+			return Strings::EqualFold(n, name);
+		});
+
+		if (!still_present) {
+			if (Mob* m = entity_list.GetMob(name))
+				entity_list.SetRaid(m, nullptr);
+		}
+	}
+
+	if (locked)
+		SendRaidLock();
+	else
+		SendRaidUnlock();
+}
+
+void Raid::ApplyMemberJoinedFromWorld(const ServerRaidMemberJoined_Struct &msg)
+{
+	RaidMember *slot = nullptr;
+	for (auto &m : members) {
+		if (!m.InUse()) {
+			slot = &m;
+			break;
+		}
+	}
+
+	if (slot == nullptr) {
+		LogError("Raid::ApplyMemberJoinedFromWorld() -- no free raid member slot for [{}]", msg.member.member_name);
+		return;
+	}
+
+	slot->name             = msg.member.member_name;
+	slot->group_number     = msg.member.group_number;
+	slot->class_           = msg.member._class;
+	slot->level            = msg.member.level;
+	slot->note             = msg.member.note;
+	slot->is_group_leader  = msg.member.is_group_leader;
+	slot->roles            = msg.member.roles;
+	slot->main_marker      = msg.member.main_marker;
+	slot->main_assister    = msg.member.main_assister;
+	slot->kind             = msg.member.kind;
+	slot->offline          = msg.member.is_offline;
+
+	AttachLocalMember(*slot, true);
+
+	if (slot->member && slot->member->IsClient())
+		SendBulkRaidInfoTo(slot->member->CastToClient());
+
+	for (auto &other : members)
+		if (other.member && other.member != slot->member && other.member->IsClient())
+			SendRaidAdd(slot->name.c_str(), other.member->CastToClient());
+}
+
+void Raid::ApplyMemberLeftFromWorld(const ServerRaidMemberLeft_Struct &msg)
+{
+	SendRaidRemoveAll(msg.member_name);
+
+	Client *rem = entity_list.GetClientByName(msg.member_name);
+	if (rem) {
+		entity_list.SetRaid(rem, nullptr);
+		SendRaidDisband(rem);
+	}
+
+	if (RuleB(Bots, Enabled)) {
+		Bot *rem_bot = entity_list.GetBotByBotName(msg.member_name);
+		if (rem_bot) {
+			if (rem_bot->GetOwner()) {
+				rem_bot->SetFollowID(rem_bot->GetOwner()->GetID());
+			}
+			rem_bot->SetTarget(nullptr);
+			rem_bot->SetVerifiedRaid(false);
+			entity_list.SetRaid(rem_bot, nullptr);
+		}
+	}
+
+	for (auto &m : members) {
+		if (Strings::EqualFold(m.name, msg.member_name)) {
+			m.name.clear();
+			m.member = nullptr;
+			m.group_number = RAID_GROUPLESS;
+			m.class_ = 0;
+			m.level = 0;
+			m.is_group_leader = false;
+			m.roles = 0;
+			m.main_marker = 0;
+			m.main_assister = 0;
+			m.kind = RaidMemberPlayer;
+			m.note.clear();
+			break;
 		}
 	}
 }
 
-bool Raid::Process()
+void Raid::ApplyMemberFieldsChangedFromWorld(const ServerRaidMemberFieldsChanged_Struct &msg)
 {
-	if (forceDisband) {
-		return false;
+	for (auto &m : members) {
+		if (Strings::EqualFold(m.name, msg.member.member_name)) {
+			m.class_           = msg.member._class;
+			m.level            = msg.member.level;
+			m.note             = msg.member.note;
+			m.roles            = msg.member.roles;
+			m.main_marker      = msg.member.main_marker;
+			m.main_assister    = msg.member.main_assister;
+			m.offline          = msg.member.is_offline;
+
+			AttachLocalMember(m);
+
+			SendRaidAddAll(m.name.c_str());
+			SendClassLevelUpdateAll(m.name.c_str());
+			break;
+		}
+	}
+}
+
+void Raid::ApplyGroupMovedFromWorld(const ServerRaidGroupMoved_Struct &msg)
+{
+	for (auto &m : members) {
+		if (Strings::EqualFold(m.name, msg.member_name)) {
+			m.group_number = msg.new_group_number;
+			AttachLocalMember(m);
+			SendRaidGroupChangeAll(m.name.c_str(), msg.new_group_number);
+			break;
+		}
+	}
+}
+
+void Raid::ApplyLeaderChangedFromWorld(const ServerRaidLeaderChanged_Struct &msg)
+{
+	for (auto &m : members) {
+		if (Strings::EqualFold(m.name, msg.leader_name))
+			m.roles |= RaidBitmaskLeader;
+		else
+			m.roles &= ~RaidBitmaskLeader;
 	}
 
-	if (disbandCheck) {
-		int count = 0;
+	SendMakeLeaderPacket(msg.leader_name);
+}
+
+void Raid::ApplyGroupLeaderChangedFromWorld(const ServerRaidGroupLeaderChanged_Struct &msg)
+{
+	for (auto &m : members) {
+		if (m.group_number == msg.group_number)
+			m.is_group_leader = Strings::EqualFold(m.name, msg.new_leader_name);
+	}
+
+	SendGroupLeaderChange(msg.group_number, msg.old_leader_name, msg.new_leader_name);
+}
+
+void Raid::ApplyStateChangedFromWorld(const ServerRaidStateChanged_Struct &msg)
+{
+	locked    = msg.locked;
+	loot_type = msg.loot_type;
+	motd      = msg.motd;
+
+	for (int i = 0; i < MAX_RAID_MAIN_ASSISTERS; ++i)
+		main_assist_names[i] = msg.main_assist_names[i];
+	for (int i = 0; i < MAX_RAID_MAIN_MARKERS; ++i)
+		main_marker_names[i] = msg.main_marker_names[i];
+	master_looter_name = msg.master_looter_name;
+	for (int i = 0; i < MAX_RAID_LOOTERS; ++i)
+		looter_names[i] = msg.looter_names[i];
+	// marked_npcs deliberately untouched -- see ApplyFullFromWorld's comment.
+
+	leadership_aa = msg.raid_aa;
+
+	if (locked)
+		SendRaidLock();
+	else
+		SendRaidUnlock();
+
+	for (const auto &m : members)
+		if (m.member && m.member->IsClient())
+			SendRaidMOTD(m.member->CastToClient());
+}
+
+void Raid::ApplyAAChangedFromWorld(const RaidLeadershipAA_Struct &new_leader_aa)
+{
+	leadership_aa = new_leader_aa;
+	SendLeadershipAAUpdate();
+}
+
+void Raid::ApplyRoleChangedFromWorld(uint8 role_id, uint8 slot, const std::string &target_name, bool clearing)
+{
+	switch (role_id) {
+		case RaidBitmaskMainAssist:
+			if (slot < MAX_RAID_MAIN_ASSISTERS) {
+				if (clearing)
+					main_assist_names[slot].clear();
+				else
+					main_assist_names[slot] = target_name;
+				SendRaidAssister(slot + 1, clearing, target_name.c_str());
+			}
+			break;
+		case RaidBitmaskMainMarker:
+			if (slot < MAX_RAID_MAIN_MARKERS) {
+				if (clearing)
+					main_marker_names[slot].clear();
+				else
+					main_marker_names[slot] = target_name;
+				SendRaidMarker(slot + 1, clearing, target_name.c_str());
+			}
+			break;
+		case RaidBitmaskMasterLooter:
+			SendRaidMasterLooter(clearing, target_name.c_str());
+			break;
+		default:
+			break;
+	}
+}
+
+void Raid::QueueClientsInRange(const Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/) const
+{
+	if (sender != nullptr && sender->IsClient()) {
 		for (const auto& m : members) {
-			if (strlen(m.member_name) == 0) {
-				continue;
+			if (m.member != nullptr && (!ignore_sender || m.member != sender)) {
+				/* If we don't have a distance requirement - send to all members */
+				if (distance == 0 ||
+					/* If negative distance - we check if current distance is greater than X */
+					(distance < 0 && DistanceSquared(sender->GetPosition(), m.member->GetPosition()) >= distance * distance) ||
+					/* If positive distance - we check if current distance is less than X */
+					(distance > 0 && DistanceSquared(sender->GetPosition(), m.member->GetPosition()) <= distance * distance))
+					m.member->QueuePacket(app, ack_required);
 			}
-			else {
-				count++;
-			}
-		}
-		if (count == 0) {
-			return false;
 		}
 	}
-	return true;
 }
 
-void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bool looter)
+void Raid::QueueClients(const EQApplicationPacket *app, bool ack_req) const
 {
-	if (!c) {
+	ForEachLocalMember([&](const RaidMember& m) { m.member->QueuePacket(app, ack_req); });
+}
+
+void Raid::RaidMessage(const char *msg, const Client *c, uint8 language, uint8 lang_skill) const
+{
+	if (c != nullptr)
+		RaidMessage(msg, c->GetCleanName(), language, lang_skill);
+}
+
+void Raid::RaidMessageString(const Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance) const
+{
+	for (const auto& m : members)
+		if (m.member != nullptr && m.member != sender)
+			m.member->MessageString(type, string_id, message, message2, message3, message4, message5, message6,
+				message7, message8, message9, distance);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Raid member logistics
+// ---------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Raid Role Functionality
+// ---------------------------------------------------------------------------------------------------------------------
+
+void Raid::MarkNPC(Client* requester, const Mob* target, uint32 number)
+{
+	if (requester == nullptr)
+		return;
+
+	// Same permission rule ClearNPCMarks() enforces -- this was previously
+	// missing entirely (any raid member could mark, regardless of whether
+	// they'd actually been delegated the ability), which defeats the whole
+	// point of RaidRoleDelegateMark.
+	const bool allowed = IsLeader(requester->GetCleanName()) || IsMarker(requester->GetCleanName());
+	if (!allowed) {
+		requester->Message(Chat::Red, "You have not been delegated the ability to mark NPCs.");
 		return;
 	}
 
-	auto rows_affected = RaidMembersRepository::ReplaceMember(
-		database,
-		GetID(),
-		c->CharacterID(),
-		0,
-		group,
-		c->GetClass(),
-		c->GetLevel(),
-		c->GetName(),
-		groupleader,
-		rleader,
-		looter
-	);
-	if (!rows_affected)
-		LogError("Error inserting into raid members for [{}]", c->GetName());
+	if (target != nullptr && number > 0 && number <= MAX_MARKED_NPCS) {
+		const uint32 EntityID = target->GetID();
+		if (EntityID > 0 && marked_npcs[number - 1] != EntityID) {
+			for (int i = 0; i < MAX_MARKED_NPCS; ++i) {
+				if (marked_npcs[i] == EntityID || (i == static_cast<int>(number - 1) && marked_npcs[i] > 0)) {
+					if (Mob* m = entity_list.GetMob(marked_npcs[i]))
+						m->IsTargeted(-1);
 
-	LearnMembers();
-	VerifyRaid();
-
-	if (rleader && group != RAID_GROUPLESS) {
-		database.SetRaidGroupLeaderInfo(group, GetID());
-		UpdateRaidAAs();
-	}
-	else if (rleader) {
-		database.SetRaidGroupLeaderInfo(RAID_GROUPLESS, GetID());
-		UpdateRaidAAs();
-	}
-
-	if (group != RAID_GROUPLESS && groupleader) {
-		database.SetRaidGroupLeaderInfo(group, GetID());
-		UpdateGroupAAs(group);
-	}
-
-	if (group < MAX_RAID_GROUPS) {
-		GroupUpdate(group);
-	}
-	else { // get raid AAs, GroupUpdate will handles it otherwise
-		SendGroupLeadershipAA(c, RAID_GROUPLESS);
-	}
-
-	SendRaidAddAll(c->GetName());
-
-	c->SetRaidGrouped(true);
-	SendRaidMOTD(c);
-
-	if (group == RAID_GROUPLESS) {
-		if (rleader) {
-			GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
-			c->GetXTargetAutoMgr()->clear();
-			c->SetXTargetAutoMgr(GetXTargetAutoMgr());
-		}
-		else {
-			if (!c->GetXTargetAutoMgr()->empty()) {
-				GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
-				c->GetXTargetAutoMgr()->clear();
-				c->RemoveAutoXTargets();
+					UpdateXtargetMarkedNPC();
+					UpdateXTargetMarkedNPC(i + 1, nullptr);
+					marked_npcs[i] = 0;
+				}
 			}
 
-			c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+			marked_npcs[number - 1] = EntityID;
+			if (Mob* m = entity_list.GetMob(EntityID))
+				m->IsTargeted(1);
 
-			if (!c->GetXTargetAutoMgr()->empty()) {
-				c->SetDirtyAutoHaters();
-			}
+			auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
+			const auto mnpcs = reinterpret_cast<MarkNPC_Struct*>(outapp->pBuffer);
+			mnpcs->TargetID = EntityID;
+			mnpcs->Number = number;
+
+			const Mob* m = entity_list.GetMob(EntityID);
+			if (m != nullptr)
+				strn0cpy(mnpcs->Name, m->GetCleanName(), sizeof(mnpcs->Name));
+
+			QueueClients(outapp);
+			safe_delete(outapp);
+
+			UpdateXTargetMarkedNPC(number, m);
 		}
 	}
-
-	if (auto* raid_update = c->GetRaid()) {
-		raid_update->SendHPManaEndPacketsTo(c);
-		raid_update->SendHPManaEndPacketsFrom(c);
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
-	auto* rga = (ServerRaidGeneralAction_Struct*) pack->pBuffer;
-	strn0cpy(rga->playername, c->GetName(), sizeof(rga->playername));
-	rga->rid         = GetID();
-	rga->zoneid      = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-
-	SendAssistTarget(c);
-
 }
 
-void Raid::AddBot(Bot* b, uint32 group, bool raid_leader, bool group_leader, bool looter)
+// Same permission rule the old world-authoritative RaidRoleClearNPCMarks
+// action enforced (leader or one of the delegated markers), now checked
+// locally like MarkNPC() -- marked_npcs is zone-local only, never touches
+// world at all.
+void Raid::ClearNPCMarks(Client* requester)
 {
-	if (!b) {
+	if (requester == nullptr)
+		return;
+
+	const bool allowed = IsLeader(requester->GetCleanName()) || IsMarker(requester->GetCleanName());
+	if (!allowed) {
+		requester->Message(Chat::Red, "You have not been delegated the ability to mark NPCs.");
 		return;
 	}
 
-	RaidMembersRepository::ReplaceMember(
-		database,
-		GetID(),
-		0,
-		b->GetBotID(),
-		group,
-		b->GetClass(),
-		b->GetLevel(),
-		b->GetName(),
-		group_leader,
-		raid_leader,
-		looter
-	);
+	for (int i = 0; i < MAX_MARKED_NPCS; ++i) {
+		if (marked_npcs[i] != 0) {
+			if (Mob* m = entity_list.GetMob(marked_npcs[i]))
+				m->IsTargeted(-1);
 
-	LearnMembers();
-	VerifyRaid();
+			marked_npcs[i] = 0;
+			UpdateXTargetMarkedNPC(i + 1, nullptr);
 
-	if (group < MAX_RAID_GROUPS) {
-		GroupUpdate(group);
-	} else { // get raid AAs, GroupUpdate will handle it otherwise
-		SendGroupLeadershipAA(b->GetOwner()->CastToClient(), RAID_GROUPLESS);
+			auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
+			const auto mnpcs = reinterpret_cast<MarkNPC_Struct*>(outapp->pBuffer);
+			mnpcs->TargetID = 0;
+			mnpcs->Number   = i + 1;
+			QueueClients(outapp);
+			safe_delete(outapp);
+		}
 	}
-
-	SendRaidAddAll(b->GetName());
-
-	b->SetRaidGrouped(true);
-
-	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
-	auto* rga = (ServerRaidGeneralAction_Struct*) pack->pBuffer;
-	strn0cpy(rga->playername, b->GetName(), sizeof(rga->playername));
-	rga->rid         = GetID();
-	rga->zoneid      = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
 }
 
-
-void Raid::RemoveMember(const char *character_name)
+void Raid::ApplyDisbandFromWorld()
 {
-	uint32 old_group = GetGroup(character_name);
+	for (const auto &m : members)
+		if (m.member && m.InUse())
+			entity_list.SetRaid(m.member, nullptr);
 
-	RaidMembersRepository::DeleteWhere(
-		database,
-		fmt::format("name = '{}'", Strings::Escape(character_name))
-	);
+	for (auto &gid : subgroup_group_ids)
+		gid = 0;
 
-	auto* b = entity_list.GetBotByBotName(character_name);
-	auto* c = entity_list.GetClientByName(character_name);
-
-	if (RuleB(Bots, Enabled) && b) {
-		b = entity_list.GetBotByBotName(character_name);
-		b->SetFollowID(b->GetOwner()->CastToClient()->GetID());
-		b->SetTarget(nullptr);
-		b->SetRaidGrouped(false);
-		b->p_raid_instance = nullptr;
-		b->SetStoredRaid(nullptr);
-		b->SetVerifiedRaid(false);
-	}
-
-	disbandCheck = true;
-	SendRaidRemoveAll(character_name);
-	SendRaidDisband(c);
-	if (c && old_group < MAX_RAID_GROUPS)
-		SendGroupDisband(c);
-
-	LearnMembers();
-	VerifyRaid();
-
-	if (old_group < MAX_RAID_GROUPS)
-		GroupUpdate(old_group);
-
-	if (c) {
-		c->SetRaidGrouped(false);
-		c->LeaveRaidXTargets(this);
-		c->p_raid_instance = nullptr;
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
-	auto* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	rga->rid         = GetID();
-	rga->instance_id = zone->GetInstanceID();
-	rga->zoneid      = zone->GetZoneID();
-	strn0cpy(rga->playername, character_name, sizeof(rga->playername));
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::DisbandRaid()
-{
-	for (const auto &m : members) {
-		if (m.member && m.group_number < MAX_RAID_GROUPS && strlen(m.member_name) > 0)
-			SendGroupDisband(m.member);
-	}
-
-	RaidMembersRepository::DeleteWhere(
-		database,
-		fmt::format("raidid = {}", GetID())
-	);
-
-	LearnMembers();
-	VerifyRaid();
 	SendRaidDisbandAll();
 
-	auto pack = new ServerPacket(ServerOP_RaidDisband, sizeof(ServerRaidGeneralAction_Struct));
-	auto* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	rga->rid         = GetID();
-	rga->zoneid      = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	strn0cpy(rga->playername, " ", sizeof(rga->playername));
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-
-	forceDisband = true;
+	entity_list.RemoveRaid(GetID()); // deletes this Raid
 }
 
-void Raid::MoveMember(const char *name, uint32 newGroup)
+Group* Raid::GetGroupObject(uint32 group_number) const
 {
-
-	RaidMembersRepository::UpdateGroupId(database, name, newGroup);
-
-	LearnMembers();
-	VerifyRaid();
-	SendRaidMoveAll(name);
-
-	auto pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
-	auto* rga = (ServerRaidGeneralAction_Struct*) pack->pBuffer;
-	strn0cpy(rga->playername, name, sizeof(rga->playername));
-	rga->rid         = GetID();
-	rga->zoneid      = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::SetGroupLeader(const char *who, bool glFlag)
-{
-	RaidMembersRepository::UpdateGroupLeaderFlag(database, who, glFlag);
-
-	LearnMembers();
-	VerifyRaid();
-
-	auto pack = new ServerPacket(ServerOP_RaidGroupLeader, sizeof(ServerRaidGeneralAction_Struct));
-	auto* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	strn0cpy(rga->playername, who, sizeof(rga->playername));
-	rga->rid         = GetID();
-	rga->zoneid      = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-Client *Raid::GetGroupLeader(uint32 group_id)
-{
-	if (group_id == RAID_GROUPLESS) {
-		return nullptr;
-	}
-
-	for (const auto& m : members) {
-		if (m.member && m.is_group_leader && m.group_number == group_id) {
-			return m.member;
-		}
+	if (group_number < MAX_RAID_GROUPS) {
+		uint32 gid = subgroup_group_ids[group_number];
+		if (gid != 0)
+			return entity_list.GetGroupByID(gid);
 	}
 
 	return nullptr;
 }
 
-void Raid::SetRaidLeader(const char *wasLead, const char *name)
+bool Raid::IsGroupLeader(const char* name) const
 {
-	RaidMembersRepository::UpdateRaidLeaderFlag(database, wasLead, 0);
-	RaidMembersRepository::UpdateRaidLeaderFlag(database, name, 1);
-
-	strn0cpy(leadername, name, 64);
-
-	Client *c = entity_list.GetClientByName(name);
-	if (c) {
-		SetLeader(c);
-	}
-	else {
-		SetLeader(nullptr);
-	} //sanity check, should never get hit but we want to prefer to NOT crash if we do VerifyRaid and leader never gets set there (raid without a leader?)
-
-	LearnMembers();
-	VerifyRaid();
-	SendMakeLeaderPacket(name);
-
-	auto pack = new ServerPacket(ServerOP_RaidLeader, sizeof(ServerRaidGeneralAction_Struct));
-	auto rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	strn0cpy(rga->playername, name, 64);
-	rga->zoneid = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::SaveGroupLeaderAA(uint32 gid)
-{
-	auto queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
-	database.DoEscapeString(queryBuffer, (char*)&group_aa[gid], sizeof(GroupLeadershipAA_Struct));
-
-	auto existing = RaidLeadersRepository::GetWhere(
-		database,
-		fmt::format("rid = {} AND gid = {} LIMIT 1", GetID(), gid)
-	);
-
-	if (!existing.empty()) {
-		auto e = existing.front();
-		e.leadershipaa = queryBuffer;
-		if (!RaidLeadersRepository::UpdateOne(database, e))
-			LogError("Unable to store LeadershipAA for gid [{}]\n", gid);
-	}
-
-	safe_delete_array(queryBuffer);
-}
-
-void Raid::SaveRaidLeaderAA()
-{
-	auto queryBuffer = new char[sizeof(RaidLeadershipAA_Struct) * 2 + 1];
-	database.DoEscapeString(queryBuffer, (char*)&raid_aa, sizeof(RaidLeadershipAA_Struct));
-
-	std::string query = "UPDATE raid_leaders SET leadershipaa = '";
-	query += queryBuffer;
-	query +=  StringFormat("' WHERE gid = %lu AND rid = %lu LIMIT 1", RAID_GROUPLESS, GetID());
-	safe_delete_array(queryBuffer);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Unable to store LeadershipAA: [{}]\n", results.ErrorMessage().c_str());
-	}
-}
-
-void Raid::UpdateGroupAAs(uint32 gid)
-{
-
-	if (gid >= MAX_RAID_GROUPS || gid == RAID_GROUPLESS) {
-		return;
-	}
-
-	Client *gl = GetGroupLeader(gid);
-
-	if (gl && gl->IsClient()) {
-		gl->GetGroupAAs(&group_aa[gid]);
-	} else {
-		memset(&group_aa[gid], 0, sizeof(GroupLeadershipAA_Struct));
-	}
-
-	if (subgroups[gid])
-		subgroups[gid]->SetGroupAAs(&group_aa[gid]);
-
-	SaveGroupLeaderAA(gid);
-}
-
-void Raid::UpdateRaidAAs()
-{
-	Client *rl = GetLeader();
-
-	if (rl) {
-		rl->GetRaidAAs(&raid_aa);
-	} else {
-		memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
-	}
-
-	SaveRaidLeaderAA();
-}
-
-void Raid::SetRaidLeadersColumn(uint32 gid, const std::string &column, std::string value) const
-{
-	if (!RaidLeadersRepository::UpsertLeaderWithColumn(database, column, value, gid, GetID()))
-		LogError("Unable to set raid_leaders.{} to {}: rid [{}] gid [{}]\n", column, value, GetID(), gid);
-}
-
-void Raid::LoadGroupLeaders(uint32 gid, Group *g)
-{
-	if (g != nullptr && gid < MAX_RAID_GROUPS) {
-		auto rows = RaidLeadersRepository::GetWhere(
-			database,
-			fmt::format("rid = {} AND gid = {} LIMIT 1", GetID(), gid)
-		);
-
-		if (!rows.empty()) {
-			const auto &e = rows.front();
-			g->SetMainTank(e.maintank.c_str());
-			g->SetMainAssist(e.assist.c_str());
-			g->SetPuller(e.puller.c_str());
-			g->SetNPCMarker(e.marknpc.c_str());
-			g->SetMasterLooter(e.masterlooter.c_str());
-		}
-	}
-}
-
-bool Raid::IsGroupLeader(const char* name)
-{
-	if (name) {
-		for (const auto &m: members) {
-			if (!strcmp(m.member_name, name)) {
+	if (name)
+		for (const auto& m : members)
+			if (m.name == name)
 				return m.is_group_leader;
-			}
-		}
-	}
 
 	return false;
 }
 
-bool Raid::IsGroupLeader(Client *c)
+bool Raid::IsGroupLeader(const Client* c) const
 {
-	if (c) {
-		for (const auto &m: members) {
-			if (m.member == c) {
+	if (c)
+		for (const auto& m : members)
+			if (m.member == c)
 				return true;
-			}
-		}
-	}
 
 	return false;
 }
 
-void Raid::UpdateLevel(const char *name, int newLevel)
-{
-	RaidMembersRepository::UpdateMemberLevel(database, name, static_cast<int8_t>(newLevel));
-
-	LearnMembers();
-	VerifyRaid();
-}
-
-uint32 Raid::GetFreeGroup()
-{
-	//check each group return the first one with 0 members assigned...
-	for (int x = 0; x < MAX_RAID_GROUPS; x++) {
-		int count = 0;
-		for (const auto& m : members) {
-			if (m.group_number == x && (strlen(m.member_name) > 0)) {
-				count++;
-			}
-		}
-		if (count == 0) {
-			return x;
-		}
-	}
-	//if we get to here then there were no free groups so we added the group as free floating members.
-	return RAID_GROUPLESS;
-}
-
-uint32 Raid::GetGroupWithRoom()
-{
-	for (uint32 x = 0; x < MAX_RAID_GROUPS; x++) {
-		uint8 count = GroupCount(x);
-		if (count > 0 && count < MAX_GROUP_MEMBERS)
-			return x;
-	}
-
-	return GetFreeGroup();
-}
-
-uint8 Raid::GroupCount(uint32 gid)
-{
-	uint8 count = 0;
-	if (gid < MAX_RAID_GROUPS) {
-		for (const auto& m : members) {
-			if (m.group_number == gid && strlen(m.member_name) > 0) {
-				count++;
-			}
-		}
-	}
-	else {
-		for (const auto& m : members) {
-			if (m.group_number > 11 && strlen(m.member_name) > 0) {
-				count++;
-			}
-		}
-	}
-	return count;
-}
-
-uint8 Raid::RaidCount()
+uint8 Raid::RaidCount() const
 {
 	int count = 0;
-	for (const auto& m : members) {
-		if (strlen(m.member_name) > 0) {
-			count++;
-		}
-	}
+	for (const auto& m : members)
+		if (m.InUse())
+			++count;
+
 	return count;
 }
 
-uint32 Raid::GetGroup(const char *name)
+uint32 Raid::GetGroupNumber(const char *name) const
 {
-	for (const auto& m : members) {
-		if (strcmp(m.member_name, name) == 0) {
+	for (const auto& m : members)
+		if (m.name == name)
 			return m.group_number;
-		}
-	}
+
 	return RAID_GROUPLESS;
 }
 
-uint32 Raid::GetGroup(Client *c)
+uint32 Raid::GetGroupNumber(const Client *c) const
 {
-	for (const auto& m : members) {
-		if (m.member == c) {
+	for (const auto& m : members)
+		if (m.member == c)
 			return m.group_number;
-		}
-	}
+
 	return RAID_GROUPLESS;
 }
 
-void Raid::RaidSay(const char *msg, Client *c, uint8 language, uint8 lang_skill)
+Client* Raid::GetClientByIndex(uint16 index) const
 {
-	if (!c) {
-		return;
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
-	ServerRaidMessage_Struct *rga = (ServerRaidMessage_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = RAID_GROUPLESS;
-	rga->language = language;
-	rga->lang_skill = lang_skill;
-	strn0cpy(rga->from, c->GetName(), 64);
-
-	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
-
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::RaidGroupSay(const char *msg, Client *c, uint8 language, uint8 lang_skill)
-{
-	if (!c) {
-		return;
-	}
-
-	uint32 group_id_to_use = GetGroup(c->GetName());
-
-	if (group_id_to_use >= MAX_RAID_GROUPS) {
-		return;
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
-	auto rga = (ServerRaidMessage_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = group_id_to_use;
-	rga->language = language;
-	rga->lang_skill = lang_skill;
-	strn0cpy(rga->from, c->GetName(), 64);
-
-	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
-
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-uint32 Raid::GetPlayerIndex(const char *name)
-{
-	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if (strcmp(name, members[x].member_name) == 0) {
-			return x;
-		}
-	}
-	return 0; //should never get to here if we do everything else right, set it to 0 so we never crash things that rely on it.
-}
-
-uint32 Raid::GetPlayerIndex(Client *c)
-{
-	for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
-		if (c == members[i].member) {
-			return i;
-		}
-	}
-	return 0xFFFFFFFF; // return sentinel value, make sure you check it unlike the above function
-}
-
-Client *Raid::GetClientByIndex(uint16 index)
-{
-	if (index >= MAX_RAID_MEMBERS) {
-		return nullptr;
-	}
-
-	return members[index].member;
-}
-
-Client* Raid::GetClientByName(const char* name)
-{
-	for (const auto& m : members) {
-		if (strcmp(m.member_name, name) == 0)
-			return m.member;
+	if (index < MAX_RAID_MEMBERS) {
+		Mob* m = members[index].member;
+		if (m != nullptr && m->IsClient())
+			return m->CastToClient();
 	}
 
 	return nullptr;
 }
 
-void Raid::CastGroupSpell(Mob* caster, int32 spellid, uint32 gid)
-{
-	float range, distance;
-
-	if (!caster) {
-		return;
-	}
-
-	range = caster->GetAOERange(spellid);
-
-	float range2 = range*range;
-
-	for (const auto& m : members) {
-		if (m.member == caster) {
-			caster->SpellOnTarget(spellid, caster);
-#ifdef GROUP_BUFF_PETS
-			if (spells[spellid].target_type != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed()) {
-				caster->SpellOnTarget(spellid, caster->GetPet());
-			}
-#endif
-		}
-		else if (m.member != nullptr && m.group_number == gid) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-			if (distance <= range2) {
-				caster->SpellOnTarget(spellid, m.member);
-
-#ifdef GROUP_BUFF_PETS
-				if (spells[spellid].target_type != ST_GroupNoPets && m.member->GetPet() && m.member->HasPetAffinity() &&
-					!m.member->GetPet()->IsCharmed()) {
-					caster->SpellOnTarget(spellid, m.member->GetPet());
-				}
-#endif
-			}
-			else {
-				LogSpells("Raid spell: [{}] is out of range [{}] at distance [{}] from [{}]", m.member->GetName(), range, distance, caster->GetName());
-			}
-		}
-	}
-}
-
-
-uint32 Raid::GetTotalRaidDamage(Mob* other)
+uint32 Raid::GetTotalRaidDamage(Mob* other) const
 {
 	uint32 total = 0;
 
-	for (const auto& m : members) {
-		if (!m.member) {
-			continue;
-		}
-
-		if (other->CheckAggro(m.member)) {
+	for (const auto& m : members)
+		if (m.member != nullptr && other->CheckAggro(m.member))
 			total += other->GetHateAmount(m.member, true);
-		}
-	}
 
 	return total;
 }
 
-void Raid::HealGroup(uint32 heal_amount, Mob* caster, uint32 group_id, float range)
+void Raid::TeleportRaid(const Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading)
 {
-	if (!caster) {
-		return;
-	}
-
-	if (!range) {
-		range = 200;
-	}
-
-	float distance;
-	float range_squared = range * range;
-
-	int member_count = 0;
-
-	for (const auto& m : members) {
-		if (m.member && m.group_number == group_id) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-
-			if (distance <= range_squared) {
-				member_count += 1;
-			}
-		}
-	}
-
-	if (member_count > 0) {
-		heal_amount /= member_count;
-	}
-
-	for (const auto& m : members) {
-		if (m.member && m.group_number == group_id) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-
-			if (distance <= range_squared) {
-				m.member->SetHP(m.member->GetHP() + heal_amount);
-				m.member->SendHPUpdate();
-			}
-		}
-	}
+	for (const auto& m : members)
+		if (m.member != nullptr && m.member != sender && m.member->IsClient())
+			m.member->CastToClient()->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
 }
 
-
-void Raid::BalanceHP(int32 penalty, uint32 group_id, float range, Mob* caster, int32 limit)
+const char *Raid::GetRaidMasterLooter() const
 {
-	if (!caster) {
-		return;
-	}
-
-	if (!range) {
-		range = 200;
-	}
-
-	int damage_taken           = 0;
-	int damage_taken_temporary = 0;
-	int member_count           = 0;
-
-	float distance;
-	float range_squared = range * range;
-
-	for (const auto& m : members) {
-		if (m.member && m.group_number == group_id) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-
-			if (distance <= range_squared) {
-				damage_taken_temporary = m.member->GetMaxHP() - m.member->GetHP();
-
-				if (limit && (damage_taken_temporary > limit)) {
-					damage_taken_temporary = limit;
-				}
-
-				damage_taken += damage_taken_temporary;
-				member_count += 1;
-			}
-		}
-	}
-
-	damage_taken += damage_taken * penalty / 100;
-
-	if (member_count > 0) {
-		damage_taken /= member_count;
-	}
-
-	for (const auto& m : members) {
-		if (m.member && m.group_number == group_id) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-
-			//this way the ability will never kill someone
-			//but it will come darn close
-			if (distance <= range_squared) {
-				if ((m.member->GetMaxHP() - damage_taken) < 1) {
-					m.member->SetHP(1);
-					m.member->SendHPUpdate();
-				} else {
-					m.member->SetHP(m.member->GetMaxHP() - damage_taken);
-					m.member->SendHPUpdate();
-				}
-			}
-		}
-	}
-}
-
-void Raid::BalanceMana(int32 penalty, uint32 group_id, float range, Mob* caster, int32 limit)
-{
-	if (!caster) {
-		return;
-	}
-
-	if (!range) {
-		range = 200;
-	}
-
-	float distance;
-	float range_squared = range * range;
-
-	int mana_taken           = 0;
-	int mana_taken_temporary = 0;
-	int member_count         = 0;
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.group_number == group_id && m.member->GetMaxMana() > 0) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-
-			if (distance <= range_squared) {
-				mana_taken_temporary = m.member->GetMaxMana() - m.member->GetMana();
-
-				if (limit && (mana_taken_temporary > limit)) {
-					mana_taken_temporary = limit;
-				}
-
-				mana_taken += mana_taken_temporary;
-				member_count += 1;
-			}
-		}
-	}
-
-	mana_taken += mana_taken * penalty / 100;
-
-	if (member_count > 0) {
-		mana_taken /= member_count;
-	}
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.group_number == group_id) {
-			distance = DistanceSquared(caster->GetPosition(), m.member->GetPosition());
-
-			if (distance <= range_squared) {
-				if ((m.member->GetMaxMana() - mana_taken) < 1) {
-					m.member->SetMana(1);
-
-					if (m.member->IsClient()) {
-						m.member->CastToClient()->SendManaUpdate();
-					}
-				} else {
-					m.member->SetMana(m.member->GetMaxMana() - mana_taken);
-
-					if (m.member->IsClient()) {
-						m.member->CastToClient()->SendManaUpdate();
-					}
-				}
-			}
-		}
-	}
-}
-
-//basically the same as Group's version just with more people like a lot of non group specific raid stuff
-//this only functions if the member has a group in the raid. This does not support /autosplit?
-void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
-{
-	//avoid unneeded work
-	if (gid == RAID_GROUPLESS) {
-		return;
-	}
-
-	if (
-		!copper &&
-		!silver &&
-		!gold &&
-		!platinum
-	) {
-		return;
-	}
-
-	uint8 member_count = 0;
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.group_number == gid && m.member->IsClient()) {
-			member_count++;
-		}
-	}
-
-	if (!member_count) {
-		return;
-	}
-
-	uint32 modifier;
-	if (member_count > 1) {
-		modifier = platinum % member_count;
-
-		if (modifier) {
-			platinum -= modifier;
-			gold += 10 * modifier;
-		}
-
-		modifier = gold % member_count;
-
-		if (modifier) {
-			gold -= modifier;
-			silver += 10 * modifier;
-		}
-
-		modifier = silver % member_count;
-
-		if (modifier) {
-			silver -= modifier;
-			copper += 10 * modifier;
-		}
-	}
-
-	auto copper_split = copper / member_count;
-	auto silver_split = silver / member_count;
-	auto gold_split = gold / member_count;
-	auto platinum_split = platinum / member_count;
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.group_number == gid && m.member->IsClient()) { // If Group Member is Client
-			m.member->AddMoneyToPP(
-				copper_split,
-				silver_split,
-				gold_split,
-				platinum_split,
-				true
-			);
-
-			if (PlayerEventLogs::Instance()->IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
-				auto e = PlayerEvent::SplitMoneyEvent{
-					.copper = copper_split,
-					.silver = silver_split,
-					.gold = gold_split,
-					.platinum = platinum_split,
-					.player_money_balance = m.member->GetCarriedMoney(),
-				};
-
-				RecordPlayerEventLogWithClient(m.member, PlayerEvent::SPLIT_MONEY, e);
-			}
-
-			m.member->MessageString(
-				Chat::MoneySplit,
-				YOU_RECEIVE_AS_SPLIT,
-				Strings::Money(
-					platinum_split,
-					gold_split,
-					silver_split,
-					copper_split
-				).c_str()
-			);
-		}
-	}
-}
-
-void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid)
-{
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.group_number == gid && m.member->IsClient()) {
-			m.member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
-		}
-	}
-}
-
-void Raid::TeleportRaid(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading)
-{
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.member->IsClient()) {
-			m.member->MovePC(zoneID, instance_id, x, y, z, heading, 0, ZoneSolicited);
-		}
-	}
-}
-
-void Raid::ChangeLootType(uint32 type)
-{
-	RaidDetailsRepository::UpdateLootType(database, GetID(), type);
-	LootType = type;
-
-	// LeaderSelected is the only valid loot type for delegated non-master looters
-	if (type != RaidLootType::LeaderSelected) {
-		RaidMembersRepository::ClearAllLooters(database, GetID());
-
-		for (auto &m : members)
-			m.is_looter = false;
-	}
-}
-
-void Raid::DelegateRaidMasterLooter(const char *name)
-{
-	if (name != nullptr && strlen(name) > 0) {
-		RaidMembersRepository::ClearMasterLooter(database, GetID());
-
-		if (!RaidMembersRepository::UpdateMasterLooterFlag(database, GetID(), name, 1))
-			LogError("Unable to set raid master looter: [{}]\n", name);
-
-		for (auto &m : members)
-			m.is_master_looter = strcmp(m.member_name, name) == 0;
-	}
-}
-
-void Raid::UndelegateRaidMasterLooter(const char *name)
-{
-	if (name != nullptr && strlen(name) > 0) {
-		if (!RaidMembersRepository::UpdateMasterLooterFlag(database, GetID(), name, 0))
-			LogError("Unable to clear raid master looter: [{}]\n", name);
-
-		for (auto &m : members) {
-			if (strcmp(m.member_name, name) == 0) {
-				m.is_master_looter = false;
-				break;
-			}
-		}
-	}
-}
-
-const char *Raid::GetRaidMasterLooter()
-{
-	for (const auto &m : members) {
-		if (m.is_master_looter)
-			return m.member_name;
-	}
+	for (const auto &m : members)
+		if (m.roles & RaidBitmaskMasterLooter)
+			return m.name.c_str();
 
 	return "";
 }
 
-void Raid::AddRaidLooter(const char* looter)
+bool Raid::IsRaidMember(const char *name) const
 {
-	RaidMembersRepository::UpdateLooterFlag(database, looter, 1);
-
-	for (auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (strcmp(looter, m.member_name) == 0) {
-			m.is_looter = true;
-			break;
-		}
-	}
-
-	auto pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
-	auto rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->zoneid = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::RemoveRaidLooter(const char* looter)
-{
-	RaidMembersRepository::UpdateLooterFlag(database, looter, 0);
-
-	for (auto& m: members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (strcmp(looter, m.member_name) == 0) {
-			m.is_looter = false;
-			break;
-		}
-	}
-
-	auto pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
-	auto rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->zoneid = zone->GetZoneID();
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-bool Raid::IsRaidMember(const char *name)
-{
-	if (name) {
-		for (const auto &m: members) {
-			if (!strcmp(m.member_name, name)) {
+	if (name != nullptr && name[0] != '\0')
+		for (const auto &m: members)
+			if (Strings::EqualFold(m.name, name))
 				return true;
-			}
-		}
-	}
 
 	return false;
 }
 
-bool Raid::IsRaidMember(Client* c)
+bool Raid::IsRaidMember(const Client* c) const
 {
-	if (c) {
-		for (const auto &m: members) {
-			if (m.member == c) {
+	if (c != nullptr)
+		for (const auto &m: members)
+			if (m.member == c)
 				return true;
-			}
-		}
-	}
 
 	return false;
 }
 
-uint32 Raid::GetHighestLevel()
+uint32 Raid::GetHighestLevel() const
 {
 	uint32 highlvl = 0;
-	for (const auto& m : members) {
-		if (strlen(m.member_name) && m.level > highlvl) {
+	for (const auto& m : members)
+		if (m.InUse() && m.level > highlvl)
 			highlvl = m.level;
-		}
-	}
 
 	return highlvl;
 }
 
-uint32 Raid::GetLowestLevel()
+uint32 Raid::GetLowestLevel() const
 {
-	uint32 lowlvl = 1000;
-	for (const auto& m : members) {
-		if (strlen(m.member_name) && m.level < lowlvl) {
+	uint32 lowlvl = std::numeric_limits<uint32>::max();
+	for (const auto& m : members)
+		if (m.InUse() && m.level < lowlvl)
 			lowlvl = m.level;
-		}
-	}
 
 	return lowlvl;
 }
@@ -1214,100 +794,152 @@ uint32 Raid::GetLowestLevel()
 /*
  * Packet Functions Start
  */
-void Raid::SendRaidCreate(Client *to)
-{
-	if (!to) {
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidJoin, sizeof(RaidCreate_Struct));
-	auto rc = (RaidCreate_Struct*)outapp->pBuffer;
-	rc->action = raidCreate;
-	strn0cpy(rc->leader_name, leadername, 64);
-	rc->leader_id = (GetLeader()?GetLeader()->GetID():0);
-	to->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void Raid::SendRaidAdd(const char *who, Client *to)
-{
-	if (!to) {
-		return;
-	}
-
-	std::vector<RaidMember> rm = GetMembers();
-
-	for (const auto& m : rm) {
-		if (strcmp(m.member_name, who) == 0) {
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
-			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
-			ram->raidGen.action = raidAdd;
-			ram->raidGen.parameter = m.group_number;
-			strn0cpy(ram->raidGen.leader_name, m.member_name, sizeof(ram->raidGen.leader_name));
-			strn0cpy(ram->raidGen.player_name, m.member_name, sizeof(ram->raidGen.player_name));
-			ram->_class = m._class;
-			ram->level = m.level;
-			ram->isGroupLeader = m.is_group_leader;
-			to->QueuePacket(outapp);
-			safe_delete(outapp);
-
-			if (IsAssister(m.member_name)) {
-				SendRaidAssisterTo(m.member_name, to);
-			}
-
-			if (IsMarker(m.member_name)) {
-				SendRaidMarkerTo(m.member_name, to);
-			}
-
-			return;
-		}
-	}
-}
-
-void Raid::SendRaidAddAll(const char *who)
-{
-	std::vector<RaidMember> rm = GetMembers();
-
-	for (const auto& m : rm) {
-		if (strcmp(m.member_name, who) == 0) {
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
-			auto ram = (RaidAddMember_Struct*)outapp->pBuffer;
-			ram->raidGen.action = raidAdd;
-			ram->raidGen.parameter = m.group_number;
-			strn0cpy(ram->raidGen.leader_name, m.member_name, sizeof(ram->raidGen.leader_name));
-			strn0cpy(ram->raidGen.player_name, m.member_name, sizeof(ram->raidGen.player_name));
-			ram->isGroupLeader = m.is_group_leader;
-			ram->_class = m._class;
-			ram->level = m.level;
-
-			QueuePacket(outapp);
-			safe_delete(outapp);
-
-			if (IsAssister(m.member_name)) {
-				SendRaidAssister(m.member_name);
-			}
-
-			if (IsMarker(m.member_name)) {
-				SendRaidMarker(m.member_name);
-			}
-
-			return;
-		}
-	}
-}
-
-void Raid::SendClassLevelUpdate(const char *who, Client *to)
+void Raid::SendRaidCreate(Client *to) const
 {
 	if (to != nullptr) {
-		std::vector<RaidMember> rm = GetMembers();
+		auto outapp = new EQApplicationPacket(OP_RaidJoin, sizeof(RaidCreate_Struct));
+		const auto rc = reinterpret_cast<RaidCreate_Struct*>(outapp->pBuffer);
+		rc->action = raidCreate;
+		strn0cpy(rc->leader_name, leader_name.c_str(), 64);
+		rc->leader_id = GetLeader() ? GetLeader()->GetID() : 0;
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
 
-		for (const auto& m : rm) {
-			if (strcmp(m.member_name, who) == 0) {
+void Raid::SendRaidMembers(Client *to) const
+{
+	if (to != nullptr) {
+		RaidMembersUpdate_Struct snapshot{};
+		snapshot.action = raidMembers;
+		strn0cpy(snapshot.leader_name, leader_name.c_str(), sizeof(snapshot.leader_name));
+		snapshot.raid_id = GetID();
+		strn0cpy(snapshot.motd, motd.c_str(), sizeof(snapshot.motd));
+		snapshot.locked = IsLocked() ? 1 : 0;
+
+		// Same opportunistic entity-id resolution as
+		// SendRaidAssister/SendRaidMarker/SendRaidMasterLooter -- 0 if the
+		// named member isn't physically resolvable in this zone.
+		for (int i = 0; i < MAX_RAID_MAIN_ASSISTERS; ++i) {
+			strn0cpy(snapshot.main_assist_name[i], main_assist_names[i].c_str(), sizeof(snapshot.main_assist_name[i]));
+			if (const auto* mob = entity_list.GetMob(main_assist_names[i].c_str()))
+				snapshot.main_assist_id[i] = mob->GetID();
+		}
+		for (int i = 0; i < MAX_RAID_MAIN_MARKERS; ++i) {
+			if (const auto* mob = entity_list.GetMob(main_marker_names[i].c_str()))
+				snapshot.main_marker_id[i] = mob->GetID();
+		}
+		if (const auto* mob = entity_list.GetMob(GetRaidMasterLooter()))
+			snapshot.master_looter_id = mob->GetID();
+
+		uint32 count = 0;
+		for (const auto& m : members) {
+			if (m.InUse() && count < std::size(snapshot.members)) {
+				auto& out = snapshot.members[count];
+				strn0cpy(out.name, m.name.c_str(), sizeof(out.name));
+				strn0cpy(out.note, m.note.c_str(), sizeof(out.note));
+				out.level = m.level;
+				out._class = m.class_;
+				out.is_raid_leader = (m.roles & RaidBitmaskLeader) ? 1 : 0;
+				out.is_group_leader = m.is_group_leader ? 1 : 0;
+				out.is_assist = m.main_assister != 0 ? 1 : 0;
+				out.is_marker = m.main_marker != 0 ? 1 : 0;
+				out.is_master_looter = (m.roles & RaidBitmaskMasterLooter) ? 1 : 0;
+				out.group_number = m.group_number;
+
+				if (m.is_group_leader && m.group_number < std::size(snapshot.group_leader_names))
+					strn0cpy(snapshot.group_leader_names[m.group_number], m.name.c_str(), sizeof(snapshot.group_leader_names[0]));
+
+				++count;
+			}
+		}
+		snapshot.member_count = count;
+
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMembersUpdate_Struct));
+		memcpy(outapp->pBuffer, &snapshot, sizeof(RaidMembersUpdate_Struct));
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
+void Raid::SendRaidAdd(const char *who, Client *to) const
+{
+	if (to != nullptr && who != nullptr && who[0] != '\0') {
+		for (const auto& m : members) {
+			if (m.InUse() && Strings::EqualFold(m.name, who)) {
+				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
+				const auto ram = reinterpret_cast<RaidAddMember_Struct*>(outapp->pBuffer);
+				ram->raidGen.action = raidAdd;
+				ram->raidGen.parameter = m.group_number;
+				strn0cpy(ram->raidGen.leader_name, m.name.c_str(), sizeof(ram->raidGen.leader_name));
+				strn0cpy(ram->raidGen.player_name, m.name.c_str(), sizeof(ram->raidGen.player_name));
+				ram->_class = m.class_;
+				ram->level = m.level;
+				ram->isGroupLeader = m.is_group_leader;
+				to->QueuePacket(outapp);
+				safe_delete(outapp);
+
+				if (m.main_assister != 0)
+					SendRaidAssisterTo(m.main_assister, m.name.c_str(), to);
+
+				if (m.main_marker != 0)
+					SendRaidMarkerTo(m.main_marker, m.name.c_str(), to);
+
+				if (m.roles & RaidBitmaskMasterLooter)
+					SendRaidMasterLooterTo(m.name.c_str(), to);
+
+				return;
+			}
+		}
+	}
+}
+
+void Raid::SendRaidAddAll(const char *who) const
+{
+	if (who != nullptr && who[0] != '\0') {
+		for (const auto& m : members) {
+			if (m.InUse() && Strings::EqualFold(m.name, who)) {
+				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
+				const auto ram = reinterpret_cast<RaidAddMember_Struct*>(outapp->pBuffer);
+				ram->raidGen.action = raidAdd;
+				ram->raidGen.parameter = m.group_number;
+				strn0cpy(ram->raidGen.leader_name, m.name.c_str(), sizeof(ram->raidGen.leader_name));
+				strn0cpy(ram->raidGen.player_name, m.name.c_str(), sizeof(ram->raidGen.player_name));
+				ram->isGroupLeader = m.is_group_leader;
+				ram->_class = m.class_;
+				ram->level = m.level;
+
+				for (const auto &other : members)
+					if (other.member && !Strings::EqualFold(other.name, who))
+						other.member->QueuePacket(outapp);
+
+				safe_delete(outapp);
+
+				if (m.main_assister != 0)
+					SendRaidAssister(m.main_assister, false, m.name.c_str());
+
+				if (m.main_marker != 0)
+					SendRaidMarker(m.main_marker, false, m.name.c_str());
+
+				if (m.roles & RaidBitmaskMasterLooter)
+					SendRaidMasterLooter(false, m.name.c_str());
+
+				return;
+			}
+		}
+	}
+}
+
+void Raid::SendClassLevelUpdate(const char *who, Client *to) const
+{
+	if (to != nullptr && who != nullptr && who[0] != '\0') {
+		for (const auto& m : members) {
+			if (m.InUse() && Strings::EqualFold(m.name, who)) {
 				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidUpdateClassLevel_Struct));
-				auto ruc = (RaidUpdateClassLevel_Struct*)outapp->pBuffer;
+				const auto ruc = reinterpret_cast<RaidUpdateClassLevel_Struct*>(outapp->pBuffer);
 				ruc->general.action = raidUpdateClassLevel;
-				strn0cpy(ruc->general.leader_name, m.member_name, sizeof(ruc->general.leader_name));
-				ruc->_class = m._class;
+				strn0cpy(ruc->general.leader_name, m.name.c_str(), sizeof(ruc->general.leader_name));
+				ruc->_class = m.class_;
 				ruc->level = m.level;
 				to->QueuePacket(outapp);
 				safe_delete(outapp);
@@ -1317,58 +949,37 @@ void Raid::SendClassLevelUpdate(const char *who, Client *to)
 	}
 }
 
-void Raid::SendClassLevelUpdateAll(const char *who)
+void Raid::SendClassLevelUpdateAll(const char *who) const
 {
-	std::vector<RaidMember> rm = GetMembers();
+	if (who != nullptr && who[0] != '\0') {
+		for (const auto& m : members) {
+			if (m.InUse() && Strings::EqualFold(m.name, who)) {
+				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidUpdateClassLevel_Struct));
+				const auto ruc = reinterpret_cast<RaidUpdateClassLevel_Struct*>(outapp->pBuffer);
+				ruc->general.action = raidUpdateClassLevel;
+				strn0cpy(ruc->general.leader_name, m.name.c_str(), sizeof(ruc->general.leader_name));
+				ruc->_class = m.class_;
+				ruc->level = m.level;
 
-	for (const auto& m : rm) {
-		if (strcmp(m.member_name, who) == 0) {
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidUpdateClassLevel_Struct));
-			auto ruc = (RaidUpdateClassLevel_Struct*)outapp->pBuffer;
-			ruc->general.action = raidUpdateClassLevel;
-			strn0cpy(ruc->general.leader_name, m.member_name, sizeof(ruc->general.leader_name));
-			ruc->_class = m._class;
-			ruc->level = m.level;
-
-			QueuePacket(outapp);
-			safe_delete(outapp);
-			return;
+				QueueClients(outapp);
+				safe_delete(outapp);
+				return;
+			}
 		}
 	}
 }
 
-void Raid::SendRaidRemove(const char *who, Client *to)
+void Raid::SendRaidRemoveAll(const char* who) const
 {
-	if (!to) {
-		return;
-	}
-
 	for (const auto& m : members) {
-		if (strcmp(m.member_name, who) == 0) {
+		if (m.InUse() && Strings::EqualFold(m.name, who)) {
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-			auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
+			const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
 			rg->action = raidRemove2;
 			strn0cpy(rg->leader_name, who, 64);
 			strn0cpy(rg->player_name, who, 64);
 			rg->parameter = 0;
-			to->QueuePacket(outapp);
-			safe_delete(outapp);
-			return;
-		}
-	}
-}
-
-void Raid::SendRaidRemoveAll(const char *who)
-{
-	for (const auto& m : members) {
-		if (strcmp(m.member_name, who) == 0) {
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-			auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
-			rg->action = raidRemove2;
-			strn0cpy(rg->leader_name, who, 64);
-			strn0cpy(rg->player_name, who, 64);
-			rg->parameter = 0;
-			QueuePacket(outapp);
+			QueueClients(outapp);
 			safe_delete(outapp);
 			return;
 		}
@@ -1377,1192 +988,419 @@ void Raid::SendRaidRemoveAll(const char *who)
 
 void Raid::SendRaidDisband(Client *to)
 {
-	if (!to) {
-		return;
+	if (to != nullptr) {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
+		rg->action = raidDisband;
+		strn0cpy(rg->leader_name, to->GetName(), 64);
+		strn0cpy(rg->player_name, to->GetName(), 64);
+		rg->parameter = 0;
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
 	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
-	rg->action = raidDisband;
-	strn0cpy(rg->leader_name, to->GetName(), 64);
-	strn0cpy(rg->player_name, to->GetName(), 64);
-	rg->parameter = 0;
-	to->QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
-void Raid::SendRaidDisbandAll()
+void Raid::SendRaidDisbandAll() const
 {
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
+	const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
 	rg->action = raidDisband;
 	strn0cpy(rg->leader_name, "RaidMember", 64);
 	strn0cpy(rg->player_name, "RaidMember", 64);
 	rg->parameter = 0;
-	QueuePacket(outapp);
+	QueueClients(outapp);
 	safe_delete(outapp);
 }
 
-void Raid::SendRaidMove(const char* who, Client *to)
+void Raid::SendRaidGroupChangeAll(const char *who, uint32 new_group) const
 {
-	if (!to) {
-		return;
-	}
-
-	Client *c = entity_list.GetClientByName(who);
-	if (c && c == to) {
-		SendRaidCreate(c);
-		SendMakeLeaderPacketTo(leadername, c);
-	}
-
-	SendRaidRemove(who, to);
-	SendRaidAdd(who, to);
-	if (c && c == to) {
-		SendBulkRaid(c);
-		if (IsLocked()) {
-			SendRaidLockTo(c);
-		}
+	if (who != nullptr && who[0] != '\0') {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
+		rg->action = raidMoveGroup;
+		strn0cpy(rg->leader_name, who, sizeof(rg->leader_name));
+		strn0cpy(rg->player_name, who, sizeof(rg->player_name));
+		rg->parameter = new_group;
+		QueueClients(outapp);
+		safe_delete(outapp);
 	}
 }
 
-void Raid::SendRaidMoveAll(const char* who)
+// Called from multiple contexts on purpose: a direct local call on warm
+// zone-in (client_packet.cpp, raid data already cached here), cold-start
+// completion once world's reply lands (worldserver.cpp), and from the
+// Apply*FromWorld handlers when a new member joins. This actually matches
+// Group's real equivalent (SendFullGroupUpdate() is also called directly at
+// zone-in, no world round-trip) -- raid additionally needs the cold/async
+// path because raid membership is more likely to span zones than group
+// membership.
+void Raid::SendBulkRaidInfoTo(Client *c) const
 {
-	Client *c = entity_list.GetClientByName(who);
-	SendRaidRemoveAll(who);
-
-	if (c) {
-		SendRaidCreate(c);
-	}
-
-	if (c) {
-		SendBulkRaid(c);
-		if (IsLocked()) {
-			SendRaidLockTo(c);
-		}
-	}
-
-	SendRaidAddAll(who);
-	SendMakeLeaderPacket(leadername);
-}
-
-void Raid::SendBulkRaid(Client *to)
-{
-	if (!to) {
-		return;
-	}
-
-	for (const auto& m : members) {
-		if (strlen(m.member_name) > 0 && (strcmp(m.member_name, to->GetName()) != 0)) {
-			SendRaidAdd(m.member_name, to);
-		}
-	}
-	SendRaidNotes();
-}
-
-void Raid::QueuePacket(const EQApplicationPacket *app, bool ack_req)
-{
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
+	if (c != nullptr) {
+		if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF2) {
+			// TODO: This is probably true for SoD+, but previous clients would need testing
+			SendRaidMembers(c);
+		} else {
+			SendRaidCreate(c);
+			SendRaidAdd(c->GetName(), c);
+			SendBulkRaid(c);
+			SendRaidMOTD(c);
+			SendMakeLeaderPacketTo(leader_name.c_str(), c);
+			if (IsLocked())
+				SendRaidLockTo(c);
 		}
 
-		if (m.member && m.member->IsClient()) {
-			m.member->QueuePacket(app, ack_req);
-		}
+		// technically this is in the bulk packet, but it's not reversed. gap is probably acceptable
+		SendLeadershipAAUpdate();
+
+		SendAssistTarget(c);
+		SendMarkTargets(c);
 	}
 }
 
-void Raid::SendMakeLeaderPacket(const char *who)
+void Raid::SendBulkRaid(Client *to) const
 {
+	if (to != nullptr) {
+		for (const auto& m : members)
+			if (m.InUse() && !Strings::EqualFold(m.name, to->GetName()))
+				SendRaidAdd(m.name.c_str(), to);
 
-	if (RuleB(Bots, Enabled) && entity_list.GetBotByBotName(who)) {
-		return;
+		SendRaidNotes();
 	}
+}
 
+void Raid::SendMakeLeaderPacket(const char *who) const
+{
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
-	auto rg = (RaidLeadershipUpdate_Struct*)outapp->pBuffer;
+	const auto rg = reinterpret_cast<RaidLeadershipUpdate_Struct*>(outapp->pBuffer);
 	rg->action = raidMakeLeader;
 	strn0cpy(rg->leader_name, who, 64);
 	strn0cpy(rg->player_name, who, 64);
-	memcpy(&rg->raid, &raid_aa, sizeof(RaidLeadershipAA_Struct));
-	QueuePacket(outapp);
+	memcpy(&rg->raid, &leadership_aa, sizeof(RaidLeadershipAA_Struct));
+	QueueClients(outapp);
 	safe_delete(outapp);
 }
 
-void Raid::SendMakeLeaderPacketTo(const char *who, Client *to)
+void Raid::SendMakeLeaderPacketTo(const char *who, Client *to) const
 {
-	if (!to) {
-		return;
-	}
-
-	if (RuleB(Bots, Enabled) && entity_list.GetBotByBotName(who)) {
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
-	auto rg = (RaidLeadershipUpdate_Struct*)outapp->pBuffer;
-	rg->action = raidMakeLeader;
-	strn0cpy(rg->leader_name, who, 64);
-	strn0cpy(rg->player_name, who, 64);
-	memcpy(&rg->raid, &raid_aa, sizeof(RaidLeadershipAA_Struct));
-	to->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-//nyi
-void Raid::SendMakeGroupLeaderPacketAll()
-{
-}
-
-void Raid::SendMakeGroupLeaderPacket(const char *who) //13
-{
-}
-
-void Raid::SendMakeGroupLeaderPacketTo(const char *who, Client *to)
-{
-	if (!to) {
-		return;
+	if (to != nullptr) {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
+		const auto rg = reinterpret_cast<RaidLeadershipUpdate_Struct*>(outapp->pBuffer);
+		rg->action = raidMakeLeader;
+		strn0cpy(rg->leader_name, who, 64);
+		strn0cpy(rg->player_name, who, 64);
+		memcpy(&rg->raid, &leadership_aa, sizeof(RaidLeadershipAA_Struct));
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
 	}
 }
 
-void Raid::GroupUpdate(uint32 gid, bool initial)
-{
-	//ungrouped member doesn't need grouping.
-	if (gid >= MAX_RAID_GROUPS) {
-		return;
-	}
-
-	Group *g = subgroups[gid];
-	if (!g) {
-		return;
-	}
-
-	for (const auto& m : members) {
-		if (m.member && m.group_number == gid && strlen(m.member_name) > 0) {
-			g->SendUpdate(groupActUpdate, m.member);
-			g->NotifyMainTank(m.member, 1);
-			g->NotifyMainAssist(m.member, 1);
-			g->NotifyPuller(m.member, 1);
-			g->NotifyMarkNPC(m.member);
-			g->NotifyMasterLooter(m.member, true);
-			SendGroupLeadershipAA(m.member, gid);
-		}
-	}
-	if (initial) {
-		auto pack = new ServerPacket(ServerOP_UpdateGroup, sizeof(ServerRaidGeneralAction_Struct));
-		auto  rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-		rga->gid = gid;
-		rga->rid = GetID();
-		rga->zoneid = zone->GetZoneID();
-		rga->instance_id = zone->GetInstanceID();
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void Raid::SendRaidLock()
+void Raid::SendRaidLock() const
 {
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
+	const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
 	rg->action = raidLock;
-	strn0cpy(rg->leader_name, leadername, 64);
-	strn0cpy(rg->player_name, leadername, 64);
-	QueuePacket(outapp);
+	strn0cpy(rg->leader_name, leader_name.c_str(), 64);
+	strn0cpy(rg->player_name, leader_name.c_str(), 64);
+	QueueClients(outapp);
 	safe_delete(outapp);
 }
 
-void Raid::SendRaidUnlock()
+void Raid::SendRaidUnlock() const
 {
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
+	const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
 	rg->action = raidUnlock;
-	strn0cpy(rg->leader_name, leadername, 64);
-	strn0cpy(rg->player_name, leadername, 64);
-	QueuePacket(outapp);
+	strn0cpy(rg->leader_name, leader_name.c_str(), 64);
+	strn0cpy(rg->player_name, leader_name.c_str(), 64);
+	QueueClients(outapp);
 	safe_delete(outapp);
 }
 
 void Raid::SendRaidLockTo(Client *c)
 {
-	if (!c) {
-		return;
+	if (c != nullptr) {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
+		rg->action = raidLock;
+		strn0cpy(rg->leader_name, c->GetName(), 64);
+		strn0cpy(rg->player_name, c->GetName(), 64);
+		c->QueuePacket(outapp);
+		safe_delete(outapp);
 	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
-	rg->action = raidLock;
-	strn0cpy(rg->leader_name, c->GetName(), 64);
-	strn0cpy(rg->player_name, c->GetName(), 64);
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Raid::SendRaidUnlockTo(Client *c)
 {
-	if (!c) {
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	auto rg = (RaidGeneral_Struct*)outapp->pBuffer;
-	rg->action = raidUnlock;
-	strn0cpy(rg->leader_name, c->GetName(), 64);
-	strn0cpy(rg->player_name, c->GetName(), 64);
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void Raid::SendGroupLeaderChange(uint32 group_id, const char *old_leader_name, const char *new_leader_name)
-{
-	if (group_id >= MAX_RAID_GROUPS)
-		return;
-
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-	const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
-	rg->action = raidChangeGroupLeader;
-	rg->parameter = group_id;
-	strn0cpy(rg->player_name, old_leader_name ? old_leader_name : "", sizeof(rg->player_name));
-	strn0cpy(rg->leader_name, new_leader_name ? new_leader_name : "", sizeof(rg->leader_name));
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void Raid::SendGroupDisband(Client *to)
-{
-	if (!to) {
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
-	auto gu = (GroupUpdate_Struct*) outapp->pBuffer;
-	gu->action = groupActDisband;
-	strn0cpy(gu->leadersname, leadername, 64);
-	strn0cpy(gu->yourname, to->GetName(), 64);
-	to->FastQueuePacket(&outapp);
-}
-
-void Raid::SendRaidGroupAdd(const char *who, uint32 gid)
-{
-	auto pack = new ServerPacket(ServerOP_RaidGroupAdd, sizeof(ServerRaidGroupAction_Struct));
-	auto rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = gid;
-	strn0cpy(rga->membername, who, 64);
-	safe_delete(pack);
-}
-
-void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
-{
-	auto pack = new ServerPacket(ServerOP_RaidGroupRemove, sizeof(ServerRaidGroupAction_Struct));
-	auto rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = gid;
-	strn0cpy(rga->membername, who, 64);
-	safe_delete(pack);
-}
-
-void Raid::SendRaidMOTD(Client *c)
-{
-	if (!c || motd.empty() || c->IsBot()) {
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct));
-	auto data = (RaidMOTD_Struct*)outapp->pBuffer;
-
-	data->general.action = raidSetMotd;
-	data->general.parameter = 0;
-	data->general.unknown1 = 0;
-	strn0cpy(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
-	strn0cpy(data->general.player_name, GetLeaderName().c_str(), 64);
-	strn0cpy(data->motd, motd.c_str(), sizeof(data->motd));
-
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void Raid::SendRaidMOTD()
-{
-	if (motd.empty()) {
-		return;
-	}
-
-	for (const auto& m: members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member) {
-			SendRaidMOTD(m.member);
-		}
+	if (c != nullptr) {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
+		rg->action = raidUnlock;
+		strn0cpy(rg->leader_name, c->GetName(), 64);
+		strn0cpy(rg->player_name, c->GetName(), 64);
+		c->QueuePacket(outapp);
+		safe_delete(outapp);
 	}
 }
 
-void Raid::SendRaidMOTDToWorld()
+// Raid doesn't decide group leadership -- this only fires from
+// ApplyGroupLeaderChangedFromWorld(), reacting to a fact Group already
+// decided and reported to world. This just updates the raid window's own
+// bookkeeping/packet for it.
+void Raid::SendGroupLeaderChange(uint32 group_number, const char *old_leader_name, const char *new_leader_name) const
 {
-	if (motd.empty()) {
-		return;
+	if (group_number < MAX_RAID_GROUPS) {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+		const auto rg = reinterpret_cast<RaidGeneral_Struct*>(outapp->pBuffer);
+		rg->action = raidChangeGroupLeader;
+		rg->parameter = group_number;
+		strn0cpy(rg->player_name, old_leader_name != nullptr ? old_leader_name : "", sizeof(rg->player_name));
+		strn0cpy(rg->leader_name, new_leader_name != nullptr ? new_leader_name : "", sizeof(rg->leader_name));
+		QueueClients(outapp);
+		safe_delete(outapp);
 	}
-
-	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct));
-	auto smotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
-	smotd->rid = GetID();
-	strn0cpy(smotd->motd, motd.c_str(), sizeof(smotd->motd));
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
 }
 
-void Raid::SendGroupLeadershipAA(Client *c, uint32 gid)
+void Raid::SendRaidMOTD(Client* c) const
 {
-	if (RuleB(Bots, Enabled) && entity_list.GetBotByBotName(c->GetName())) {
-		return;
-	}
+	if (c != nullptr && !motd.empty() && !c->IsBot()) {
+		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct));
+		const auto data = reinterpret_cast<RaidMOTD_Struct*>(outapp->pBuffer);
 
+		data->general.action = raidSetMotd;
+		data->general.parameter = 0;
+		data->general.unknown1 = 0;
+		strn0cpy(data->general.leader_name, c->GetName(), sizeof(c->GetName()));
+		strn0cpy(data->general.player_name, GetLeaderName().c_str(), 64);
+		strn0cpy(data->motd, motd.c_str(), sizeof(data->motd));
+
+		c->QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
+void Raid::SendRaidMOTD() const
+{
+	if (!motd.empty())
+		for (const auto& m: members)
+			if (m.member != nullptr && m.member->IsClient())
+				SendRaidMOTD(m.member->CastToClient());
+}
+
+void Raid::SendLeadershipAAUpdate() const
+{
 	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
-	auto rlaa = (RaidLeadershipUpdate_Struct *)outapp->pBuffer;
+	const auto rlaa = reinterpret_cast<RaidLeadershipUpdate_Struct*>(outapp->pBuffer);
 	rlaa->action = raidSetLeaderAbilities;
-	strn0cpy(rlaa->leader_name, c->GetName(), 64);
-	strn0cpy(rlaa->player_name, c->GetName(), 64);
-	if (gid != RAID_GROUPLESS)
-		memcpy(&rlaa->group, &group_aa[gid], sizeof(GroupLeadershipAA_Struct));
-	memcpy(&rlaa->raid, &raid_aa, sizeof(RaidLeadershipAA_Struct));
-	c->QueuePacket(outapp);
+	rlaa->raid = leadership_aa;
+
+	ForEachClient([&rlaa, &outapp](Client* c) {
+		strn0cpy(rlaa->leader_name, c->GetName(), 64);
+		strn0cpy(rlaa->player_name, c->GetName(), 64);
+		c->QueuePacket(outapp);
+	});
+
 	safe_delete(outapp);
 }
 
-void Raid::SendGroupLeadershipAA(uint32 gid)
+uint32 Raid::GetLeadershipAA(int AAID) const
 {
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
+	if (AAID >= raidAAMarkNPC)
+		return leadership_aa.ranks[AAID - raidAAMarkNPC];
 
-		if (m.member && m.group_number == gid) {
-			SendGroupLeadershipAA(m.member, gid);
-		}
-	}
+	return  0;
 }
 
-void Raid::SendAllRaidLeadershipAA()
+void Raid::AttachLocalMember(RaidMember &m, bool is_new_member)
 {
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
+	Mob* previous = m.member;
 
-		if (m.member) {
-			SendGroupLeadershipAA(m.member, m.group_number);
-		}
-	}
-}
+	if (!m.InUse()) {
+		m.member = nullptr;
+	} else {
+		auto* c = entity_list.GetClientByName(m.name.c_str());
+		auto* b = entity_list.GetBotByBotName(m.name.c_str());
 
-
-void Raid::LockRaid(bool lockFlag)
-{
-	RaidDetailsRepository::UpdateLocked(database, GetID(), lockFlag ? 1 : 0);
-
-	locked = lockFlag;
-
-	if (lockFlag) {
-		SendRaidLock();
-	}
-	else {
-		SendRaidUnlock();
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidLockFlag, sizeof(ServerRaidGeneralAction_Struct));
-	auto rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->zoneid = zone->GetZoneID();
-	rga->gid = lockFlag;
-	rga->instance_id = zone->GetInstanceID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::SetRaidDetails()
-{
-	auto e = RaidDetailsRepository::NewEntity();
-	e.raidid          = GetID();
-	e.loottype        = 4;
-	e.locked          = 0;
-	e.motd            = "";
-	e.group_on_invite = 0;
-
-	RaidDetailsRepository::InsertOne(database, e);
-}
-
-void Raid::GetRaidDetails()
-{
-	auto raid_details = RaidDetailsRepository::FindOne(database, GetID());
-	if (raid_details.raidid == 0) {
-		return;
-	}
-
-	locked   = raid_details.locked;
-	LootType = raid_details.loottype;
-	motd     = raid_details.motd;
-	marked_npcs[0].entity_id   = raid_details.marked_npc_1_entity_id;
-	marked_npcs[0].zone_id     = raid_details.marked_npc_1_zone_id;
-	marked_npcs[0].instance_id = raid_details.marked_npc_1_instance_id;
-	marked_npcs[1].entity_id   = raid_details.marked_npc_2_entity_id;
-	marked_npcs[1].zone_id     = raid_details.marked_npc_2_zone_id;
-	marked_npcs[1].instance_id = raid_details.marked_npc_2_instance_id;
-	marked_npcs[2].entity_id   = raid_details.marked_npc_3_entity_id;
-	marked_npcs[2].zone_id     = raid_details.marked_npc_3_zone_id;
-	marked_npcs[2].instance_id = raid_details.marked_npc_3_instance_id;
-	group_on_invite            = raid_details.group_on_invite != 0;
-}
-
-void Raid::SetGroupOnInvite(bool flag)
-{
-	group_on_invite = flag;
-
-	if (!RaidDetailsRepository::UpdateGroupOnInvite(database, GetID(), flag ? 1 : 0))
-		LogError("Unable to set raid group_on_invite: rid [{}]\n", GetID());
-}
-
-void Raid::SaveRaidMOTD()
-{
-	RaidDetailsRepository::UpdateMotd(database, GetID(), motd);
-}
-
-bool Raid::LearnMembers()
-{
-	EmptyRaidMembers();
-
-	auto raid_members = RaidMembersRepository::GetWhere(
-			database,
-			fmt::format(
-					"raidid = {}",
-					GetID()
-			)
-	);
-
-	if (raid_members.empty()) {
-		disbandCheck = true;
-		return false;
-	}
-
-	int i = 0;
-	for (const auto &e: raid_members) {
-		if (e.name.empty()) {
-			continue;
-		}
-
-		members[i].member = nullptr;
-		strn0cpy(members[i].member_name, e.name.c_str(), sizeof(members[i].member_name));
-		uint32 group_id = e.groupid;
-		if (!e.note.empty()) {
-			members[i].note = e.note;
-		}
-
-		if (group_id >= MAX_RAID_GROUPS) {
-			members[i].group_number = RAID_GROUPLESS;
-		}
-		else {
-			members[i].group_number = group_id;
-		}
-
-		members[i]._class          = e._class;
-		members[i].level           = e.level;
-		members[i].is_group_leader = e.isgroupleader;
-		members[i].is_raid_leader  = e.israidleader;
-		members[i].is_looter       = e.islooter;
-		members[i].is_master_looter = e.is_master_looter != 0;
-		members[i].main_marker     = e.is_marker;
-		members[i].main_assister   = e.is_assister;
-		members[i].is_bot          = e.bot_id > 0;
-		++i;
-	}
-	return true;
-}
-
-void Raid::VerifyRaid()
-{
-	for (auto& m : members) {
-		if (strlen(m.member_name) == 0) {
-			m.member = nullptr;
-		}
-		else {
-			auto* c = entity_list.GetClientByName(m.member_name);
-			auto* b = entity_list.GetBotByBotName(m.member_name);
-
-			if (c) {
-				m.member = c;
-				m.is_bot = false;
-			}
-			else if (RuleB(Bots, Enabled) && b) {
-				//Raid requires client* we are forcing it here to be a BOT.  Care is needed here as any client function that
-				//does not exist within the Bot Class will likely corrupt memory for the member object. Good practice to test the is_bot
-				//attribute before calling a client function or casting to client.
-				b = entity_list.GetBotByBotName(m.member_name);
-				m.member = b->CastToClient();
-				m.is_bot = true;
-			}
-			else {
-				m.member = nullptr;
-			}
-
-			for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
-				if (m.main_marker == i + 1) {
-					strcpy(main_marker_pcs[i], m.member_name);
-				}
-			}
-
-			for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-				if (m.main_assister == i + 1) {
-					strcpy(main_assister_pcs[i], m.member_name);
-				}
-			}
-		}
-
-		if (m.is_raid_leader) {
-			if (strlen(m.member_name) > 0) {
-				SetLeader(m.member);
-				strn0cpy(leadername, m.member_name, sizeof(leadername));
-			}
-			else {
-				SetLeader(nullptr);
-			}
-		}
-	}
-
-	for (uint32 gid = 0; gid < MAX_RAID_GROUPS; ++gid) {
-		Mob *current_members[MAX_GROUP_MEMBERS] = { nullptr };
-		int  current_count = 0;
-		Mob *leader_mob    = nullptr;
-
-		for (const auto& rm : members) {
-			if (rm.member && rm.group_number == gid && strlen(rm.member_name) > 0) {
-				if (current_count < MAX_GROUP_MEMBERS)
-					current_members[current_count++] = rm.member;
-
-				if (rm.is_group_leader)
-					leader_mob = rm.member;
-			}
-		}
-
-		if (current_count == 0) {
-			if (subgroups[gid]) {
-				entity_list.RemoveGroup(subgroups[gid]->GetID());
-				subgroups[gid] = nullptr;
-			}
+		if (c != nullptr) {
+			m.member = c;
+			m.kind = RaidMemberPlayer;
+		} else if (RuleB(Bots, Enabled) && b != nullptr) {
+			m.member = b;
+			m.kind = RaidMemberBot;
 		} else {
-			if (!subgroups[gid]) {
-				Group *g = new Group(leader_mob ? leader_mob : current_members[0], /*is_raid_subgroup=*/true);
-				g->SetRaid(this, gid);
-				entity_list.AddGroup(g);          // real minted ID, immediately globally visible
-				LoadGroupLeaders(gid, g);         // seed role state from raid_leaders
-				g->SetGroupAAs(&group_aa[gid]);   // seed AA state
-				subgroups[gid] = g;
-			}
-
-			Group *g = subgroups[gid];
-
-			// Collect departures first so we don't mutate g->members[] mid-scan.
-			Mob *departed[MAX_GROUP_MEMBERS] = { nullptr };
-			int  departed_count = 0;
-			for (const auto m : g->members) {
-				if (m != nullptr) {
-					bool still_present = false;
-					for (int j = 0; j < current_count; ++j) {
-						if (current_members[j] == m) {
-							still_present = true;
-							break;
-						}
-					}
-
-					if (!still_present && departed_count < MAX_GROUP_MEMBERS)
-						departed[departed_count++] = m;
-				}
-			}
-
-			for (int i = 0; i < departed_count; ++i)
-				g->RemoveRaidMember(departed[i]);
-
-			for (int j = 0; j < current_count; ++j) {
-				if (!g->IsGroupMember(current_members[j]))
-					g->AddRaidMember(current_members[j]);
-			}
-
-			g->SetLeader(leader_mob ? leader_mob : current_members[0]);
-		}
-	}
-}
-
-void Raid::MemberZoned(Client *c)
-{
-	if (!c) {
-		return;
-	}
-
-	if (leader == c) {
-		leader = nullptr;
-	}
-
-	// Raid::GetGroup() goes over the members as well, this way we go over once
-	uint32 gid = RAID_GROUPLESS;
-	for (auto& m : members) {
-		if (m.member == c) {
 			m.member = nullptr;
-			gid = m.group_number;
 		}
 	}
 
-	if (gid < MAX_RAID_GROUPS && group_mentor[gid].mentoree == c) {
-		group_mentor[gid].mentoree = nullptr;
+	// IsRaided() now derives straight from the cached Client::m_raid/
+	// Bot::m_raid pointer (HasRaid<M>::IsRaided() { return m_raid != nullptr; }),
+	// so this is the single point where m.member is ever reassigned away
+	// from a previous value, and the single point a live Mob* actually
+	// starts/stops occupying a raid slot for the join/re-resolve paths
+	// (ApplyMemberJoinedFromWorld, cold-start, zone-transfer re-attach);
+	// ApplyMemberLeftFromWorld/ApplyDisbandFromWorld clear it themselves
+	// since they don't route through here.
+	if (previous != nullptr && previous != m.member)
+		entity_list.SetRaidZoned(previous, nullptr);
+
+	if (m.member != nullptr) {
+		if (is_new_member)
+			entity_list.SetRaid(m.member, this);
+		else
+			entity_list.SetRaidZoned(m.member, this);
 	}
-}
 
-void Raid::SendHPManaEndPacketsTo(Client *client)
-{
-	if (!client) {
-		return;
-	}
+	for (int i = 0; i < MAX_RAID_MAIN_MARKERS; i++)
+		if (m.main_marker == i + 1)
+			main_marker_names[i] = m.name;
 
-	uint32 group_id = GetGroup(client);
+	for (int i = 0; i < MAX_RAID_MAIN_ASSISTERS; i++)
+		if (m.main_assister == i + 1)
+			main_assist_names[i] = m.name;
 
-	EQApplicationPacket hp_packet;
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && (m.member != client) && (m.group_number == group_id)) {
-			m.member->CreateHPPacket(&hp_packet);
-			client->QueuePacket(&hp_packet, false);
-			safe_delete_array(hp_packet.pBuffer);
-			hp_packet.size = 0;
-
-			if (client->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
-				outapp.SetOpcode(OP_MobManaUpdate);
-				auto mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
-				mana_update->spawn_id = m.member->GetID();
-				mana_update->mana = m.member->GetManaPercent();
-				client->QueuePacket(&outapp, false);
-
-				outapp.SetOpcode(OP_MobEnduranceUpdate);
-				auto endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-				endurance_update->endurance = m.member->GetEndurancePercent();
-				client->QueuePacket(&outapp, false);
-			}
+	if (m.roles & RaidBitmaskLeader) {
+		if (m.InUse()) {
+			// World rejects RaidLeadershipMakeLeader when the target is a
+			// bot, so m.member here should always be a Client in practice --
+			// still guard rather than assume, since this also runs during
+			// cold-start application of world data.
+			SetLeader(m.member && m.member->IsClient() ? m.member->CastToClient() : nullptr);
+			leader_name = m.name;
+		} else {
+			SetLeader(nullptr);
 		}
 	}
 }
 
-void Raid::SendHPManaEndPacketsFrom(Mob *mob)
+void Raid::MemberZonedIn(const Client *c)
 {
-	if (!mob) {
-		return;
-	}
-
-	uint32 group_id = 0;
-
-	if (mob->IsClient()) {
-		group_id = GetGroup(mob->CastToClient());
-	}
-
-	EQApplicationPacket hpapp;
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-
-	mob->CreateHPPacket(&hpapp);
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && (!mob->IsClient() || ((m.member != mob->CastToClient()) && (m.group_number == group_id)))) {
-			m.member->QueuePacket(&hpapp, false);
-
-			if (m.member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
-				outapp.SetOpcode(OP_MobManaUpdate);
-				MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
-				mana_update->spawn_id = mob->GetID();
-				mana_update->mana = mob->GetManaPercent();
-				m.member->QueuePacket(&outapp, false);
-
-				outapp.SetOpcode(OP_MobEnduranceUpdate);
-				MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-				endurance_update->endurance = mob->GetEndurancePercent();
-				m.member->QueuePacket(&outapp, false);
-			}
-		}
-	}
-}
-
-void Raid::SendManaPacketFrom(Mob *mob)
-{
-	if (!mob) {
-		return;
-	}
-
-	uint32 group_id = 0;
-
-	if (mob->IsClient()) {
-		group_id = GetGroup(mob->CastToClient());
-	}
-
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && (!mob->IsClient() || ((m.member != mob->CastToClient()) && (m.group_number == group_id))) &&
-			m.member->ClientVersion() >= EQ::versions::ClientVersion::SoD
-		) {
-			outapp.SetOpcode(OP_MobManaUpdate);
-			MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
-			mana_update->spawn_id = mob->GetID();
-			mana_update->mana = mob->GetManaPercent();
-			m.member->QueuePacket(&outapp, false);
-		}
-	}
-}
-
-void Raid::SendEndurancePacketFrom(Mob *mob)
-{
-	if (!mob) {
-		return;
-	}
-
-	uint32 group_id = 0;
-
-	if (mob->IsClient()) {
-		group_id = GetGroup(mob->CastToClient());
-	}
-
-	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && (!mob->IsClient() || ((m.member != mob->CastToClient()) && (m.group_number == group_id))) &&
-			m.member->ClientVersion() >= EQ::versions::ClientVersion::SoD
-		) {
-			outapp.SetOpcode(OP_MobEnduranceUpdate);
-			auto endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-			endurance_update->spawn_id = mob->GetID();
-			endurance_update->endurance = mob->GetEndurancePercent();
-			m.member->QueuePacket(&outapp, false);
-		}
-	}
-}
-
-uint16 Raid::GetAvgLevel()
-{
-	double levelHolder = 0;
-	uint8 i = 0;
-	uint8 numMem = 0;
-	while (i < MAX_RAID_MEMBERS) {
-		if (strlen(members[i].member_name)) {
-			levelHolder = levelHolder + members[i].level;
-			numMem++;
-		}
-		i++;
-	}
-	levelHolder = ((levelHolder/(numMem))+.5); // total levels divided by num of characters
-	return uint16(levelHolder);
-}
-
-const char *Raid::GetClientNameByIndex(uint8 index)
-{
-	return members[index].member_name;
-}
-
-void Raid::RaidMessageString(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2,const char* message3,const char* message4,const char* message5,const char* message6,const char* message7,const char* message8,const char* message9, uint32 distance)
-{
-	for (const auto& m : members) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && m.member->IsClient() && m.member != sender) {
-			m.member->MessageString(type, string_id, message, message2, message3, message4, message5, message6,
-									message7, message8, message9, distance);
-		}
-	}
-}
-
-void Raid::LoadLeadership()
-{
-	database.GetRaidLeadershipInfo(GetID(), nullptr, nullptr, nullptr, nullptr, &raid_aa);
-
-	char mentor_name[64];
-	for (uint32 group_id = 0; group_id < MAX_RAID_GROUPS; group_id++) {
-		database.GetGroupLeadershipInfo(group_id, GetID(), nullptr, nullptr, nullptr, nullptr,
-				mentor_name, &group_mentor[group_id].mentor_percent, &group_aa[group_id]);
-
-		if (strlen(mentor_name)) {
-			group_mentor[group_id].name = mentor_name;
-			mentor_name[0] = '\0';
-		}
-	}
-}
-
-void Raid::SetGroupMentor(uint32 group_id, int percent, char *name)
-{
-	if (group_id >= MAX_RAID_GROUPS) {
-		return;
-	}
-
-	group_mentor[group_id].name = name;
-	group_mentor[group_id].mentor_percent = percent;
-	Client *client = entity_list.GetClientByName(name);
-	group_mentor[group_id].mentoree = client ? client : nullptr;
-
-	if (!RaidLeadersRepository::UpdateMentor(database, GetID(), group_id, name, percent))
-		LogError("Unable to set raid group mentor: rid [{}] gid [{}]\n", GetID(), group_id);
-}
-
-void Raid::ClearGroupMentor(uint32 group_id)
-{
-	if (group_id >= MAX_RAID_GROUPS) {
-		return;
-	}
-	group_mentor[group_id].name.clear();
-	group_mentor[group_id].mentor_percent = 0;
-	group_mentor[group_id].mentoree = nullptr;
-
-	if (!RaidLeadersRepository::ClearMentor(database, GetID(), group_id))
-		LogError("Unable to clear raid group mentor: rid [{}] gid [{}]\n", GetID(), group_id);
-}
-
-// there isn't a nice place to add this in another function, unlike groups
-// so we do it here instead
-void Raid::CheckGroupMentor(uint32 group_id, Client *c)
-{
-	if (!c || group_id >= MAX_RAID_GROUPS) {
-		return;
-	}
-
-	if (group_mentor[group_id].name == c->GetName())
-		group_mentor[group_id].mentoree = c;
-}
-
-void Raid::SetDirtyAutoHaters()
-{
-	for (const auto& m: members) {
-		if (m.member && m.is_bot) {
-			m.member->CastToBot()->SetDirtyAutoHaters();
-		}
-		else if (m.member) {
-			m.member->SetDirtyAutoHaters();
-		}
-	}
-}
-
-void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/, bool group_only /*= true*/)
-{
-	if (sender && sender->IsClient()) {
-		uint32 group_id = GetGroup(sender->CastToClient());
-
-		/* If this is a group only packet and we're not in a group -- return */
-		if (group_id == RAID_GROUPLESS && group_only) {
-			return;
-		}
-
-		for (const auto& m : members) {
-			if (!m.member) {
-				continue;
-			}
-
-			if (m.is_bot) {
-				continue;
-			}
-
-			if (m.member->IsClient()) {
-				continue;
-			}
-
-			if (ignore_sender && m.member == sender) {
-				continue;
-			}
-
-			if (group_only && m.group_number != group_id) {
-				continue;
-			}
-
-			/* If we don't have a distance requirement - send to all members */
-			if (distance == 0) {
-				m.member->CastToClient()->QueuePacket(app, ack_required);
-			}
-
-			else {
-				/* If negative distance - we check if current distance is greater than X */
-				if (distance <= 0 && DistanceSquared(sender->GetPosition(), m.member->GetPosition()) >= (distance * distance)) {
-					m.member->CastToClient()->QueuePacket(app, ack_required);
-				}
-
-				/* If positive distance - we check if current distance is less than X */
-				else if (distance >= 0 && DistanceSquared(sender->GetPosition(), m.member->GetPosition()) <= (distance * distance)) {
-					m.member->CastToClient()->QueuePacket(app, ack_required);
-				}
-			}
-		}
-	}
-}
-
-std::vector<RaidMember> Raid::GetMembers() const
-{
-	std::vector<RaidMember> raid_members;
-	for (const auto& m : members) {
-		if (m.member_name[0]) {
-			raid_members.emplace_back(m);
-		}
-	}
-	return raid_members;
-}
-
-bool Raid::AnyMemberHasDzLockout(const std::string& expedition, const std::string& event)
-{
-	std::vector<std::string> names;
-	for (const auto& mbr : members)
-	{
-		if (!mbr.member && !mbr.is_bot && mbr.member_name[0])
-		{
-			names.emplace_back(mbr.member_name); // out of zone member
-		}
-		else if (mbr.member && !mbr.is_bot && mbr.member->HasDzLockout(expedition, event))
-		{
-			return true;
-		}
-	}
-	return !CharacterExpeditionLockoutsRepository::GetLockouts(database, names, expedition, event).empty();
-}
-
-Mob* Raid::GetRaidMainAssistOne()
-{
-	for (int i = MAIN_ASSIST_1_SLOT; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-		if (strlen(main_assister_pcs[i]) > 0) {
-			auto ma = entity_list.GetMob(main_assister_pcs[i]);
-			if (ma) {
-				return ma;
-			}
-		}
-	}
-	return nullptr;
-}
-
-bool Raid::IsEngaged()
-{
-
-	for (const auto& m : GetMembers()) {
-		if (m.is_bot) {
-			continue;
-		}
-
-		if (m.member && (m.member->IsEngaged() || m.member->GetAggroCount() > 0)) {
-			return true;
-		}
-	}
-	return false;
-}
-
-void Raid::RaidGroupSay(const char* msg, const char* from, uint8 language, uint8 lang_skill)
-{
-	if (!from) {
-		return;
-	}
-
-	uint32 group_id_to_use = GetGroup(from);
-
-	if (group_id_to_use >= MAX_RAID_GROUPS) {
-		return;
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
-	auto rga = (ServerRaidMessage_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = group_id_to_use;
-	rga->language = language;
-	rga->lang_skill = lang_skill;
-	strn0cpy(rga->from, from, 64);
-
-	strcpy(rga->message, msg); // this is safe because we are allocating enough space for the entire msg above
-
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-void Raid::RaidSay(const char* msg, const char* from, uint8 language, uint8 lang_skill)
-{
-	if (!from) {
-		return;
-	}
-
-	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
-	auto rga = (ServerRaidMessage_Struct*)pack->pBuffer;
-	rga->rid = GetID();
-	rga->gid = RAID_GROUPLESS;
-	rga->language = language;
-	rga->lang_skill = lang_skill;
-	strn0cpy(rga->from, from, 64);
-
-	strcpy(rga->message, msg);
-
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::SetNewRaidLeader(uint32 i)
-{
-	if (members[i].is_raid_leader) {
-		for (const auto& m : members) {
-			if (m.is_bot) {
-				continue;
-			}
-
-			if (m.member && strlen(m.member_name) > 0 && strcmp(m.member_name, members[i].member_name) != 0) {
-				SetRaidLeader(members[i].member_name, m.member_name);
-				UpdateRaidAAs();
-				SendAllRaidLeadershipAA();
+	if (c != nullptr) {
+		for (auto &m : members) {
+			if (Strings::EqualFold(m.name, c->GetCleanName())) {
+				AttachLocalMember(m);
 				break;
 			}
 		}
 	}
 }
 
-void Raid::SaveRaidNote(std::string who, std::string note)
+void Raid::MemberZoned(const Mob* removemob)
 {
-	if (who.empty() || note.empty()) {
-		return;
-	}
+	if (removemob != nullptr) {
+		if (leader == removemob)
+			leader = nullptr;
 
-	auto result = RaidMembersRepository::UpdateRaidNote(database, GetID(), note, who);
-	if (!result) {
-		LogError("Unable to update the raid note for player [{}] in guild [{}].",
-			who,
-			GetID()
-		);
-	}
-}
-
-std::vector<RaidMember> Raid::GetMembersWithNotes()
-{
-	std::vector<RaidMember> raid_members;
-	for (const auto& m : members) {
-		if (!m.note.empty()) {
-			raid_members.emplace_back(m);
-		}
-	}
-	return raid_members;
-}
-
-void Raid::SendRaidNotes()
-{
-	LearnMembers();
-	VerifyRaid();
-
-	for (const auto& c : GetMembersWithNotes()) {
-
-		auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
-		auto data = (RaidNote_Struct*)outapp->pBuffer;
-
-		data->general.action = raidSetNote;
-		data->general.parameter = 0;
-		data->general.unknown1 = 0;
-		strn0cpy(data->general.leader_name, c.member_name, sizeof(c.member_name));
-		strn0cpy(data->general.player_name, GetLeaderName().c_str(), GetLeaderName().length());
-		strn0cpy(data->note, c.note.c_str(), sizeof(data->note));
-
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-}
-void Raid::SendRaidNotesToWorld()
-{
-	auto pack = new ServerPacket(ServerOP_RaidNote, sizeof(ServerRaidNote_Struct));
-	auto snote = (ServerRaidNote_Struct*)pack->pBuffer;
-	snote->rid = GetID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void Raid::DelegateAbilityAssist(Mob* delegator, const char* delegatee)
-{
-	auto raid_delegatee = entity_list.GetRaidByName(delegatee);
-	if (!raid_delegatee) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
-		return;
-	}
-	uint32 raid_delegatee_id = raid_delegatee->GetID();
-	uint32 raid_delegator_id = GetID();
-	if (raid_delegatee_id != raid_delegator_id) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
-		return;
-	}
-
-	auto rm = &members[GetPlayerIndex(delegatee)];
-	if (!rm) {
-		return;
-	}
-	auto c = rm->member;
-	if (!c) {
-		return;
-	}
-
-	auto slot = FindNextRaidDelegateSlot(FindNextAssisterSlot);
-	auto ma = rm->main_assister;
-	if (slot == -1 && !ma) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, MAX_MAIN_RAID_ASSISTERS);
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-	DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
-	if (ma) {
-		das->Action = ClearDelegate;
-		das->MemberNumber = ma; // slot being vacated, not FindNextRaidDelegateSlot's unrelated free slot
-		memset(main_assister_pcs[ma - 1], 0, 64);
-		rm->main_assister = DELEGATE_OFF;
-		auto result = RaidMembersRepository::UpdateRaidAssister(
-			database,
-			GetID(),
-			delegatee,
-			DELEGATE_OFF
-		);
-		if (!result) {
-			LogError("Unable to clear raid main assister for player: [{}].",
-					 delegatee
-			);
-		}
-	}
-	else {
-		if (slot >= MAIN_ASSIST_1_SLOT) {
-			strcpy(main_assister_pcs[slot], delegatee);
-			rm->main_assister = slot + 1;
-			das->Action = SetDelegate;
-			das->MemberNumber = slot + 1;
-			auto result = RaidMembersRepository::UpdateRaidAssister(
-				database,
-				GetID(),
-				delegatee,
-				slot + 1
-			);
-			if (!result) {
-				LogError("Unable to set raid main assister for player: [{}] to [{}].",
-						 delegatee,
-						 slot + 1
-				);
+		for (auto& m : members) {
+			if (m.member == removemob) {
+				// Same reasoning as Group::MemberZoned -- membership is
+				// unchanged, just detaching a live Mob* on zone-out, but the
+				// cached pointer on the (about-to-be-destroyed) Mob object
+				// should still go to nullptr.
+				entity_list.SetRaidZoned(m.member, nullptr);
+				m.member = nullptr;
+				break;
 			}
 		}
 	}
-	das->DelegateAbility = RaidDelegateMainAssist;
-	das->EntityID = c->GetID();
-	strcpy(das->Name, delegatee);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	UpdateRaidXTargets();
 }
 
-void Raid::UpdateRaidXTargets()
+uint16 Raid::GetAvgLevel() const
+{
+	double levelHolder = 0;
+	uint8 numMem = 0;
+	for (const auto& m : members) {
+		if (m.InUse()) {
+			levelHolder += m.level;
+			++numMem;
+		}
+	}
+
+	return static_cast<uint16>(std::round(levelHolder/numMem)); // total levels divided by num of characters
+}
+
+const char *Raid::GetClientNameByIndex(uint8 index) const
+{
+	return members[index].name.c_str();
+}
+
+void Raid::SetDirtyAutoHaters() const
+{
+	ForEachLocalMember([](const RaidMember& m) { m.member->SetDirtyAutoHaters(); });
+}
+
+std::vector<RaidMember> Raid::GetMembers() const
+{
+	std::vector<RaidMember> raid_members;
+	for (const auto& m : members)
+		if (m.InUse())
+			raid_members.emplace_back(m);
+	return raid_members;
+}
+
+bool Raid::AnyMemberHasDzLockout(const std::string& expedition, const std::string& event) const
+{
+	std::vector<std::string> names;
+	for (const auto& mbr : members) {
+		if (mbr.kind != RaidMemberBot) {
+			if (mbr.member == nullptr && mbr.InUse()) {
+				names.emplace_back(mbr.name); // out of zone member
+			} else if (mbr.member != nullptr && mbr.member->HasDzLockout(expedition, event)) {
+				return true;
+			}
+		}
+	}
+
+	return !CharacterExpeditionLockoutsRepository::GetLockouts(database, names, expedition, event).empty();
+}
+
+bool Raid::IsEngaged() const
+{
+	bool engaged = false;
+	ForEachLocalMember([&](const RaidMember& m) -> bool {
+		engaged = m.member->IsEngaged() || m.member->GetAggroCount() > 0;
+		return !engaged;
+	});
+
+	return engaged;
+}
+
+void Raid::RaidMessage(const char* msg, const char* from, uint8 language, uint8 lang_skill) const
+{
+	if (from != nullptr && from[0] != '\0') {
+		auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+		const auto rga = reinterpret_cast<ServerRaidMessage_Struct*>(pack->pBuffer);
+		rga->rid = GetID();
+		rga->group_number = RAID_GROUPLESS;
+		rga->language = language;
+		rga->lang_skill = lang_skill;
+		strn0cpy(rga->from, from, 64);
+		strcpy(rga->message, msg);
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void Raid::SendRaidNotes() const
+{
+	for (const auto& c : members) {
+		if (!c.note.empty()) {
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidNote_Struct));
+			const auto data = reinterpret_cast<RaidNote_Struct*>(outapp->pBuffer);
+
+			data->general.action = raidSetNote;
+			data->general.parameter = 0;
+			data->general.unknown1 = 0;
+			strn0cpy(data->general.leader_name, c.name.c_str(), sizeof(data->general.leader_name));
+			strn0cpy(data->general.player_name, GetLeaderName().c_str(), GetLeaderName().length());
+			strn0cpy(data->note, c.note.c_str(), sizeof(data->note));
+
+			QueueClients(outapp);
+			safe_delete(outapp);
+		}
+	}
+}
+
+void Raid::UpdateRaidXTargets() const
 {
 	struct AssistUpdate {
 		XTargetType assist_type;
@@ -2577,20 +1415,17 @@ void Raid::UpdateRaidXTargets()
 	};
 
 	for (const auto& u : assist_updates) {
-		if (strlen(main_assister_pcs[u.slot]) > 0) {
-			auto m = entity_list.GetMob(main_assister_pcs[u.slot]);
-			if (m) {
+		if (!main_assist_names[u.slot].empty()) {
+			auto m = entity_list.GetMob(main_assist_names[u.slot].c_str());
+			if (m != nullptr) {
 				UpdateXTargetType(u.assist_type, m, m->GetName());
 				auto n = m->GetTarget();
-				if (n && n->GetHP() > 0) {
+				if (n != nullptr && n->GetHP() > 0)
 					UpdateXTargetType(u.assist_target_type, n, n->GetName());
-				}
-				else {
+				else
 					UpdateXTargetType(u.assist_target_type, nullptr);
-				}
 			}
-		}
-		else {
+		} else {
 			UpdateXTargetType(u.assist_type, nullptr);
 			UpdateXTargetType(u.assist_target_type, nullptr);
 		}
@@ -2608,409 +1443,68 @@ void Raid::UpdateRaidXTargets()
 	};
 
 	for (auto& u : marked_updates) {
-		if (marked_npcs[u.slot].entity_id) {
-			auto m = entity_list.GetMob(marked_npcs[u.slot].entity_id);
-			if (m && m->GetHP() > 0) {
+		if (marked_npcs[u.slot] != 0) {
+			auto m = entity_list.GetMob(marked_npcs[u.slot]);
+			if (m != nullptr && m->GetHP() > 0)
 				UpdateXTargetType(u.mark_target, m, m->GetName());
-			}
-			else {
+			else
 				UpdateXTargetType(u.mark_target, nullptr);
-			}
-		}
-		else {
+		} else {
 			UpdateXTargetType(u.mark_target, nullptr);
 		}
 	}
 }
 
-void Raid::DelegateAbilityMark(Mob* delegator, const char* delegatee)
+void Raid::UpdateXTargetType(XTargetType Type, const Mob *m, const char *name) const
 {
-	auto raid_delegatee = entity_list.GetRaidByName(delegatee);
-	if (!raid_delegatee) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
-		return;
-	}
-	uint32 raid_delegatee_id = raid_delegatee->GetID();
-	uint32 raid_delegator_id = GetID();
-	if (raid_delegatee_id != raid_delegator_id) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
-		return;
-	}
-
-	auto rm = &members[GetPlayerIndex(delegatee)];
-	if (!rm) {
-		return;
-	}
-	auto c = rm->member;
-	if (!c) {
-		return;
-	}
-
-	auto slot = FindNextRaidDelegateSlot(FindNextMarkerSlot);
-	auto mm = rm->main_marker;
-
-	if (slot == -1 && !mm) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, MAX_MAIN_RAID_MARKERS);
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-	DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
-	if (mm) {
-		das->Action = ClearDelegate;
-		das->MemberNumber = mm; // slot being vacated, not FindNextRaidDelegateSlot's unrelated free slot
-		memset(main_marker_pcs[mm - 1], 0, 64);
-		rm->main_marker = DELEGATE_OFF;
-		auto result = RaidMembersRepository::UpdateRaidMarker(
-			database,
-			GetID(),
-			delegatee,
-			DELEGATE_OFF
-		);
-		if (!result) {
-			LogError("Unable to clear rain main marker for player: [{}].", delegatee);
-		}
-	}
-	else {
-		if (slot >= 0) {
-			strcpy(main_marker_pcs[slot], c->GetName());
-			rm->main_marker = slot + 1;
-			das->Action = SetDelegate;
-			das->MemberNumber = slot + 1;
-			auto result = RaidMembersRepository::UpdateRaidMarker(
-				database,
-				GetID(),
-				delegatee,
-				slot + 1
-			);
-			if (!result) {
-				LogError("Unable to set raid main marker for player: [{}] to [{}].", delegatee, slot + 1);
-			}
-		}
-	}
-	das->DelegateAbility = RaidDelegateMainMarker;
-	das->EntityID = c->GetID();
-	strcpy(das->Name, delegatee);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	ForEachLocalMember([&](const RaidMember& rm) { rm.member->UpdateXTargetType(Type, m, name); });
 }
 
-void Raid::DelegateAbilityMasterLooter(Mob* delegator, const char* delegatee)
+void Raid::UpdateXTargetMarkedNPC(uint32 number, const Mob* m) const
 {
-	const auto raid_delegatee = entity_list.GetRaidByName(delegatee);
-	if (raid_delegatee == nullptr) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
-		return;
-	}
-
-	uint32 raid_delegatee_id = raid_delegatee->GetID();
-	uint32 raid_delegator_id = GetID();
-	if (raid_delegatee_id != raid_delegator_id) {
-		delegator->CastToClient()->MessageString(Chat::Cyan, NOT_IN_YOUR_RAID, delegatee);
-		return;
-	}
-
-	auto* c = GetClientByName(delegatee);
-	if (c == nullptr)
-		return;
-
-	auto rm_index = GetPlayerIndex(c);
-	if (rm_index >= MAX_RAID_MEMBERS)
-		return;
-
-	auto rm = &members[rm_index];
-
-	if (rm->is_master_looter) {
-		auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-		const auto das = reinterpret_cast<DelegateAbility_Struct*>(outapp->pBuffer);
-		das->Action = ClearDelegate;
-		das->MemberNumber = 1;
-		das->DelegateAbility = RaidDelegateMasterLooter;
-		das->EntityID = c->GetID();
-		strcpy(das->Name, delegatee);
-		UndelegateRaidMasterLooter(delegatee);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-		return;
-	}
-
-	const std::string previous_looter = GetRaidMasterLooter();
-	if (!previous_looter.empty() && strcasecmp(previous_looter.c_str(), delegatee) != 0) {
-		Mob* prev = entity_list.GetMob(previous_looter.c_str());
-		auto clear_app = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-		const auto clear_das = reinterpret_cast<DelegateAbility_Struct*>(clear_app->pBuffer);
-		clear_das->Action = ClearDelegate;
-		clear_das->MemberNumber = 1;
-		clear_das->DelegateAbility = RaidDelegateMasterLooter;
-		clear_das->EntityID = prev ? prev->GetID() : 0;
-		strcpy(clear_das->Name, previous_looter.c_str());
-		QueuePacket(clear_app);
-		safe_delete(clear_app);
-	}
-
-	auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-	const auto das = reinterpret_cast<DelegateAbility_Struct*>(outapp->pBuffer);
-	das->Action = SetDelegate;
-	das->MemberNumber = 1;
-	das->DelegateAbility = RaidDelegateMasterLooter;
-	das->EntityID = c->GetID();
-	strcpy(das->Name, delegatee);
-	DelegateRaidMasterLooter(delegatee);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	ForEachClient([&number, &m](Client* c) {
+		c->UpdateXTargetType(
+			number == 1 ? RaidMarkTarget1 :
+			number == 2 ? RaidMarkTarget2 :
+			RaidMarkTarget3, m);
+	});
 }
 
-int Raid::FindNextRaidDelegateSlot(int option)
-{
-	if (option == FindNextRaidMainMarkerSlot) {
-		for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
-			if (strlen(main_marker_pcs[i]) == 0) {
-				return i;
-			}
-		}
-	}
-	else if (option == FindNextRaidMainAssisterSlot) {
-		for (int i = 0; i < MAX_NO_RAID_MAIN_ASSISTERS; i++) {
-			if (strlen(main_assister_pcs[i]) == 0) {
-				return i;
-			}
-		}
-	}
-
-	return -1;
-}
-
-void Raid::UpdateXTargetType(XTargetType Type, Mob *m, const char *name)
-{
-	for (const auto &rm: members) {
-		if (!rm.member || rm.is_bot || !rm.member->XTargettingAvailable()) {
-			continue;
-		}
-
-		for (int i = 0; i < rm.member->GetMaxXTargets(); ++i) {
-			if (rm.member->XTargets[i].Type == Type) {
-				if (m) {
-					rm.member->XTargets[i].ID = m->GetID();
-				}
-				else {
-					rm.member->XTargets[i].ID = 0;
-				}
-
-				if (name) {
-					strn0cpy(rm.member->XTargets[i].Name, name, 64);
-				}
-
-				rm.member->SendXTargetPacket(i, m);
-			}
-		}
-	}
-}
-
-void Raid::RaidMarkNPC(Mob* mob, uint32 parameter)
-{
-	Client* c = mob->CastToClient();
-	if (!c || !c->GetTarget() || parameter < 1 || parameter > 3) {
-		LogDebug("RaidMarkNPC Failed sanity checks.");
-		return;
-	}
-
-	for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
-		auto cname = c->GetCleanName();
-		if (strcasecmp(main_marker_pcs[i], cname) == 0 || strcasecmp(leadername, cname) == 0) {
-			marked_npcs[parameter - 1].entity_id = c->GetTarget()->GetID();
-			marked_npcs[parameter - 1].zone_id = c->GetTarget()->GetZoneID();
-			marked_npcs[parameter - 1].instance_id = c->GetTarget()->GetInstanceVersion();
-			auto result = RaidDetailsRepository::UpdateRaidMarkedNPC(
-				database,
-				GetID(),
-				marked_npcs[parameter - 1].entity_id,
-				marked_npcs[parameter - 1].zone_id,
-				marked_npcs[parameter - 1].instance_id,
-				parameter
-				);
-			if (!result) {
-				LogError("Unable to set MarkedNPC{} from slot: [{}] for guild [{}].",
-					parameter,
-					parameter - 1,
-					GetID()
-				);
-			}
-
-			auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
-			MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
-			mnpcs->TargetID = marked_npcs[parameter - 1].entity_id;
-			mnpcs->Number = parameter;
-			strcpy(mnpcs->Name, c->GetTarget()->GetCleanName());
-			QueuePacket(outapp);
-			safe_delete(outapp);
-			UpdateXtargetMarkedNPC();
-			return;
-		}
-	}
-		//client is not delegated the mark ability
-		c->MessageString(Chat::Cyan, NOT_DELEGATED_MARKER);
-		return;
-}
-
-void Raid::UpdateXtargetMarkedNPC()
+void Raid::UpdateXtargetMarkedNPC() const
 {
 	for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-		auto mm = entity_list.GetNPCByID(marked_npcs[i].entity_id);
-		if (mm) {
+		const auto mm = entity_list.GetNPCByID(marked_npcs[i]);
+		if (mm)
 			UpdateXTargetType(static_cast<XTargetType>(RaidMarkTarget1 + i), mm->CastToMob(), mm->CastToMob()->GetName());
-		}
-		else {
+		else
 			UpdateXTargetType(static_cast<XTargetType>(RaidMarkTarget1 + i), nullptr);
-		}
-	}
-}
-
-void Raid::RaidClearNPCMarks(Client* c)
-{
-	auto mob_id = c->GetID();
-
-	if (Strings::EqualFold(main_marker_pcs[MAIN_MARKER_1_SLOT], c->GetCleanName()) ||
-		Strings::EqualFold(main_marker_pcs[MAIN_MARKER_2_SLOT], c->GetCleanName()) ||
-		Strings::EqualFold(main_marker_pcs[MAIN_MARKER_3_SLOT], c->GetCleanName())) {
-		for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-			if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
-				&& marked_npcs[i].instance_id == c->GetInstanceID())
-			{
-				auto npc_name = entity_list.GetNPCByID(marked_npcs[i].entity_id)->GetCleanName();
-				RaidMessageString(nullptr, Chat::Cyan, RAID_NO_LONGER_MARKED, npc_name);
-				marked_npcs[i].entity_id = 0;
-				marked_npcs[i].zone_id = 0;
-				marked_npcs[i].instance_id = 0;
-				auto result = RaidDetailsRepository::UpdateRaidMarkedNPC(
-					database,
-					GetID(),
-					0,
-					0,
-					0,
-					i + 1
-				);
-				if (!result) {
-					LogError("Unable to clear MarkedNPC{} from slot: [{}] for guild [{}].", i + 1, i, GetID());
-				}
-			}
-		}
-
-		auto outapp = new EQApplicationPacket(OP_RaidClearNPCMarks, sizeof(MarkNPC_Struct));
-		MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
-		mnpcs->TargetID = 0;
-		mnpcs->Number = 0;
-		QueuePacket(outapp);
-		safe_delete(outapp);
-		UpdateXtargetMarkedNPC();
-	}
-	else {
-		c->MessageString(Chat::Cyan, NOT_DELEGATED_MARKER);
-	}
-}
-
-void Raid::RemoveRaidDelegates(const char* delegatee)
-{
-	auto ma = members[GetPlayerIndex(delegatee)].main_assister;
-	auto mm = members[GetPlayerIndex(delegatee)].main_marker;
-
-	if (ma) {
-		SendRemoveRaidXTargets(static_cast<XTargetType>(RaidAssist1 + ma - 1));
-		SendRemoveRaidXTargets(static_cast<XTargetType>(RaidAssist1Target + ma - 1));
-		DelegateAbilityAssist(leader->CastToMob(), delegatee);
-	}
-
-	if (mm) {
-		SendRemoveRaidXTargets(static_cast<XTargetType>(RaidMarkTarget1 + mm - 1));
-		DelegateAbilityMark(leader->CastToMob(), delegatee);
-	}
-}
-
-void Raid::SendRemoveAllRaidXTargets(const char* client_name)
-{
-
-	auto c = entity_list.GetClientByName(client_name);
-
-	for (int i = 0; i < c->GetMaxXTargets(); ++i)
-	{
-		if ((c->XTargets[i].Type == RaidAssist1) ||
-			(c->XTargets[i].Type == RaidAssist2) ||
-			(c->XTargets[i].Type == RaidAssist3) ||
-			(c->XTargets[i].Type == RaidAssist1Target) ||
-			(c->XTargets[i].Type == RaidAssist2Target) ||
-			(c->XTargets[i].Type == RaidAssist3Target) ||
-			(c->XTargets[i].Type == RaidMarkTarget1) ||
-			(c->XTargets[i].Type == RaidMarkTarget2) ||
-			(c->XTargets[i].Type == RaidMarkTarget3))
-		{
-			c->XTargets[i].ID = 0;
-			c->XTargets[i].Name[0] = 0;
-			c->SendXTargetPacket(i, nullptr);
-		}
-	}
-}
-
-void Raid::SendRemoveRaidXTargets(XTargetType Type)
-{
-	for (const auto &m: members) {
-		if (m.member && !m.is_bot) {
-			for (int i = 0; i < m.member->GetMaxXTargets(); ++i) {
-				if (m.member->XTargets[i].Type == Type) {
-					m.member->XTargets[i].ID = 0;
-					m.member->XTargets[i].Name[0] = 0;
-					m.member->SendXTargetPacket(i, nullptr);
-				}
-			}
-		}
-	}
-}
-
-void Raid::SendRemoveAllRaidXTargets()
-{
-	for (const auto &m: members) {
-		if (m.member && !m.is_bot) {
-			for (int i = 0; i < m.member->GetMaxXTargets(); ++i) {
-				if ((m.member->XTargets[i].Type == RaidAssist1) ||
-					(m.member->XTargets[i].Type == RaidAssist2) ||
-					(m.member->XTargets[i].Type == RaidAssist3) ||
-					(m.member->XTargets[i].Type == RaidAssist1Target) ||
-					(m.member->XTargets[i].Type == RaidAssist2Target) ||
-					(m.member->XTargets[i].Type == RaidAssist3Target) ||
-					(m.member->XTargets[i].Type == RaidMarkTarget1) ||
-					(m.member->XTargets[i].Type == RaidMarkTarget2) ||
-					(m.member->XTargets[i].Type == RaidMarkTarget3)) {
-					m.member->XTargets[i].ID = 0;
-					m.member->XTargets[i].Name[0] = 0;
-					m.member->SendXTargetPacket(i, nullptr);
-				}
-			}
-		}
 	}
 }
 
 // Send a packet to the entire raid notifying them of the group target selected by the Main Assist.
-void Raid::SendRaidAssistTarget()
+void Raid::SendRaidAssistTarget() const
 {
 	uint16 assist_target_id = 0;
 	uint16 number = 0;
 	Mob* target = nullptr;
 
 	struct AssistTypes {
-		MainAssistType main_assist_type_slot;
-		MainAssistType main_assist_number;
+		MainAssistSlot main_assist_type_slot;
+		uint32 main_assist_number; // 1-indexed wire slot number (main_assist_type_slot + 1)
 	};
 
 	std::vector<AssistTypes> assist_types = {
-		{.main_assist_type_slot = MAIN_ASSIST_1_SLOT, .main_assist_number = MAIN_ASSIST_1},
-		{.main_assist_type_slot = MAIN_ASSIST_2_SLOT, .main_assist_number = MAIN_ASSIST_2},
-		{.main_assist_type_slot = MAIN_ASSIST_3_SLOT, .main_assist_number = MAIN_ASSIST_3}
+		{.main_assist_type_slot = MAIN_ASSIST_1_SLOT, .main_assist_number = MAIN_ASSIST_1_SLOT + 1},
+		{.main_assist_type_slot = MAIN_ASSIST_2_SLOT, .main_assist_number = MAIN_ASSIST_2_SLOT + 1},
+		{.main_assist_type_slot = MAIN_ASSIST_3_SLOT, .main_assist_number = MAIN_ASSIST_3_SLOT + 1}
 	};
 
 	for (auto &a: assist_types) {
-		if (strlen(main_assister_pcs[a.main_assist_type_slot]) > 0) {
-			auto player = entity_list.GetMob(main_assister_pcs[a.main_assist_type_slot]);
-			if (player) {
+		if (!main_assist_names[a.main_assist_type_slot].empty()) {
+			auto player = entity_list.GetMob(main_assist_names[a.main_assist_type_slot].c_str());
+			if (player != nullptr) {
 				target = player->GetTarget();
-				if (target) {
+				if (target != nullptr) {
 					assist_target_id = target->GetID();
 					number           = a.main_assist_number;
 					break;
@@ -3021,68 +1515,64 @@ void Raid::SendRaidAssistTarget()
 
 	if (assist_target_id) {
 		auto outapp = new EQApplicationPacket(OP_SetGroupTarget, sizeof(MarkNPC_Struct));
-		MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
+		const auto mnpcs = reinterpret_cast<MarkNPC_Struct*>(outapp->pBuffer);
 		mnpcs->TargetID = assist_target_id;
 		mnpcs->Number = number;
 
-		for (const auto& m : members) {
-			if (m.member && !m.is_bot) {
+		for (const auto& m : members)
+			if (m.member != nullptr)
 				m.member->QueuePacket(outapp);
-			}
-		}
+
 		safe_delete(outapp);
 	}
 }
 
-void Raid::SendAssistTarget(Client *c)
+void Raid::SendAssistTarget(Client *c) const
 {
-	if (!c || c->IsBot()) {
-		return;
-	}
+	if (c != nullptr) {
+		uint32 assist_target_id = 0;
+		uint32 number           = 0;
 
-	uint16 assist_target_id = 0;
-	uint16 number           = 0;
-	Mob *target = nullptr;
+		struct AssistTypes {
+			MainAssistSlot main_assist_type_slot;
+			uint32 main_assist_number; // 1-indexed wire slot number (main_assist_type_slot + 1)
+		};
 
-	struct AssistTypes {
-		MainAssistType main_assist_type_slot;
-		MainAssistType main_assist_number;
-	};
+		std::vector<AssistTypes> assist_types = {
+			{.main_assist_type_slot = MAIN_ASSIST_1_SLOT, .main_assist_number = MAIN_ASSIST_1_SLOT + 1},
+			{.main_assist_type_slot = MAIN_ASSIST_2_SLOT, .main_assist_number = MAIN_ASSIST_2_SLOT + 1},
+			{.main_assist_type_slot = MAIN_ASSIST_3_SLOT, .main_assist_number = MAIN_ASSIST_3_SLOT + 1}
+		};
 
-	std::vector<AssistTypes> assist_types = {
-		{.main_assist_type_slot = MAIN_ASSIST_1_SLOT, .main_assist_number = MAIN_ASSIST_1},
-		{.main_assist_type_slot = MAIN_ASSIST_2_SLOT, .main_assist_number = MAIN_ASSIST_2},
-		{.main_assist_type_slot = MAIN_ASSIST_3_SLOT, .main_assist_number = MAIN_ASSIST_3}
-	};
-
-	for (auto &a: assist_types) {
-		if (strlen(main_assister_pcs[a.main_assist_type_slot]) > 0) {
-			auto player = entity_list.GetMob(main_assister_pcs[a.main_assist_type_slot]);
-			if (player) {
-				target = player->GetTarget();
-				if (target) {
-					assist_target_id = target->GetID();
-					number           = a.main_assist_number;
-					break;
+		for (const auto& a : assist_types) {
+			if (!main_assist_names[a.main_assist_type_slot].empty()) {
+				const auto player = entity_list.GetMob(main_assist_names[a.main_assist_type_slot].c_str());
+				if (player != nullptr) {
+					const Mob* target = player->GetTarget();
+					if (target != nullptr) {
+						assist_target_id = target->GetID();
+						number           = a.main_assist_number;
+						break;
+					}
 				}
 			}
 		}
-	}
 
-	if (assist_target_id) {
-		auto outapp = new EQApplicationPacket(OP_SetGroupTarget, sizeof(MarkNPC_Struct));
-		MarkNPC_Struct *mnpcs = (MarkNPC_Struct *) outapp->pBuffer;
-		mnpcs->TargetID = assist_target_id;
-		mnpcs->Number   = number;
-		c->QueuePacket(outapp);
-		safe_delete(outapp);
+		if (assist_target_id != 0) {
+			auto outapp = new EQApplicationPacket(OP_SetGroupTarget, sizeof(MarkNPC_Struct));
+			const auto mnpcs = reinterpret_cast<MarkNPC_Struct*>(outapp->pBuffer);
+			mnpcs->TargetID = assist_target_id;
+			mnpcs->Number   = number;
+			c->QueuePacket(outapp);
+			safe_delete(outapp);
+		}
 	}
 }
 
-bool Raid::IsAssister(const char* who)
+bool Raid::IsAssister(const char* who) const
 {
-	for (auto & main_assister_pc : main_assister_pcs) {
-		if (strcasecmp(main_assister_pc, who) == 0) {
+	for (const auto & main_assist_name : main_assist_names) {
+		if (Strings::EqualFold(main_assist_name, who)) {
 			return true;
 		}
 	}
@@ -3090,154 +1580,128 @@ bool Raid::IsAssister(const char* who)
 	return false;
 }
 
-void Raid::SendRaidAssisterTo(const char* assister, Client* to)
+// Verified against tob/packet_analysis/OP_RaidDelegateAbility.md: this is a
+// direct passthrough on TOB (no ENCODE override), so DelegateAbility_Struct's
+// fields travel to the client unchanged. Doesn't require a resolvable Mob --
+// the client needs Name for its chat message ("X is now/no longer...") even
+// when the delegatee isn't physically present in this zone; EntityID (used
+// for the icon target) just falls back to 0 in that case.
+EQApplicationPacket* Raid::BuildDelegateAbilityPacket(uint32 ability, uint32 member_number, bool clearing, const char* name)
 {
-	if (strlen(assister) == 0 || !to || to->IsBot()) {
-		return;
-	}
+	if (name == nullptr || name[0] == '\0')
+		return nullptr;
 
-	auto mob = entity_list.GetMob(assister);
-	if (mob) {
-		auto m_id = mob->GetID();
-		if (m_id) {
-			auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-			DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
-			das->Action = SetDelegate;
-			das->DelegateAbility = RaidDelegateMainAssist;
-			das->MemberNumber = 0;
-			das->EntityID = m_id;
-			strcpy(das->Name, assister);
-			to->QueuePacket(outapp);
-			safe_delete(outapp);
-		}
+	auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
+	const auto das = reinterpret_cast<DelegateAbility_Struct*>(outapp->pBuffer);
+	das->DelegateAbility = ability;
+	das->MemberNumber    = member_number;
+	das->Action          = clearing ? ClearDelegate : SetDelegate;
+	if (const auto* mob = entity_list.GetMob(name))
+		das->EntityID = mob->GetID();
+	strn0cpy(das->Name, name, sizeof(das->Name));
+	return outapp;
+}
+
+void Raid::SendRaidAssisterTo(uint32 slot, const char* assister, Client* to)
+{
+	if (to == nullptr)
+		return;
+
+	if (auto* outapp = BuildDelegateAbilityPacket(RaidDelegateMainAssist, slot, false, assister)) {
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
 	}
 }
 
-void Raid::SendRaidAssister(const char* assister)
+void Raid::SendRaidAssister(uint32 slot, bool clearing, const char* assister) const
 {
-	if (strlen(assister) == 0) {
-		return;
-	}
-
-	auto mob = entity_list.GetMob(assister);
-
-	if (mob) {
-		auto m_id = mob->GetID();
-		if (m_id) {
-			auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-			DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
-			das->Action = SetDelegate;
-			das->DelegateAbility = RaidDelegateMainAssist;
-			das->MemberNumber = 0;
-			das->EntityID = m_id;
-			strcpy(das->Name, assister);
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-	}
-}
-bool Raid::IsMarker(const char* who)
-{
-	for (int i = 0; i < MAX_NO_RAID_MAIN_MARKERS; i++) {
-		if (Strings::EqualFold(main_marker_pcs[i], who)) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void Raid::SendRaidMarkerTo(const char* marker, Client* to)
-{
-	if (strlen(marker) == 0 || !to || to->IsBot()) {
-		return;
-	}
-
-	auto mob = entity_list.GetMob(marker);
-	if (mob) {
-		auto m_id = mob->GetID();
-		if (m_id) {
-			auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-			DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
-			das->Action = SetDelegate;
-			das->DelegateAbility = RaidDelegateMainMarker;
-			das->MemberNumber = 0;
-			das->EntityID = m_id;
-			strcpy(das->Name, marker);
-			to->QueuePacket(outapp);
-			safe_delete(outapp);
-		}
+	if (auto* outapp = BuildDelegateAbilityPacket(RaidDelegateMainAssist, slot, clearing, assister)) {
+		QueueClients(outapp);
+		safe_delete(outapp);
 	}
 }
 
-void Raid::SendRaidMarker(const char* marker)
+bool Raid::IsMarker(const char* who) const
 {
-	if (strlen(marker) == 0) {
-		return;
-	}
+	return std::ranges::any_of(main_marker_names, [&who](const auto& marker) {
+		return Strings::EqualFold(marker, who);
+	});
+}
 
-	auto mob = entity_list.GetMob(marker);
-	if (mob) {
-		auto m_id = mob->GetID();
-		if (m_id) {
-			auto outapp = new EQApplicationPacket(OP_RaidDelegateAbility, sizeof(DelegateAbility_Struct));
-			DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
-			das->Action = SetDelegate;
-			das->DelegateAbility = RaidDelegateMainMarker;
-			das->MemberNumber = 0;
-			das->EntityID = m_id;
-			strcpy(das->Name, marker);
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
+void Raid::SendRaidMarkerTo(uint32 slot, const char* marker, Client* to)
+{
+	if (to == nullptr)
+		return;
+
+	if (auto* outapp = BuildDelegateAbilityPacket(RaidDelegateMainMarker, slot, false, marker)) {
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
 	}
 }
 
-void Raid::SendMarkTargets(Client* c)
+void Raid::SendRaidMarker(uint32 slot, bool clearing, const char* marker) const
 {
-	if (!c || c->IsBot()) {
-		return;
+	if (auto* outapp = BuildDelegateAbilityPacket(RaidDelegateMainMarker, slot, clearing, marker)) {
+		QueueClients(outapp);
+		safe_delete(outapp);
 	}
+}
 
-	for (int i = 0; i < MAX_MARKED_NPCS; i++) {
-		if (marked_npcs[i].entity_id > 0 && marked_npcs[i].zone_id == c->GetZoneID()
-			&& marked_npcs[i].instance_id == c->GetInstanceID()) {
-			auto marked_mob = entity_list.GetMob(marked_npcs[i].entity_id);
-			if (marked_mob) {
-				auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
-				MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
-				mnpcs->TargetID = marked_mob->GetID();
-				mnpcs->Number = i + 1;
-				strcpy(mnpcs->Name, marked_mob->GetCleanName());
-				QueuePacket(outapp);
-				safe_delete(outapp);
+// Analog of SendRaidAssisterTo/SendRaidMarkerTo -- was never written at all
+// (the client-facing OP_RaidDelegateAbility push for master looter simply
+// didn't exist), so master looter delegation was previously silent: state
+// changed on world and in each member's roster row, but no client ever
+// learned who currently holds it except via a cold full resync. MemberNumber
+// is always 0 -- the client hardcodes an internal slot for this ability type
+// (see the packet analysis doc), it doesn't read the field for MasterLooter.
+void Raid::SendRaidMasterLooterTo(const char* looter, Client* to)
+{
+	if (to == nullptr)
+		return;
+
+	if (auto* outapp = BuildDelegateAbilityPacket(RaidDelegateMasterLooter, 0, false, looter)) {
+		to->QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
+void Raid::SendRaidMasterLooter(bool clearing, const char* looter) const
+{
+	if (auto* outapp = BuildDelegateAbilityPacket(RaidDelegateMasterLooter, 0, clearing, looter)) {
+		QueueClients(outapp);
+		safe_delete(outapp);
+	}
+}
+
+void Raid::SendMarkTargets(const Client* c) const
+{
+	if (c != nullptr) {
+		for (int i = 0; i < MAX_MARKED_NPCS; i++) {
+			if (marked_npcs[i] > 0) {
+				const auto marked_mob = entity_list.GetMob(marked_npcs[i]);
+				if (marked_mob != nullptr) {
+					auto outapp = new EQApplicationPacket(OP_MarkRaidNPC, sizeof(MarkNPC_Struct));
+					const auto mnpcs = reinterpret_cast<MarkNPC_Struct*>(outapp->pBuffer);
+					mnpcs->TargetID = marked_mob->GetID();
+					mnpcs->Number = i + 1;
+					strcpy(mnpcs->Name, marked_mob->GetCleanName());
+					QueueClients(outapp);
+					safe_delete(outapp);
+				}
 			}
 		}
+		UpdateXtargetMarkedNPC();
 	}
-	UpdateXtargetMarkedNPC();
 }
 
-void Raid::EmptyRaidMembers()
+// Ordinary (non-template) definition -- lives here because this is where
+// Raid is actually complete, unlike mob.h. Since RaidMembership isn't a
+// template, this is the one and only definition needed regardless of how
+// many concrete Mob-derived classes mix HasRaid<M> in -- no explicit
+// instantiation list to keep in sync.
+void RaidMembership::SetRaid(Raid* raid)
 {
-	for (auto& member : members) {
-		member.group_number				= RAID_GROUPLESS;
-		member.is_group_leader		 	= false;
-		member.level          		 	= 0;
-		member.main_assister  		 	= 0;
-		member.main_marker    		 	= 0;
-		member._class         		 	= 0;
-		member.is_bot         		 	= false;
-		member.is_looter      		 	= false;
-		member.is_master_looter			= false;
-		member.is_raid_leader 		 	= false;
-		member.is_raid_main_assist_one	= false;
-		member.member					= nullptr;
-		member.note.clear();
-		member.member_name[0]			= '\0';
-	}
-
-	for (auto &pc : main_assister_pcs)
-		pc[0] = '\0';
-
-	for (auto &pc : main_marker_pcs)
-		pc[0] = '\0';
+	m_raid = raid;
+	m_raid_id = raid != nullptr ? raid->GetID() : 0;
 }
+

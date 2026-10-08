@@ -154,7 +154,7 @@ Corpse::Corpse(
 	m_corpse_db_id        = 0;
 	m_player_corpse_depop = false;
 	strcpy(corpse_name, npc->GetName());
-	strcpy(name, npc->GetName());
+	SetName(npc->GetName());
 
 	for (auto &npcCorpseDecayTime: npcCorpseDecayTimes) {
 		if (
@@ -303,7 +303,7 @@ Corpse::Corpse(Client *c, int32 rez_exp, KilledByTypes in_killed_by) : Mob(
 	SetRezTimer(true);
 
 	strcpy(corpse_name, pp->name);
-	strcpy(name, pp->name);
+	SetName(pp->name);
 
 	/* become_npc was not being initialized which led to some pretty funky things with newly created corpses */
 	m_become_npc = false;
@@ -562,7 +562,7 @@ Corpse::Corpse(
 	}
 
 	strcpy(corpse_name, character_name);
-	strcpy(name, character_name);
+	SetName(character_name);
 
 	m_copper                    = copper;
 	m_silver                    = silver;
@@ -626,6 +626,7 @@ Corpse::~Corpse()
 this needs to be called AFTER the entity_id is set
 the client does this too, so it's unchangable
 */
+// TODO: This is incorrect. The client appends "'s corpse" when it needs to based on state, need to test, but this might be able to be removed completely
 void Corpse::CalcCorpseName()
 {
 	EntityList::RemoveNumbers(name);

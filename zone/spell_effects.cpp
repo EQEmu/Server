@@ -700,21 +700,9 @@ bool Mob::SpellEffect(Mob* caster, int32 spell_id, float partial, int level_over
 				//Added client messages to give some indication this effect is active.
 				// Is there a message generated? Too disgusted by raids.
 				uint32 time = spell.base_value[i] * 10 * 1000;
-				if (caster && caster->IsClient()) {
-					if (caster->IsGrouped()) {
-						auto group = caster->GetGroup();
-						for (int i = 0; i < 6; ++i)
-							if (group->members[i])
-								group->members[i]->aa_timers[aaTimerWarcry].Start(time);
-					} else if (caster->IsRaidGrouped()) {
-						auto raid = caster->GetRaid();
-						uint32 gid = raid->GetGroup(caster->CastToClient());
-						if (gid < 12)
-							for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
-								if (raid->members[i].member && raid->members[i].group_number == gid)
-									raid->members[i].member->aa_timers[aaTimerWarcry].Start(time);
-					}
-				}
+				if (caster && caster->IsGrouped())
+					caster->GetGroup()->ForEachMember([&](Mob* m) { m->aa_timers[aaTimerWarcry].Start(time); });
+
 				break;
 			}
 
@@ -1782,126 +1770,61 @@ bool Mob::SpellEffect(Mob* caster, int32 spell_id, float partial, int level_over
 				snprintf(effect_desc, _EDLEN, "Summon Corpse: %d", effect_value);
 #endif
 				// can only summon corpses of clients
-				if(!IsNPC()) {
-					Client* TargetClient = nullptr;
-					if(GetTarget())
-						TargetClient = GetTarget()->CastToClient();
-					else
-						TargetClient = CastToClient();
+				if (IsClient() && caster != nullptr) {
+					if (caster == this || (IsGrouped() && caster->IsGrouped() && GetGroup() == caster->GetGroup())) {
+						if (GetLevel() <= effect_value) {
+							Corpse* corpse = entity_list.GetCorpseByOwner(CastToClient());
+							if (corpse != nullptr) {
+								if (caster == this)
+									caster->MessageString(Chat::LightBlue, SUMMONING_CORPSE);
+								else
+									caster->MessageString(Chat::LightBlue, SUMMONING_CORPSE_OTHER, GetCleanName());
 
-					// We now have a valid target for this spell. Either the caster himself or a targetted player. Lets see if the target is in the group.
-					Group* group = entity_list.GetGroupByClient(TargetClient);
-					if(group) {
-						if(!group->IsGroupMember(TargetClient)) {
-							Message(Chat::Red, "Your target must be a group member for this spell.");
-							break;
-						}
-					}
-					else if (caster) {
-						Raid *r = entity_list.GetRaidByClient(caster->CastToClient());
-						if(r)
-						{
-							uint32 gid = 0xFFFFFFFF;
-							gid = r->GetGroup(caster->GetName());
-							if(gid < 11)
-							{
-								if (TargetClient && r->GetGroup(TargetClient->GetName()) != gid) {
-									Message(Chat::Red, "Your target must be a group member for this spell.");
-									break;
-								}
+								corpse->Summon(caster->CastToClient(), true, true);
+							} else {
+								// No corpse found in the zone
+								caster->MessageString(Chat::LightBlue, CORPSE_CANT_SENSE);
 							}
 						} else {
-							if(TargetClient != CastToClient()) {
-								Message(Chat::Red, "Your target must be a group member for this spell.");
-								break;
-							}
+							caster->MessageString(Chat::SpellFailure, SPELL_LEVEL_REQ, fmt::format("{}", effect_value).c_str());
 						}
+					} else {
+						caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
 					}
-
-					// Now we should either be casting this on self or its being cast on a valid group member
-					if(TargetClient) {
-
-						if (TargetClient->GetLevel() <= effect_value){
-
-							Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
-							if(corpse) {
-								if(TargetClient == CastToClient())
-									MessageString(Chat::LightBlue, SUMMONING_CORPSE, TargetClient->CastToMob()->GetCleanName());
-								else
-									MessageString(Chat::LightBlue, SUMMONING_CORPSE_OTHER, TargetClient->CastToMob()->GetCleanName());
-
-								corpse->Summon(CastToClient(), true, true);
-							}
-							else {
-								// No corpse found in the zone
-								MessageString(Chat::LightBlue, CORPSE_CANT_SENSE);
-							}
-						}
-						else if (caster) {
-							char level[4];
-							ConvertArray(effect_value, level);
-							caster->MessageString(Chat::SpellFailure,
-								SPELL_LEVEL_REQ, level);
-						}
-					}
-					else {
-						MessageString(Chat::LightBlue, TARGET_NOT_FOUND);
-						LogError("[{}] attempted to cast spell id [{}] with spell effect SpellEffect::SummonCorpse, but could not cast target into a Client object", GetCleanName(), spell_id);
-					}
+				} else {
+					if (caster != nullptr)
+						caster->MessageString(Chat::LightBlue, TARGET_NOT_FOUND);
+					LogError("[{}] attempted to cast spell id [{}] with spell effect SpellEffect::SummonCorpse, but could not cast target into a Client object", GetCleanName(), spell_id);
 				}
 
 				break;
 			}
 			case SpellEffect::SummonCorpseZone:
 			{
-				if (IsClient()) {
-					Client* client_target = CastToClient();
-					if (client_target && client_target->IsGrouped()) {
-						Group* group = client_target->GetGroup();
-						if (!group->IsGroupMember(caster)) {
-							if (caster != this) {
-								caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
-								break;
-							}
-						}
-					} else if (caster) {
-						if (caster->IsRaidGrouped()) {
-							Raid *raid = caster->GetRaid();
-							uint32 group_id = raid->GetGroup(caster->GetName());
-							if (group_id > 0 && group_id < MAX_RAID_GROUPS) {
-								if (client_target && raid->GetGroup(client_target->GetName()) != group_id) {
-									caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
-									break;
-								}
-							}
-						} else {
-							if (caster != this) {
-								caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
-								break;
-							}
-						}
-					}
-
-					if (client_target) {
-						if (database.CountCharacterCorpses(client_target->CharacterID()) == 0) {
-							if (caster == this) {
+				if (IsClient() && caster != nullptr) {
+					if (caster == this || (IsGrouped() && caster->IsGrouped() && GetGroup() == caster->GetGroup())) {
+						if (database.CountCharacterCorpses(CastToClient()->CharacterID()) == 0) {
+							if (caster == this)
 								Message(Chat::Yellow, "You have no corpses to summon.");
-							} else {
-								caster->Message(Chat::Yellow, "%s has no corpses to summon.", client_target->GetCleanName());
-							}
+							else
+								caster->Message(Chat::Yellow, "%s has no corpses to summon.", GetCleanName());
 						} else {
-							if (caster == this) {
+							if (caster == this)
 								Message(Chat::Spells, "Summoning your corpses.");
-							} else {
-								caster->MessageString(Chat::Spells, SUMMONING_CORPSE_ZONE, client_target->GetCleanName());
-							}
-							client_target->SummonAllCorpses(client_target->GetPosition());
+							else
+								caster->MessageString(Chat::Spells, SUMMONING_CORPSE_ZONE, GetCleanName());
+
+							CastToClient()->SummonAllCorpses(caster->GetPosition());
 						}
 					} else {
-						MessageString(Chat::Spells, TARGET_NOT_FOUND);
-						LogError("[{}] attempted to cast spell id [{}] with spell effect SpellEffect::SummonCorpseZone, but could not cast target into a Client object", GetCleanName(), spell_id);
+						caster->MessageString(Chat::Red, SUMMON_ONLY_GROUP_CORPSE);
 					}
+				} else {
+					if (caster != nullptr)
+						caster->MessageString(Chat::LightBlue, TARGET_NOT_FOUND);
+					LogError("[{}] attempted to cast spell id [{}] with spell effect SpellEffect::SummonCorpseZone, but could not cast target into a Client object", GetCleanName(), spell_id);
 				}
+
 				break;
 			}
 			case SpellEffect::AddMeleeProc:
@@ -2224,7 +2147,7 @@ bool Mob::SpellEffect(Mob* caster, int32 spell_id, float partial, int level_over
 
 				if (IsClient()) {
 					if (caster->IsClient()) {
-						if (!entity_list.IsInSameGroupOrRaidGroup(caster->CastToClient(), CastToClient())) {
+						if (!entity_list.IsInSameGroup(caster->CastToClient(), CastToClient())) {
 							caster->MessageString(Chat::SpellFailure, TARGET_GROUP_MEMBER);
 							break;
 						}
@@ -2559,58 +2482,20 @@ bool Mob::SpellEffect(Mob* caster, int32 spell_id, float partial, int level_over
 			}
 
 			case SpellEffect::BalanceHP: {
-				if(!caster)
-					break;
-
-				if(!caster->IsClient())
-					break;
-
-				Raid *r = entity_list.GetRaidByClient(caster->CastToClient());
-				if(r)
-				{
-					uint32 gid = 0xFFFFFFFF;
-					gid = r->GetGroup(caster->GetName());
-					if(gid < 11)
-					{
-						r->BalanceHP(spell.base_value[i], gid, spell.range, caster, spell.limit_value[i]);
-						break;
-					}
+				if (caster != nullptr && caster->IsClient()) {
+					Group* g = entity_list.GetGroupByClient(caster->CastToClient());
+					if (g != nullptr)
+						g->BalanceHP(spell.base_value[i], spell.range, caster, spell.limit_value[i]);
 				}
-
-				Group *g = entity_list.GetGroupByClient(caster->CastToClient());
-
-				if(!g)
-					break;
-
-				g->BalanceHP(spell.base_value[i], spell.range, caster, spell.limit_value[i]);
 				break;
 			}
 
 			case SpellEffect::BalanceMana: {
-				if(!caster)
-					break;
-
-				if(!caster->IsClient())
-					break;
-
-				Raid *r = entity_list.GetRaidByClient(caster->CastToClient());
-				if(r)
-				{
-					uint32 gid = 0xFFFFFFFF;
-					gid = r->GetGroup(caster->GetName());
-					if(gid < 11)
-					{
-						r->BalanceMana(spell.base_value[i], gid, spell.range, caster, spell.limit_value[i]);
-						break;
-					}
+				if (caster != nullptr && caster->IsClient()) {
+					Group* g = entity_list.GetGroupByClient(caster->CastToClient());
+					if (g != nullptr)
+						g->BalanceMana(spell.base_value[i], spell.range, caster, spell.limit_value[i]);
 				}
-
-				Group *g = entity_list.GetGroupByClient(caster->CastToClient());
-
-				if(!g)
-					break;
-
-				g->BalanceMana(spell.base_value[i], spell.range, caster, spell.limit_value[i]);
 				break;
 			}
 
@@ -2686,46 +2571,25 @@ bool Mob::SpellEffect(Mob* caster, int32 spell_id, float partial, int level_over
 			}
 
 			case SpellEffect::HealGroupFromMana: {
-				if(!caster)
-					break;
+				if (caster != nullptr && caster->IsClient()) {
+					int32 max_mana_ = spell.base_value[i];
+					int ratio = spell.limit_value[i];
+					uint64 heal_amt = 0;
 
-				if(!caster->IsClient())
-					break;
-
-				int32 max_mana = spell.base_value[i];
-				int ratio = spell.limit_value[i];
-				uint64 heal_amt = 0;
-
-				if (caster->GetMana() <= max_mana){
-					heal_amt = ratio*caster->GetMana()/10;
-					caster->SetMana(0);
-				}
-
-				else {
-					heal_amt = ratio*max_mana/10;
-					caster->SetMana(caster->GetMana() - max_mana);
-				}
-
-				Raid *r = entity_list.GetRaidByClient(caster->CastToClient());
-				if(r)
-				{
-					uint32 gid = 0xFFFFFFFF;
-					gid = r->GetGroup(caster->GetName());
-					if(gid < 11)
-					{
-						r->HealGroup(heal_amt,caster, gid, spell.range);
-						break;
+					if (caster->GetMana() <= max_mana_) {
+						heal_amt = ratio * caster->GetMana() / 10;
+						caster->SetMana(0);
+					} else {
+						heal_amt = ratio * max_mana_ / 10;
+						caster->SetMana(caster->GetMana() - max_mana_);
 					}
+
+					Group* g = entity_list.GetGroupByClient(caster->CastToClient());
+					if (g == nullptr)
+						caster->HealDamage(heal_amt);
+					else
+						g->HealGroup(heal_amt, caster, spell.range);
 				}
-
-				Group *g = entity_list.GetGroupByClient(caster->CastToClient());
-
-				if(!g){
-					caster->HealDamage(heal_amt);
-					break;
-				}
-
-				g->HealGroup(heal_amt, caster, spell.range);
 				break;
 			}
 

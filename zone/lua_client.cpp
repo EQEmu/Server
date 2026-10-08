@@ -1005,7 +1005,7 @@ void Lua_Client::BreakInvis() {
 
 void Lua_Client::LeaveGroup() {
 	Lua_Safe_Call_Void();
-	self->LeaveGroup();
+	self->RequestLeaveGroup();
 }
 
 bool Lua_Client::IsGrouped() {
@@ -1015,7 +1015,7 @@ bool Lua_Client::IsGrouped() {
 
 bool Lua_Client::IsRaidGrouped() {
 	Lua_Safe_Call_Bool();
-	return self->IsRaidGrouped();
+	return self->IsRaided();
 }
 
 bool Lua_Client::Hungry() {
@@ -2776,7 +2776,7 @@ void Lua_Client::ApplySpell(int spell_id, int duration, int level, bool allow_pe
 
 void Lua_Client::ApplySpell(int spell_id, int duration, int level, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets, true, allow_bots);
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets, allow_bots);
 }
 
 void Lua_Client::ApplySpellGroup(int spell_id) {
@@ -2801,7 +2801,7 @@ void Lua_Client::ApplySpellGroup(int spell_id, int duration, int level, bool all
 
 void Lua_Client::ApplySpellGroup(int spell_id, int duration, int level, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets, true, allow_bots);
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets);
 }
 
 void Lua_Client::ApplySpellRaid(int spell_id) {
@@ -2826,12 +2826,12 @@ void Lua_Client::ApplySpellRaid(int spell_id, int duration, int level, bool allo
 
 void Lua_Client::ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only) {
 	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+	self->ApplySpell(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 void Lua_Client::ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+	self->ApplySpell(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 void Lua_Client::SetSpellDuration(int spell_id) {
@@ -2856,7 +2856,7 @@ void Lua_Client::SetSpellDuration(int spell_id, int duration, int level, bool al
 
 void Lua_Client::SetSpellDuration(int spell_id, int duration, int level, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets, true, allow_bots);
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets, allow_bots);
 }
 
 void Lua_Client::SetSpellDurationGroup(int spell_id) {
@@ -2881,7 +2881,7 @@ void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, int level, bo
 
 void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, int level, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets, true, allow_bots);
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets, allow_bots);
 }
 
 void Lua_Client::SetSpellDurationRaid(int spell_id) {
@@ -2906,12 +2906,12 @@ void Lua_Client::SetSpellDurationRaid(int spell_id, int duration, int level, boo
 
 void Lua_Client::SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only) {
 	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+	self->SetSpellDuration(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 void Lua_Client::SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets, is_raid_group_only, allow_bots);
+	self->SetSpellDuration(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets, allow_bots);
 }
 
 void Lua_Client::UpdateAdmin() {

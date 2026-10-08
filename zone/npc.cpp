@@ -310,6 +310,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	EntityList::RemoveNumbers(name);
 	entity_list.MakeNameUnique(name);
+	CleanMobName(name, clean_name);
 
 	npc_aggro = npc_type_data->npc_aggro;
 

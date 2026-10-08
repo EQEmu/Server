@@ -483,6 +483,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	//this is called once the client is fully allowed to zone here
 	//it takes care of all the activities which occur when a client zones out
 
+	Zone();
 	SendLogoutPackets();
 
 	/* Dont clear aggro until the zone is successful */
@@ -607,12 +608,9 @@ void Client::MoveZoneGroup(const char *zone_short_name, const glm::vec4 &locatio
 	if (!g) {
 		MoveZone(zone_short_name, location);
 	} else {
-		for (const auto& gm : g->members) {
-			if (gm && gm->IsClient()) {
-				Client* c = gm->CastToClient();
-				c->MoveZone(zone_short_name, location);
-			}
-		}
+		g->ForEachClient([&](Client* c) {
+			c->MoveZone(zone_short_name, location);
+		});
 	}
 }
 
@@ -621,12 +619,11 @@ void Client::MoveZoneRaid(const char *zone_short_name, const glm::vec4 &location
 	if (!r) {
 		MoveZone(zone_short_name, location);
 	} else {
-		for (const auto& rm : r->members) {
-			if (rm.member && rm.member->IsClient()) {
-				Client* c = rm.member->CastToClient();
-				c->MoveZone(zone_short_name, location);
+		r->ForEachLocalMember([&](const auto& rm) {
+			if (rm.member->IsClient()) {
+				rm.member->CastToClient()->MoveZone(zone_short_name, location);
 			}
-		}
+		});
 	}
 }
 
@@ -652,12 +649,9 @@ void Client::MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4 &location
 	if (!g) {
 		MoveZoneInstance(instance_id, location);
 	} else {
-		for (const auto& gm : g->members) {
-			if (gm && gm->IsClient()) {
-				Client* c = gm->CastToClient();
-				c->MoveZoneInstance(instance_id, location);
-			}
-		}
+		g->ForEachClient([&](Client* c) {
+			c->MoveZoneInstance(instance_id, location);
+		});
 	}
 }
 
@@ -666,12 +660,11 @@ void Client::MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4 &location)
 	if (!r) {
 		MoveZoneInstance(instance_id, location);
 	} else {
-		for (const auto& rm : r->members) {
-			if (rm.member && rm.member->IsClient()) {
-				Client* c = rm.member->CastToClient();
-				c->MoveZoneInstance(instance_id, location);
+		r->ForEachLocalMember([&](const auto& rm) {
+			if (rm.member->IsClient()) {
+				rm.member->CastToClient()->MoveZoneInstance(instance_id, location);
 			}
-		}
+		});
 	}
 }
 

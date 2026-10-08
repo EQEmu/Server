@@ -754,6 +754,14 @@ bool Strings::ToBool(const std::string& bool_string)
 	return false;
 }
 
+bool Strings::EqualFold(std::string_view string_one, std::string_view string_two)
+{
+	return std::ranges::equal(string_one, string_two,
+		[](unsigned char one, unsigned char two) {
+			return std::tolower(one) == std::tolower(two);
+		});
+}
+
 // a wrapper for stoi which will return a fallback if the string
 // fails to cast to a number
 int Strings::ToInt(const std::string &s, int fallback)

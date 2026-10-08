@@ -1013,6 +1013,7 @@ namespace TOB {
 			/*021*/	uint32	unknown1;
 			/*025*/	uint32	unknown2;
 			/*029*/	uint32	unknown3;
+			/*033*/	uint32	unknown4;
 		};
 
 		struct ArmorPropertyStruct

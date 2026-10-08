@@ -108,8 +108,6 @@ public:
 	uint32 GetAccountIDByName(const std::string& account_name, const std::string& loginserver, int16* status = 0, uint32* lsid = 0);
 	uint32 GetCharacterID(const std::string& name);
 	uint32 GetGuildIDByCharID(uint32 character_id);
-	uint32 GetGroupIDByCharID(uint32 character_id);
-	uint32 GetRaidIDByCharID(uint32 character_id);
 
 	const std::string GetAccountName(uint32 account_id, uint32* lsaccount_id = 0);
 	const std::string GetCharName(uint32 character_id);
@@ -138,11 +136,9 @@ public:
 	uint32 GetTimeRemainingInstance(uint16 instance_id, bool& is_perma);
 	uint32 GetInstanceZoneID(uint16 instance_id);
 
-	void AssignGroupToInstance(uint32 group_id, uint32 instance_id);
-	void AssignRaidToInstance(uint32 raid_id, uint32 instance_id);
+	void AssignCharactersToInstance(const std::vector<uint32>& character_ids, uint32 instance_id);
 	void DeleteInstance(uint16 instance_id);
-	void FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 group_id);
-	void FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 raid_id);
+	void FlagInstanceByLeader(uint32 zone_id, int16 version, uint32 character_id, const std::string& leader_name);
 	void GetCharactersInInstance(uint16 instance_id, std::list<uint32>& character_ids);
 	void PurgeExpiredInstances();
 	void SetInstanceDuration(uint16 instance_id, uint32 new_duration);
@@ -182,54 +178,6 @@ public:
 
 	int GetInstanceID(uint32 character_id, uint32 zone_id);
 
-
-	/* Groups */
-	std::string GetGroupLeaderForLogin(const std::string& character_name);
-	char* GetGroupLeadershipInfo(
-		uint32 group_id,
-		char* leaderbuf,
-		char* maintank = nullptr,
-		char* assist = nullptr,
-		char* puller = nullptr,
-		char* marknpc = nullptr,
-		char* mentoree = nullptr,
-		int* mentor_percent = nullptr,
-		GroupLeadershipAA_Struct* GLAA = nullptr,
-		char* masterlooter = nullptr
-	);
-	std::string GetGroupLeaderName(uint32 group_id);
-	uint32 GetGroupID(const std::string& name);
-	void ClearGroup(uint32 group_id = 0);
-	void ClearGroupLeader(uint32 group_id = 0);
-	void SetGroupLeaderName(uint32 group_id, const std::string& name);
-
-	/* Raids */
-	const std::string GetRaidLeaderName(uint32 raid_id);
-	uint32 GetRaidID(const std::string& name);
-	void ClearRaid(uint32 raid_id = 0);
-	void ClearRaidDetails(uint32 raid_id = 0);
-	void ClearRaidLeader(uint32 group_id = std::numeric_limits<uint32>::max(), uint32 raid_id = 0);
-	void GetGroupLeadershipInfo(
-		uint32 group_id,
-		uint32 raid_id,
-		char* maintank = nullptr,
-		char* assist = nullptr,
-		char* puller = nullptr,
-		char* marknpc = nullptr,
-		char* mentoree = nullptr,
-		int* mentor_percent = nullptr,
-		GroupLeadershipAA_Struct* GLAA = nullptr
-	);
-	void GetRaidLeadershipInfo(
-		uint32 raid_id,
-		char* maintank = nullptr,
-		char* assist = nullptr,
-		char* puller = nullptr,
-		char* marknpc = nullptr,
-		RaidLeadershipAA_Struct* RLAA = nullptr
-	);
-	void SetRaidGroupLeaderInfo(uint32 group_id, uint32 raid_id);
-
 	void PurgeAllDeletedDataBuckets();
 	void ClearGuildOnlineStatus();
 	void ClearTraderDetails();
@@ -267,13 +215,4 @@ public:
 private:
 	std::mutex      Mvarcache;
 	VarCache_Struct varcache;
-
-	/* Groups, utility methods. */
-	void ClearAllGroupLeaders();
-	void ClearAllGroups();
-
-	/* Raid, utility methods. */
-	void ClearAllRaids();
-	void ClearAllRaidDetails();
-	void ClearAllRaidLeaders();
 };

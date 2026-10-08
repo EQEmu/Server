@@ -538,9 +538,15 @@ void EntityList::MobProcess()
 		}
 
 		if (mob_dead) {
+			if (Group* g = GetGroupByMob(mob))
+				g->MemberZoned(mob);
+
 			if (mob->IsMerc()) {
 				entity_list.RemoveMerc(id);
 			} else if (mob->IsBot()) {
+				if (Raid* r = GetRaidByBot(mob->CastToBot()))
+					r->MemberZoned(mob);
+
 				entity_list.RemoveBot(id);
 			} else if (mob->IsNPC()) {
 				entity_list.RemoveNPC(id);
@@ -550,16 +556,8 @@ void EntityList::MobProcess()
 				in.s_addr = mob->CastToClient()->GetIP();
 				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
-
-				Group* g = GetGroupByMob(mob);
-				if (g) {
-					g->DelMember(mob);
-				}
-
-				Raid* r = entity_list.GetRaidByClient(mob->CastToClient());
-				if (r) {
-					r->MemberZoned(mob->CastToClient());
-				}
+				if (Raid* r = GetRaidByClient(mob->CastToClient()))
+					r->MemberZoned(mob);
 
 				entity_list.RemoveClient(id);
 			}
@@ -1148,14 +1146,15 @@ NPC *EntityList::GetNPCBySpawnID(uint32 spawn_id)
 
 Mob *EntityList::GetMob(uint16 get_id)
 {
-	Entity *ent = nullptr;
-
 	if (get_id == 0)
 		return nullptr;
 
+	Entity *ent = nullptr;
+
 	if ((ent = entity_list.GetEntityMob(get_id)))
 		return ent->CastToMob();
-	else if ((ent = entity_list.GetEntityCorpse(get_id)))
+
+	if ((ent = entity_list.GetEntityCorpse(get_id)))
 		return ent->CastToMob();
 
 	return nullptr;
@@ -1657,22 +1656,11 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 						}
 
 						Send = !clear_target_window;
-					} else if (c->IsRaidGrouped()) {
-						Raid *raid = c->GetRaid();
-						if (raid) {
-							uint32 gid = raid->GetGroup(c);
-							if (gid < MAX_RAID_GROUPS && raid->GroupCount(gid) >= 3) {
-								if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
-									Send = !clear_target_window;
-							}
-						}
-					} else {
+					} else if (c->IsGrouped()) {
 						Group *group = c->GetGroup();
-						if (group && group->GroupCount() >= 3) {
-							if (group->GetLeadershipAA(groupAAInspectBuffs)) {
+						if (group->GroupCount() >= 3)
+							if (group->GetLeadershipAA(groupAAInspectBuffs))
 								Send = !clear_target_window;
-							}
-						}
 					}
 				} else {
 					Send = true;
@@ -2099,28 +2087,21 @@ int EntityList::RezzAllCorpsesByCharID(uint32 charid)
 	return RezzExp;
 }
 
-Group *EntityList::GetGroupByMob(Mob *mob)
+Group* EntityList::GetGroupByMob(const Mob* mob) const
 {
-	std::list<Group *>::iterator iterator;
+	if (mob != nullptr)
+		for (const auto& g : group_list)
+			if (g->IsGroupMember(mob))
+				return g;
 
-	iterator = group_list.begin();
-
-	while (iterator != group_list.end()) {
-		if ((*iterator)->IsGroupMember(mob))
-			return *iterator;
-		++iterator;
-	}
 	return nullptr;
 }
 
 Group *EntityList::GetGroupByMobName(const char* name)
 {
 	for (const auto& g : group_list) {
-		for (const auto& m : g->membername) {
-			if (strcmp(m, name) == 0) {
-				return g;
-			}
-		}
+		if (g->HasMemberNamed(name))
+			return g;
 	}
 	return nullptr;
 }
@@ -2153,28 +2134,41 @@ Group *EntityList::GetGroupByID(uint32 group_id)
 	return nullptr;
 }
 
-bool EntityList::IsInSameGroupOrRaidGroup(Client *client1, Client *client2) {
-	Group* group = entity_list.GetGroupByClient(client1);
-	Raid* raid = entity_list.GetRaidByClient(client1);
-
-	return (group && group->IsGroupMember(client2))
-		   || (raid && raid->IsRaidMember(client2->GetName()) && raid->GetGroup(client1) == raid->GetGroup(client2));
+bool EntityList::IsInSameGroup(const Client *client1, const Client *client2) {
+	return  client1->IsGrouped() && client1->GetGroup()->IsGroupMember(client2);
 }
 
-Group *EntityList::GetGroupByClient(Client *client)
+Group *EntityList::GetGroupByClient(const Client* client) const
 {
-	std::list <Group *>::iterator iterator;
-
-	iterator = group_list.begin();
-
-	while (iterator != group_list.end()) {
-		if ((*iterator)->IsGroupMember(client->CastToMob())) {
-			return *iterator;
-		}
-		++iterator;
-	}
+	for (const auto& g : group_list)
+		if (g->IsGroupMember(client))
+			return g;
 
 	return nullptr;
+}
+
+void EntityList::SetGroup(Mob* mob, Group* group)
+{
+	if (mob != nullptr)
+		mob->SetGroup(group);
+}
+
+void EntityList::SetRaid(Mob* mob, Raid* raid)
+{
+	if (mob != nullptr)
+		mob->SetRaid(raid);
+}
+
+void EntityList::SetGroupZoned(Mob* mob, Group* group)
+{
+	if (mob != nullptr)
+		mob->SetGroupZoned(group);
+}
+
+void EntityList::SetRaidZoned(Mob* mob, Raid* raid)
+{
+	if (mob != nullptr)
+		mob->SetRaidZoned(raid);
 }
 
 Raid *EntityList::GetRaidByID(uint32 id)
@@ -2191,24 +2185,26 @@ Raid *EntityList::GetRaidByID(uint32 id)
 	return nullptr;
 }
 
-Raid* EntityList::GetRaidByClient(Client* client)
+Raid* EntityList::GetRaidByClient(const Client* client) const
 {
-	if (client->p_raid_instance) {
-		return client->p_raid_instance;
-	}
-
-	std::list<Raid*>::iterator iterator;
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for (const auto& member : (*iterator)->members) {
-			if (member.member && member.member == client) {
-				client->p_raid_instance = *iterator;
-				return *iterator;
-			}
+	// Deliberately uncached -- matches EntityList::GetGroupByClient(), which
+	// has never cached and never had this class of bug. A cache here
+	// (removed) required every single raid-departure code path to remember
+	// to invalidate it; missing even one left it silently pointing at a
+	// disbanded raid forever, breaking every subsequent raid command for
+	// that character. Even a "validate the cache before trusting it"
+	// version still has to walk the cached raid's member list to check, so
+	// it's no cheaper than this plain search -- not worth carrying the
+	// extra state and invalidation risk for zero actual benefit.
+	for (const auto &r : raid_list) {
+		bool found = false;
+		r->ForEachLocalMember([&](const auto& member) -> bool {
+			found = (member.member == client);
+			return !found;
+		});
+		if (found) {
+			return r;
 		}
-
-		++iterator;
 	}
 
 	return nullptr;
@@ -2216,34 +2212,30 @@ Raid* EntityList::GetRaidByClient(Client* client)
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
 	for (const auto& r : raid_list) {
-		for (const auto& m : r->members) {
-			if (m.is_bot && strcmp(m.member_name, name) == 0) {
-				return r;
-			}
+		bool found = false;
+		r->ForEachMember([&](const auto& m) -> bool {
+			found = (m.kind == RaidMemberBot && m.name == name);
+			return !found;
+		});
+		if (found) {
+			return r;
 		}
 	}
 
 	return nullptr;
 }
 
-Raid* EntityList::GetRaidByBot(Bot* bot)
+Raid* EntityList::GetRaidByBot(const Bot* bot) const
 {
-	if (bot->p_raid_instance) {
-		return bot->p_raid_instance;
-	}
-
-	std::list<Raid*>::iterator iterator;
-	iterator = raid_list.begin();
-
-	while (iterator != raid_list.end()) {
-		for (const auto& member : (*iterator)->members) {
-			if (member.member && member.is_bot && member.member->CastToBot() == bot) {
-				bot->p_raid_instance = *iterator;
-				return *iterator;
-			}
+	for (const auto &r : raid_list) {
+		bool found = false;
+		r->ForEachLocalMember([&](const auto& member) -> bool {
+			found = (member.kind == RaidMemberBot && member.member->CastToBot() == bot);
+			return !found;
+		});
+		if (found) {
+			return r;
 		}
-
-		++iterator;
 	}
 
 	return nullptr;
@@ -2252,10 +2244,13 @@ Raid* EntityList::GetRaidByBot(Bot* bot)
 Raid* EntityList::GetRaidByName(const char* name)
 {
 	for (const auto& r : raid_list) {
-		for (const auto& m : r->members) {
-			if (Strings::EqualFold(m.member_name, name)) {
-				return r;
-			}
+		bool found = false;
+		r->ForEachMember([&](const auto& m) -> bool {
+			found = Strings::EqualFold(m.name, name);
+			return !found;
+		});
+		if (found) {
+			return r;
 		}
 	}
 	return nullptr;
@@ -2682,6 +2677,11 @@ void EntityList::RemoveAllGroups()
 
 void EntityList::RemoveAllRaids()
 {
+	// Shutdown-only: called from Clear(), after every Client/Bot/NPC/Mob is
+	// already destroyed, so raid members' Mob* pointers are dangling here.
+	// Deliberately skips RemoveRaid()'s teardown/notify for that reason --
+	// there's no live client left to notify, and dereferencing those
+	// pointers would be a use-after-free.
 	while (raid_list.size()) {
 		auto raid = raid_list.front();
 		raid_list.pop_front();
@@ -3042,7 +3042,26 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	}
 	auto group = *it;
 	group_list.erase(it);
+
+	group->ForEachMember([](Mob* m) { entity_list.SetGroup(m, nullptr); });
+
 	safe_delete(group);
+	return true;
+}
+
+bool EntityList::RemoveRaid(uint32 delete_id)
+{
+	auto it = std::find_if(raid_list.begin(), raid_list.end(),
+			[delete_id](const Raid *a) { return a->GetID() == delete_id; });
+	if (it == raid_list.end()) {
+		return false;
+	}
+	auto raid = *it;
+	raid_list.erase(it);
+
+	raid->ForEachLocalMember([](const auto& m) { entity_list.SetRaid(m.member, nullptr); });
+
+	safe_delete(raid);
 	return true;
 }
 
@@ -4551,80 +4570,6 @@ void EntityList::TryWakeTheDead(Mob *sender, Mob *target, int32 spell_id, uint32
 			sender->WakeTheDead(spell_id, ClosestCorpse, target, duration);
 			used_corpse_list.push_back(ClosestCorpse->GetID());
 		}
-	}
-}
-
-void EntityList::ForceGroupUpdate(uint32 gid)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second){
-			Group *g = nullptr;
-			g = it->second->GetGroup();
-			if (g) {
-				if (g->GetID() == gid) {
-					database.RefreshGroupFromDB(it->second);
-				}
-			}
-		}
-		++it;
-	}
-}
-
-void EntityList::SendGroupLeave(uint32 gid, const char *name)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *c = it->second;
-		if (c) {
-			Group *g = nullptr;
-			g = c->GetGroup();
-			if (g) {
-				if (g->GetID() == gid) {
-					auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
-					strcpy(gj->membername, name);
-					gj->action = groupActLeave;
-					strcpy(gj->yourname, c->GetName());
-					Mob *Leader = g->GetLeader();
-					if (Leader)
-						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
-					c->QueuePacket(outapp);
-					safe_delete(outapp);
-					g->DelMemberOOZ(name);
-					if (g->IsLeader(c) && c->IsLFP())
-						c->UpdateLFP();
-				}
-			}
-		}
-		++it;
-	}
-}
-
-void EntityList::SendGroupJoin(uint32 gid, const char *name)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second){
-			Group *g = nullptr;
-			g = it->second->GetGroup();
-			if (g) {
-				if (g->GetID() == gid) {
-					auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
-					strcpy(gj->membername, name);
-					gj->action = groupActJoin;
-					strcpy(gj->yourname, it->second->GetName());
-					Mob *Leader = g->GetLeader();
-					if (Leader)
-						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
-
-					it->second->QueuePacket(outapp);
-					safe_delete(outapp);
-				}
-			}
-		}
-		++it;
 	}
 }
 

@@ -147,178 +147,45 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 	std::set<int> delayed_remove;
 	bool          is_buff   = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
 
-	if (owner->IsRaidGrouped() && owner->IsOfClientBot()) { // currently raids are just client, but safety check
-		auto raid = owner->GetRaid();
-		if (raid == nullptr) { // well shit
-			owner->RemoveAura(GetID(), false, true);
-			return;
-		}
-		auto group_id = raid->GetGroup(owner->CastToClient());
-
-		// some lambdas so the for loop is less horrible ...
-		auto verify_raid_client = [&raid, &group_id, this](Client *c) {
-			auto idx = raid->GetPlayerIndex(c);
-			if (c->GetID() == m_owner) {
-				return DistanceSquared(GetPosition(), c->GetPosition()) <= distance;
-			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
-					 raid->members[idx].group_number == 0xFFFFFFFF) {
-				return false;
-			}
-			else if (DistanceSquared(GetPosition(), c->GetPosition()) > distance) {
-				return false;
-			}
-			return true;
-		};
-
-		auto verify_raid_client_pet = [&raid, &group_id, this](Mob *m) {
-			auto idx = raid->GetPlayerIndex(m->GetOwner()->CastToClient());
-			if (m->GetOwner()->GetID() == m_owner) {
-				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
-			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
-					 raid->members[idx].group_number == 0xFFFFFFFF) {
-				return false;
-			}
-			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
-				return false;
-			}
-			return true;
-		};
-
-		auto verify_raid_client_swarm = [&raid, &group_id, this](NPC *n) {
-			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner == nullptr) {
-				return false;
-			}
-			auto idx = raid->GetPlayerIndex(owner->CastToClient());
-			if (owner->GetID() == m_owner) {
-				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
-			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
-					 raid->members[idx].group_number == 0xFFFFFFFF) {
-				return false;
-			}
-			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
-				return false;
-			}
-			return true;
-		};
-
-		for (auto &e : mob_list) {
-			auto mob = e.second;
-			if (!mob) {
-				continue;
-			}
-			// step 1: check if we're already managing this NPC's buff
-			auto it  = casted_on.find(mob->GetID());
-			if (it != casted_on.end()) {
-				// verify still good!
-				if (mob->IsOfClientBot()) {
-					if (!verify_raid_client(mob->CastToClient())) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-				else if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner()) {
-					if (!verify_raid_client_pet(mob)) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
-					auto npc = mob->CastToNPC();
-					if (!verify_raid_client_swarm(npc)) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-			}
-			else { // we're not on it!
-				if (mob->IsOfClientBot() && verify_raid_client(mob->CastToClient())) {
-					casted_on.insert(mob->GetID());
-					if (is_buff) {
-						SpellFinished(spell_id, mob);
-					}
-				}
-				else if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner() && verify_raid_client_pet(mob)) {
-					casted_on.insert(mob->GetID());
-					if (is_buff) {
-						SpellFinished(spell_id, mob);
-					}
-				}
-				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
-					auto npc = mob->CastToNPC();
-					if (verify_raid_client_swarm(npc)) {
-						casted_on.insert(mob->GetID());
-						if (is_buff) {
-							SpellFinished(spell_id, mob);
-						}
-					}
-				}
-			}
-		}
-	}
-	else if (owner->IsGrouped()) {
+	if (owner->IsGrouped()) {
 		auto group = owner->GetGroup();
-		if (group == nullptr) { // uh oh
-			owner->RemoveAura(GetID(), false, true);
-			return;
-		}
 
 		// lambdas to make for loop less ugly
 		auto verify_group_pet = [&group, this](Mob *m) {
 			auto owner = m->GetOwner();
-			if (owner != nullptr && group->IsGroupMember(owner) &&
-				DistanceSquared(GetPosition(), m->GetPosition()) <= distance) {
-				return true;
-			}
-			return false;
+			return owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 		};
 
 		auto verify_group_swarm = [&group, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner != nullptr && group->IsGroupMember(owner) &&
-				DistanceSquared(GetPosition(), n->GetPosition()) <= distance) {
-				return true;
-			}
-			return false;
+			return owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 		};
 
-		for (auto &e : mob_list) {
-			auto mob = e.second;
+		for (auto& [_, mob] : mob_list) {
 			auto it  = casted_on.find(mob->GetID());
-
 			if (it != casted_on.end()) { // make sure we're still valid
-				if (mob->IsPet()) {
-					if (!verify_group_pet(mob)) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
-					if (!verify_group_swarm(mob->CastToNPC())) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-				else if (!group->IsGroupMember(mob) || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
+				if (mob->IsPet() && !verify_group_pet(mob)) {
+					delayed_remove.insert(mob->GetID());
+				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() &&
+					!verify_group_swarm(mob->CastToNPC())) {
+					delayed_remove.insert(mob->GetID());
+				} else if (!group->IsGroupMember(mob) || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
 					delayed_remove.insert(mob->GetID());
 				}
-			}
-			else { // not on, check if we should be!
+			} else { // not on, check if we should be!
 				if (mob->IsPet() && verify_group_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					if (is_buff) {
+					if (is_buff)
 						SpellFinished(spell_id, mob);
-					}
-				}
-				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
+				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() != nullptr &&
+					verify_group_swarm(mob->CastToNPC())) {
 					casted_on.insert(mob->GetID());
-					if (is_buff) {
+					if (is_buff)
 						SpellFinished(spell_id, mob);
-					}
-				}
-				else if (group->IsGroupMember(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+				} else if (group->IsGroupMember(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 					casted_on.insert(mob->GetID());
-					if (is_buff) {
+					if (is_buff)
 						SpellFinished(spell_id, mob);
-					}
 				}
 			}
 		}
@@ -391,144 +258,37 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 	// This type can either live on the pet (level 55/70 MAG aura) or on the pet owner (level 85 MAG aura)
 	auto          group_member = owner->GetOwnerOrSelf();
 
-	if (group_member->IsRaidGrouped() &&
-		group_member->IsOfClientBot()) { // currently raids are just client, but safety check
-		auto raid = group_member->GetRaid();
-		if (raid == nullptr) { // well shit
-			owner->RemoveAura(GetID(), false, true);
-			return;
-		}
-		auto group_id = raid->GetGroup(group_member->CastToClient());
-
-		// some lambdas so the for loop is less horrible ...
-		auto verify_raid_client_pet = [&raid, &group_id, &group_member, this](Mob *m) {
-			auto idx = raid->GetPlayerIndex(m->GetOwner()->CastToClient());
-			if (m->GetOwner()->GetID() == group_member->GetID()) {
-				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
-			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
-					 raid->members[idx].group_number == 0xFFFFFFFF) {
-				return false;
-			}
-			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
-				return false;
-			}
-			return true;
-		};
-
-		auto verify_raid_client_swarm = [&raid, &group_id, &group_member, this](NPC *n) {
-			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			if (owner == nullptr) {
-				return false;
-			}
-			auto idx = raid->GetPlayerIndex(owner->CastToClient());
-			if (owner->GetID() == group_member->GetID()) {
-				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
-			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
-					 raid->members[idx].group_number == 0xFFFFFFFF) {
-				return false;
-			}
-			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
-				return false;
-			}
-			return true;
-		};
-
-		for (auto &e : mob_list) {
-			auto mob = e.second;
-			if (!mob) {
-				continue;
-			}
-			// step 1: check if we're already managing this NPC's buff
-			auto it  = casted_on.find(mob->GetID());
-			if (it != casted_on.end()) {
-				// verify still good!
-				if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner()) {
-					if (!verify_raid_client_pet(mob)) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
-					auto npc = mob->CastToNPC();
-					if (!verify_raid_client_swarm(npc)) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-			}
-			else { // we're not on it!
-				if (mob->IsOfClientBot()) {
-					continue; // never hit client
-				}
-				else if (mob->IsPet() && mob->IsPetOwnerOfClientBot() && mob->GetOwner() && verify_raid_client_pet(mob)) {
-					casted_on.insert(mob->GetID());
-					if (is_buff) {
-						SpellFinished(spell_id, mob);
-					}
-				}
-				else if (mob->IsNPC() && mob->IsPetOwnerOfClientBot()) {
-					auto npc = mob->CastToNPC();
-					if (verify_raid_client_swarm(npc)) {
-						casted_on.insert(mob->GetID());
-						if (is_buff) {
-							SpellFinished(spell_id, mob);
-						}
-					}
-				}
-			}
-		}
-	}
-	else if (group_member->IsGrouped()) {
+	if (group_member->IsGrouped()) {
 		auto group = group_member->GetGroup();
-		if (group == nullptr) { // uh oh
-			owner->RemoveAura(GetID(), false, true);
-			return;
-		}
 
 		// lambdas to make for loop less ugly
 		auto verify_group_pet = [&group, this](Mob *m) {
 			auto owner = m->GetOwner();
-			return owner != nullptr && group->IsGroupMember(owner) &&
-				   DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
+			return owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 		};
 
 		auto verify_group_swarm = [&group, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
-			return owner != nullptr && group->IsGroupMember(owner) &&
-				   DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
+			return owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 		};
 
-		for (auto &e : mob_list) {
-			auto mob = e.second;
+		for (auto& [_, mob] : mob_list) {
 			auto it  = casted_on.find(mob->GetID());
-
 			if (it != casted_on.end()) { // make sure we're still valid
-				if (mob->IsPet()) {
-					if (!verify_group_pet(mob)) {
-						delayed_remove.insert(mob->GetID());
-					}
+				if (mob->IsPet() && !verify_group_pet(mob)) {
+					delayed_remove.insert(mob->GetID());
+				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && !verify_group_swarm(mob->CastToNPC())) {
+					delayed_remove.insert(mob->GetID());
 				}
-				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
-					if (!verify_group_swarm(mob->CastToNPC())) {
-						delayed_remove.insert(mob->GetID());
-					}
-				}
-			}
-			else { // not on, check if we should be!
-				if (mob->IsOfClientBot()) {
-					continue;
-				}
-				else if (mob->IsPet() && verify_group_pet(mob)) {
+			} else { // not on, check if we should be!
+				if (mob->IsPet() && verify_group_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					if (is_buff) {
+					if (is_buff)
 						SpellFinished(spell_id, mob);
-					}
-				}
-				else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
+				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
 					casted_on.insert(mob->GetID());
-					if (is_buff) {
+					if (is_buff)
 						SpellFinished(spell_id, mob);
-					}
 				}
 			}
 		}
@@ -821,34 +581,8 @@ bool Aura::ShouldISpawnFor(Client *c)
 		return true;
 	}
 
-	if (owner->IsRaidGrouped() && owner->IsOfClientBot()) {
-		auto raid = owner->GetRaid();
-		if (raid == nullptr) {
-			return false;
-		} // hmm
-		auto group_id = raid->GetGroup(owner->CastToClient());
-		if (group_id == 0xFFFFFFFF) { // owner handled above, and they're in a raid and groupless
-			return false;
-		}
-
-		auto idx = raid->GetPlayerIndex(c);
-		if (idx == 0xFFFFFFFF) { // they're not in our raid!
-			return false;
-		}
-
-		if (raid->members[idx].group_number != group_id) { // in our raid, but not our group
-			return false;
-		}
-
-		return true; // we got here so we know that 1 they're in our raid and 2 they're in our group!
-	}
-	else if (owner->IsGrouped()) {
+	if (owner->IsGrouped()) {
 		auto group = owner->GetGroup();
-		if (group == nullptr) {
-			return false;
-		} // hmm
-
-		// easy, in our group
 		return group->IsGroupMember(c);
 	}
 

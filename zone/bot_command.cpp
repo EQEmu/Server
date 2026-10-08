@@ -609,20 +609,18 @@ int helper_bot_follow_option_chain(Client* bot_owner)
 		bot_group_map[bot_group->GetID()] = bot_group;
 	}
 
-	std::list<Bot*> bot_member_list;
 	if (bot_owner->GetGroup()) {
 
-		bot_owner->GetGroup()->GetBotList(bot_member_list);
-		for (auto bot_member_iter : bot_member_list) {
+		bot_owner->GetGroup()->ForEachBot([&](Bot* bot_member_iter) {
 
 			if (!bot_member_iter || bot_member_iter->GetBotOwnerCharacterID() != bot_owner->CharacterID() || bot_member_iter == followee || bot_member_iter->GetManualFollow()) {
-				continue;
+				return;
 			}
 
 			bot_member_iter->SetFollowID(followee->GetID());
 			followee = bot_member_iter;
 			++chain_follow_count;
-		}
+		});
 	}
 
 	for (auto bot_group_iter : bot_group_map) {
@@ -631,17 +629,16 @@ int helper_bot_follow_option_chain(Client* bot_owner)
 			continue;
 		}
 
-		bot_group_iter.second->GetBotList(bot_member_list);
-		for (auto bot_member_iter : bot_member_list) {
+		bot_group_iter.second->ForEachBot([&](Bot* bot_member_iter) {
 
 			if (!bot_member_iter || bot_member_iter->GetBotOwnerCharacterID() != bot_owner->CharacterID() || bot_member_iter == followee || bot_member_iter->GetManualFollow()) {
-				continue;
+				return;
 			}
 
 			bot_member_iter->SetFollowID(followee->GetID());
 			followee = bot_member_iter;
 			++chain_follow_count;
-		}
+		});
 	}
 
 	return chain_follow_count;

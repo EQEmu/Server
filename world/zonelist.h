@@ -88,6 +88,10 @@ public:
 	ZoneServer* FindByInstanceID(uint32 InstanceID);
 	ZoneServer* FindByName(const char* zonename);
 	ZoneServer* FindByZoneID(uint32 ZoneID);
+	ZoneServer* FindByZoneIDAndInstanceID(uint32 ZoneID, uint32 InstanceID)
+	{
+		return InstanceID != 0 ? FindByInstanceID(InstanceID) : FindByZoneID(ZoneID);
+	}
 
 	const std::list<std::unique_ptr<ZoneServer>> &getZoneServerList() const;
 	inline uint32_t GetServerListCount() { return zone_server_list.size(); }

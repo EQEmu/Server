@@ -39,7 +39,7 @@ Horse::Horse(
 	GravityBehavior::Water
 )
 {
-	strn0cpy(name, fmt::format("{}`s_Mount00", c->GetCleanName()).c_str(), sizeof(name));
+	SetName(fmt::format("{}`s_Mount00", c->GetCleanName()).c_str());
 
 	is_horse = true;
 	owner    = c;

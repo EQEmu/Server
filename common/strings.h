@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include "common/types.h"
 
 #include <cctype>
@@ -27,6 +29,7 @@
 #include <string_view>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 class Strings {
@@ -75,14 +78,30 @@ public:
 	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 	static uint32 TimeToSeconds(std::string time_string);
 	static bool ToBool(const std::string& bool_string);
-	static inline bool EqualFold(const std::string &string_one, const std::string &string_two) { return strcasecmp(string_one.c_str(), string_two.c_str()) == 0; }
+	static bool EqualFold(std::string_view string_one, std::string_view string_two);
 	static std::string Random(size_t length);
 	static bool BeginsWith(const std::string& subject, const std::string& search);
 	static bool EndsWith(const std::string& subject, const std::string& search);
 	static std::string ZoneTime(const uint8 hours, const uint8 minutes);
 	static std::string Slugify(const std::string &input, const std::string &separator = "-");
 	static bool IsValidJson(const std::string& json);
+
+	template <std::size_t N> requires (N > 0)
+	static void Copy(char (&dest)[N], std::string_view source) { dest[source.copy(dest, N - 1)] = '\0'; }
 };
+
+// string hash utility for using string-likes to lookup string keys
+struct StringHash
+{
+	using is_transparent = void;
+
+	std::size_t operator()(std::string_view sv) const noexcept { return std::hash<std::string_view>{}(sv); }
+	std::size_t operator()(const std::string& s) const noexcept { return std::hash<std::string>{}(s); }
+	std::size_t operator()(const char* str) const noexcept { return std::hash<std::string_view>{}(str); }
+};
+
+template <typename Val>
+using TransparentStringMap = std::unordered_map<std::string, Val, StringHash, std::equal_to<>>;
 
 const std::string StringFormat(const char *format, ...);
 const std::string vStringFormat(const char *format, va_list args);

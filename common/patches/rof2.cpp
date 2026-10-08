@@ -31,6 +31,7 @@
 #include "common/races.h"
 #include "common/raid.h"
 #include "common/rulesys.h"
+#include "common/serialize_buffer.h"
 #include "common/strings.h"
 
 #include <cassert>
@@ -1564,91 +1565,6 @@ namespace RoF2
 			return;
 		}
 
-		if (in->size == sizeof(GroupUpdate2_Struct))
-		{
-			// Group Update2
-			//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Struct is GroupUpdate2");
-
-			unsigned char *__emu_buffer = in->pBuffer;
-			GroupUpdate2_Struct *gu2 = (GroupUpdate2_Struct*)__emu_buffer;
-
-			//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Yourname is %s", gu2->yourname);
-
-			int MemberCount = 1;
-			uint32 PacketLength = 8 + strlen(gu2->leadersname) + 1 + 22 + strlen(gu2->yourname) + 1;
-
-			for (int i = 0; i < 5; ++i)
-			{
-				//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Membername[%i] is %s", i,  gu2->member_name[i]);
-				if (gu2->membername[i][0] != '\0')
-				{
-					PacketLength += (22 + strlen(gu2->membername[i]) + 1);
-					++MemberCount;
-				}
-			}
-
-			//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Leadername is %s", gu2->leadersname);
-
-			auto outapp = new EQApplicationPacket(OP_GroupUpdateB, PacketLength);
-
-			char *Buffer = (char *)outapp->pBuffer;
-
-			// Header
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Think this should be SpawnID, but it doesn't seem to matter
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberCount);
-			VARSTRUCT_ENCODE_STRING(Buffer, gu2->leadersname);
-
-			// Leader
-			//
-
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);		// index
-			VARSTRUCT_ENCODE_STRING(Buffer, gu2->yourname);	// name
-			VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);		// owner name of merc
-			//VARSTRUCT_ENCODE_STRING(Buffer, "");
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// This is a string
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x46);	// level
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// group tank flag
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// group assist flag
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// group puller flag
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);		// offline
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);		// timestamp
-
-			int MemberNumber = 1;
-
-			for (int i = 0; i < 5; ++i)
-			{
-				if (gu2->membername[i][0] == '\0')
-					continue;
-
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberNumber++);	// index
-				VARSTRUCT_ENCODE_STRING(Buffer, gu2->membername[i]);	// name
-				VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);				// merc flag
-				//VARSTRUCT_ENCODE_STRING(Buffer, "");
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// owner name fo merc
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x41);			// level
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// group tank flag
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// group assist flag
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// group puller flag
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);				// offline
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);				// timestamp
-			}
-
-			//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
-			dest->FastQueuePacket(&outapp);
-
-			outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
-
-			GroupLeadershipAAUpdate_Struct *GLAAus = (GroupLeadershipAAUpdate_Struct*)outapp->pBuffer;
-
-			GLAAus->NPCMarkerID = gu2->NPCMarkerID;
-			memcpy(&GLAAus->LeaderAAs, &gu2->leader_aas, sizeof(GLAAus->LeaderAAs));
-
-			dest->FastQueuePacket(&outapp);
-			delete in;
-
-			return;
-
-		}
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Generic GroupUpdate, yourname = %s, member_name = %s", gjs->yourname, gjs->member_name);
 		ENCODE_LENGTH_EXACT(GroupJoin_Struct);
 		SETUP_DIRECT_ENCODE(GroupJoin_Struct, structs::GroupJoin_Struct);
@@ -1667,6 +1583,54 @@ namespace RoF2
 		FINISH_ENCODE();
 
 		dest->FastQueuePacket(&outapp);
+	}
+
+	ENCODE(OP_GroupUpdateB)
+	{
+		EQApplicationPacket* inapp = *p;
+		*p = nullptr;
+		const auto emu = reinterpret_cast<GroupMembersUpdate_Struct*>(inapp->pBuffer);
+
+		uint32 packet_length = sizeof(uint32) + // group_id
+			sizeof(uint32) + // member_count
+			strlen(emu->leader_name) + 1;
+
+		packet_length += emu->member_count * (
+			sizeof(uint32) + // index
+			sizeof(uint16) + // type
+			sizeof(uint32) + // level
+			3 * sizeof(uint8) + // roles * 3
+			sizeof(uint32) + // is_offline
+			sizeof(uint32) // online_timestamp
+		);
+
+		for (uint32 i = 0; i < emu->member_count; ++i) {
+			packet_length += strlen(emu->members[i].name) + 1;
+			packet_length += strlen(emu->members[i].owner_name) + 1;
+		}
+
+		SerializeBuffer buffer(packet_length);
+		buffer.WriteUInt32(0); // group_id, not used
+		buffer.WriteUInt32(emu->member_count);
+		buffer.WriteString(emu->leader_name);
+
+		for (uint32 index = 0; index < emu->member_count; ++index) {
+			const auto& m = emu->members[index];
+			buffer.WriteUInt32(index);
+			buffer.WriteString(m.name);
+			buffer.WriteUInt16(m.type);
+			buffer.WriteString(m.owner_name);
+			buffer.WriteUInt32(m.level);
+			buffer.WriteUInt8(m.is_tank);
+			buffer.WriteUInt8(m.is_assist);
+			buffer.WriteUInt8(m.is_puller);
+			buffer.WriteUInt32(m.offline);
+			buffer.WriteUInt32(0); // confirmed present on the wire (immediately overwrites the client's own computed online-timestamp) but not meaningfully consumed
+		}
+
+		auto outapp = new EQApplicationPacket(OP_GroupUpdateB, std::move(buffer));
+		dest->FastQueuePacket(&outapp);
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_GuildBank)
@@ -3244,6 +3208,89 @@ namespace RoF2
 		case raidNoRaid:
 		{
 			dest->QueuePacket(inapp);
+			break;
+		}
+		case raidMembers:
+		{
+			// See RaidMembersUpdate_Struct's comment in common/eq_packet_structs.h
+			// for what's confirmed vs. zero-filled here, and why -- this is the
+			// single-packet bulk raid-join path (RoF2's equivalent of Group's
+			// OP_GroupUpdateB), reverse-engineered from the 2013-05-10 client's
+			// CRaid::HandleS2CRaidMessage case 6 (sub_47ED80/sub_47FCE0).
+			const auto emu = reinterpret_cast<RaidMembersUpdate_Struct*>(__emu_buffer);
+
+			SerializeBuffer buf;
+			buf.WriteUInt32(raidMembers);
+			// Legacy leader-name slot read right after the action byte -- the
+			// client never stores its content (no memcpy target was found for
+			// it in sub_47ED80), only advances its cursor past it. Sent for
+			// wire-shape safety; the leader name the client actually keeps is
+			// written again near the end, right before the locked byte.
+			buf.WriteString(emu->leader_name);
+
+			// 532-byte blob consumed by sub_47FCE0 in one shot (confirmed by the
+			// total matching its local buffer size exactly, and by boundary --
+			// it ends exactly where eqlib's CRaid::raidMembers[] array begins).
+			// The leading ~256 bytes are still unconfirmed even in eqlib's own
+			// community-maintained model, so zero-filled.
+			for (int i = 0; i < 64; ++i)
+				buf.WriteUInt32(0); // unverified reserved block
+
+			// MainAssists/MainAssistNames/MainMarkers/MasterLooter -- confirmed
+			// via eqlib's commented-out RaidData struct (MAX_RAID_ASSISTS=3),
+			// the same shape as TOB's independently-confirmed
+			// RaidData::UnSerialize (its action 0xF). See
+			// RaidMembersUpdate_Struct's own comment in
+			// common/eq_packet_structs.h.
+			for (int i = 0; i < 3; ++i)
+				buf.WriteUInt32(emu->main_assist_id[i]);
+			for (int i = 0; i < 3; ++i)
+				buf.WriteString(emu->main_assist_name[i]);
+			for (int i = 0; i < 3; ++i)
+				buf.WriteUInt32(emu->main_marker_id[i]);
+			buf.WriteUInt32(emu->master_looter_id);
+
+			// Remaining trailing block -- still unconfirmed even in eqlib's own
+			// model, zero-filled.
+			for (int i = 0; i < 14; ++i)
+				buf.WriteUInt32(0); // unverified reserved block
+
+			// Confirmed via CRaid::RaidCreated (which writes this same field,
+			// this+0x2c00, from CreateRaidMessage) and cross-checked against
+			// eqlib's CRaid::raidId at the identical offset: this is the raid's
+			// own numeric id, not a character id.
+			buf.WriteUInt32(emu->raid_id);
+			buf.WriteUInt32(emu->member_count);
+
+			// Per-member field order/meaning confirmed byte-for-byte against
+			// eqlib's RaidMember struct (148-byte stride matches exactly).
+			for (uint32 i = 0; i < emu->member_count; ++i) {
+				const auto& m = emu->members[i];
+				buf.WriteUInt32(m.group_number);
+				buf.WriteString(m.name);
+				buf.WriteString(m.note);
+				buf.WriteUInt8(m.level);
+				buf.WriteUInt8(m._class);
+				buf.WriteUInt8(m.is_raid_leader);
+				buf.WriteUInt8(m.is_group_leader);
+				buf.WriteUInt8(m.is_assist);
+				buf.WriteUInt8(m.is_marker);
+				buf.WriteUInt8(m.is_master_looter);
+			}
+
+			// Plausible from the wire shape (count + N strings, right after the
+			// member array) but unconfirmed -- see group_leader_names' comment.
+			buf.WriteUInt32(12); // always all 12 slots
+			for (int i = 0; i < 12; ++i)
+				buf.WriteString(emu->group_leader_names[i]);
+
+			buf.WriteString(emu->motd);
+			buf.WriteString(emu->leader_name); // the leader name the client actually stores
+			buf.WriteUInt8(emu->locked); // confirmed via CRaid::IsRaidLocked's backing field
+
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, std::move(buf));
+
+			dest->FastQueuePacket(&outapp);
 			break;
 		}
 		default:

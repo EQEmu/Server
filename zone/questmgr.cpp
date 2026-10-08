@@ -28,6 +28,7 @@
 #include "common/skills.h"
 #include "common/spdat.h"
 #include "common/strings.h"
+#include <unordered_map>
 #include "zone/bot.h"
 #include "zone/dialogue_window.h"
 #include "zone/entity.h"
@@ -470,12 +471,9 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 			initiator->MoveZone(zone_name);
 		} else {
 			auto client_group = initiator->GetGroup();
-			for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-				if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-					auto group_member = client_group->members[member_index]->CastToClient();
-					group_member->MoveZone(zone_name);
-				}
-			}
+			client_group->ForEachClient([&](Client *group_member) {
+				group_member->MoveZone(zone_name);
+			});
 		}
 	}
 }
@@ -487,16 +485,11 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 			initiator->MoveZone(zone_name);
 		} else {
 			auto client_raid = initiator->GetRaid();
-			for (const auto& m : client_raid->members) {
-				if (m.is_bot) {
-					continue;
+			client_raid->ForEachLocalMember([&](const auto& m) {
+				if (m.kind != RaidMemberBot && m.member->IsClient()) {
+					m.member->CastToClient()->MoveZone(zone_name);
 				}
-
-				if (m.member && m.member->IsClient()) {
-					auto raid_member = m.member->CastToClient();
-					raid_member->MoveZone(zone_name);
-				}
-			}
+			});
 		}
 	}
 }
@@ -1284,8 +1277,9 @@ void QuestManager::safemove() {
 void QuestManager::rain(int weather) {
 	QuestManagerCurrentQuestVars();
 	zone->zone_weather = weather;
-	auto outapp = new EQApplicationPacket(OP_Weather, 8);
-	*((uint32*) &outapp->pBuffer[4]) = (uint32) weather; // Why not just use 0x01/2/3?
+	auto outapp = new EQApplicationPacket(OP_Weather, sizeof(Weather_Struct));
+	auto ws = (Weather_Struct *) outapp->pBuffer;
+	ws->type = (uint32) weather; // Why not just use 0x01/2/3?
 	entity_list.QueueClients(owner, outapp);
 	safe_delete(outapp);
 }
@@ -1293,9 +1287,10 @@ void QuestManager::rain(int weather) {
 void QuestManager::snow(int weather) {
 	QuestManagerCurrentQuestVars();
 	zone->zone_weather = weather + 1;
-	auto outapp = new EQApplicationPacket(OP_Weather, 8);
-	outapp->pBuffer[0] = 0x01;
-	*((uint32*) &outapp->pBuffer[4]) = (uint32)weather;
+	auto outapp = new EQApplicationPacket(OP_Weather, sizeof(Weather_Struct));
+	auto ws = (Weather_Struct *) outapp->pBuffer;
+	ws->val1 = 0x01;
+	ws->type = (uint32) weather;
 	entity_list.QueueClients(initiator, outapp);
 	safe_delete(outapp);
 }
@@ -1472,20 +1467,10 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 		return;
 	}
 
-	if (Group *g = entity_list.GetGroupByClient(initiator)) {
+	if (Group* g = entity_list.GetGroupByClient(initiator))
 		g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
-	} else {
-		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
-			const auto group_id = r->GetGroup(initiator);
-			if (EQ::ValueWithin(group_id, 0, MAX_RAID_GROUPS)) {
-				r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, group_id);
-			} else {
-				initiator->MovePC(zoneid, x, y, z, 0.0f);
-			}
-		} else {
-			initiator->MovePC(zoneid, x, y, z, 0.0f);
-		}
-	}
+	else
+		initiator->MovePC(zoneid, x, y, z, 0.0f);
 }
 
 void QuestManager::doanim(int animation_id, int animation_speed, bool ackreq, eqFilterType filter) {
@@ -3593,7 +3578,28 @@ void QuestManager::AssignGroupToInstance(uint16 instance_id)
 	if (initiator) {
 		Group* g = initiator->GetGroup();
 		if (g) {
-			database.AssignGroupToInstance(g->GetID(), instance_id);
+			std::vector<uint32> character_ids;
+
+			std::unordered_map<std::string, uint32> live_ids;
+			g->ForEachClient([&](Client *c) {
+				live_ids[c->GetName()] = c->CharacterID();
+			});
+
+			for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+				if (g->GetMemberName(i)[0] == '\0') {
+					continue;
+				}
+
+				auto it = live_ids.find(g->GetMemberName(i));
+				if (it != live_ids.end()) {
+					character_ids.push_back(it->second);
+				}
+				else {
+					character_ids.push_back(database.GetCharacterID(g->GetMemberName(i)));
+				}
+			}
+
+			database.AssignCharactersToInstance(character_ids, instance_id);
 		}
 	}
 }
@@ -3605,7 +3611,17 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 	if (initiator) {
 		Raid* r = initiator->GetRaid();
 		if (r) {
-			database.AssignRaidToInstance(r->GetID(), instance_id);
+			std::vector<uint32> character_ids;
+			r->ForEachMember([&](const auto& m) {
+				if (m.member && m.kind != RaidMemberBot && m.member->IsClient()) {
+					character_ids.push_back(m.member->CastToClient()->CharacterID());
+				}
+				else {
+					character_ids.push_back(database.GetCharacterID(m.name.c_str()));
+				}
+			});
+
+			database.AssignCharactersToInstance(character_ids, instance_id);
 		}
 	}
 }
@@ -3670,7 +3686,7 @@ void QuestManager::FlagInstanceByGroupLeader(uint32 zone, int16 version)
 	if (initiator) {
 		Group* g = initiator->GetGroup();
 		if (g) {
-			database.FlagInstanceByGroupLeader(zone, version, initiator->CharacterID(), g->GetID());
+			database.FlagInstanceByLeader(zone, version, initiator->CharacterID(), g->GetLeaderName());
 		}
 	}
 }
@@ -3682,7 +3698,7 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 	if (initiator) {
 		Raid* r = initiator->GetRaid();
 		if (r) {
-			database.FlagInstanceByRaidLeader(zone, version, initiator->CharacterID(), r->GetID());
+			database.FlagInstanceByLeader(zone, version, initiator->CharacterID(), r->GetLeaderName());
 		}
 	}
 }
@@ -3725,16 +3741,29 @@ int QuestManager::getguildidbycharid(uint32 char_id) {
     return 0;
 }
 
+// World now owns all group/raid state; zone only knows about a character's
+// group/raid if they're represented locally (entity_list's own mirror).
+// Resolves via that mirror instead of the (now-removed) group_id/raid_members
+// DB tables -- covers the common case (self, or a nearby/interacting NPC's
+// target) but returns 0 if this zone has no local knowledge of char_id.
 int QuestManager::getgroupidbycharid(uint32 char_id) {
     if (char_id > 0) {
-        return database.GetGroupIDByCharID(char_id);
+        if (Client *c = entity_list.GetClientByCharID(char_id)) {
+            if (Group *g = entity_list.GetGroupByClient(c)) {
+                return g->GetID();
+            }
+        }
     }
     return 0;
 }
 
 int QuestManager::getraididbycharid(uint32 char_id) {
     if (char_id > 0) {
-        return database.GetRaidIDByCharID(char_id);
+        if (Client *c = entity_list.GetClientByCharID(char_id)) {
+            if (Raid *r = entity_list.GetRaidByClient(c)) {
+                return r->GetID();
+            }
+        }
     }
     return 0;
 }

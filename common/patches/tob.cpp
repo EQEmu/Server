@@ -780,9 +780,6 @@ namespace TOB
 		FINISH_ENCODE();
 	}
 
-	// TODO: This needs a refactor in the server to enable the extra struct members (and separate out different
-	//       logic branches). Right now the server has to send extra role update packets that should be embedded
-	//       in this single packet (for OP_GroupUpdateB)
 	ENCODE(OP_GroupUpdate)
 	{
 		EQApplicationPacket *in = *p;
@@ -802,56 +799,9 @@ namespace TOB
 			// leader change is handled by SendGroupLeaderChangePacket (OP_GroupLeaderChange)
 			// AA update packet is unused in TOB (OP_GroupLeadershipAAUpdate was removed)
 			delete in;
-		} else if (in->size == sizeof(GroupUpdate2_Struct)) {
-			// Full group snapshot
-			const auto gu2 = reinterpret_cast<GroupUpdate2_Struct*>(in->pBuffer);
-
-			int MemberCount = 1;
-			for (int i = 0; i < 5; ++i) {
-				if (gu2->membername[i][0] != '\0')
-					++MemberCount;
-			}
-
-			uint32 PacketLength = 4 + 4 + strlen(gu2->leadersname) + 1;
-			PacketLength += MemberCount * (4 + 2 + 1 + 4 + 5 + 4 + 8 + 4 + 8);
-			PacketLength += strlen(gu2->yourname) + 1;
-			for (int i = 0; i < 5; ++i) {
-				if (gu2->membername[i][0] != '\0')
-					PacketLength += strlen(gu2->membername[i]) + 1;
-			}
-
-			auto outapp = new EQApplicationPacket(OP_GroupUpdateB, PacketLength);
-			auto Buffer = reinterpret_cast<char*>(outapp->pBuffer);
-
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// group_id — unused client-side
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberCount);
-			VARSTRUCT_ENCODE_STRING(Buffer, gu2->leadersname);
-
-			auto encode_member = [&](uint32 index, const char *name) {
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, index);
-				VARSTRUCT_ENCODE_STRING(Buffer, name);
-				VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);	// Type (0 = player)
-				VARSTRUCT_ENCODE_STRING(Buffer, "");		// OwnerName (merc owner; N/A)
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// TODO: Level
-				for (int f = 0; f < 5; ++f)
-					VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// bRoleStates[1..5] — set via OP_GroupRoles as well
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// TODO: bIsOffline (grays out the group entry)
-				VARSTRUCT_ENCODE_TYPE(uint64, Buffer, 0);	// TODO: OnlineTimestamp
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// TODO: UniquePlayerID
-				VARSTRUCT_ENCODE_TYPE(uint64, Buffer, 0);	// Unknown0x30 — unidentified
-			};
-
-			encode_member(0, gu2->yourname);
-			uint32 MemberIndex = 1;
-			for (int i = 0; i < 5; ++i) {
-				if (gu2->membername[i][0] != '\0')
-					encode_member(MemberIndex++, gu2->membername[i]);
-			}
-
-			dest->FastQueuePacket(&outapp, ack_req);
-			delete in;
 		} else {
 			// groupActJoin: notify existing members that a new member joined.
+			// TODO: This is missing type, level, and owner name for mercs
 			ENCODE_LENGTH_EXACT(GroupJoin_Struct);
 			SETUP_DIRECT_ENCODE(GroupJoin_Struct, structs::GroupJoin_Struct);
 
@@ -859,6 +809,64 @@ namespace TOB
 
 			FINISH_ENCODE();
 		}
+	}
+
+	// Full-roster bulk update -- see GroupMembersUpdate_Struct's comment in
+	// common/eq_packet_structs.h for the confirmed field order and what's
+	// sent as 0 because the client doesn't meaningfully consume it.
+	ENCODE(OP_GroupUpdateB)
+	{
+		EQApplicationPacket* inapp = *p;
+		*p = nullptr;
+		const auto emu = reinterpret_cast<GroupMembersUpdate_Struct*>(inapp->pBuffer);
+
+		// all strings need an extra byte for the null character
+		uint32 packet_length = sizeof(uint32) + // group_id
+			sizeof(uint32) + // member_count
+			strlen(emu->leader_name) + 1;
+
+		packet_length += emu->member_count * (
+			sizeof(uint32) +    // index
+			sizeof(uint16) +    // type
+			sizeof(uint32) +    // level
+			5 * sizeof(uint8) + // roles * 5
+			sizeof(uint32) +    // is_offline
+			sizeof(uint64) +    // online_timestamp
+			sizeof(uint32) +    // unique_player_id
+			sizeof(uint64)      // unknown
+		);
+
+		for (uint32 i = 0; i < emu->member_count; ++i) {
+			packet_length += strlen(emu->members[i].name) + 1;
+			packet_length += strlen(emu->members[i].owner_name) + 1;
+		}
+
+		SerializeBuffer buffer(packet_length);
+		buffer.WriteUInt32(0); // group_id, not used
+		buffer.WriteUInt32(emu->member_count);
+		buffer.WriteString(emu->leader_name);
+
+		for (uint32 index = 0; index < emu->member_count; ++index) {
+			const auto& m = emu->members[index];
+			buffer.WriteUInt32(index);
+			buffer.WriteString(m.name);
+			buffer.WriteUInt16(m.type);
+			buffer.WriteString(m.owner_name);
+			buffer.WriteUInt32(m.level);
+			buffer.WriteUInt8(m.is_tank);
+			buffer.WriteUInt8(m.is_assist);
+			buffer.WriteUInt8(m.is_puller);
+			buffer.WriteUInt8(m.is_mark);
+			buffer.WriteUInt8(m.is_master_looter);
+			buffer.WriteUInt32(m.offline);
+			buffer.WriteUInt64(0); // OnlineTimestamp, apparently unused in client
+			buffer.WriteUInt32(0); // UniquePlayerID, unused in client
+			buffer.WriteUInt64(0); // read but unused in client
+		}
+
+		auto outapp = new EQApplicationPacket(OP_GroupUpdateB, std::move(buffer));
+		dest->FastQueuePacket(&outapp);
+		safe_delete(inapp);
 	}
 
 	ENCODE(OP_HPUpdate)
@@ -2835,7 +2843,7 @@ namespace TOB
 			break;
 		}
 		case raidSetLeaderAbilities:
-			break;
+			break; // LAA has been removed from TOB
 		case raidMakeLeader:
 		{
 			const auto emu = reinterpret_cast<RaidLeadershipUpdate_Struct*>(__emu_buffer);
@@ -2885,6 +2893,7 @@ namespace TOB
 			break;
 		}
 		case raidChangeGroupLeader:
+		case raidMoveGroup:
 		{
 			const auto emu = reinterpret_cast<RaidGeneral_Struct*>(__emu_buffer);
 
@@ -2935,6 +2944,101 @@ namespace TOB
 		case raidNoRaid:
 		{
 			dest->QueuePacket(inapp);
+			break;
+		}
+		case raidMembers:
+		{
+			// Single-packet bulk raid-join path -- see RaidMembersUpdate_Struct's
+			// comment in common/eq_packet_structs.h. Reverse-engineered from the
+			// 2025-09-11 TOB client's CRaid::HandleRaidMessage case 6, via its
+			// deserializer chain (SoeUtil::IString::possible_ctor_or_dtor_123 @
+			// 0x140180530, per-member sub_140180270, string reader sub_1405893B0
+			// which reads length-prefixed strings) and cross-checked against
+			// eqlib's emu-tob branch (github.com/macroquest/eqlib,
+			// include/eqlib/game/EQData.h), whose RaidData/RaidMember structs are
+			// fully resolved there (unlike RoF2's, which are still "unknown").
+			// Unlike RoF2's version, several outer (non-member) fields here
+			// couldn't be pinned down with confidence -- see the zero-filled
+			// ones below -- because tracing them further ran into Hex-Rays
+			// mixing byte- and dword-indexed pointer arithmetic on the same
+			// object, which made a couple of reads ambiguous between "a raw
+			// wire value" and "a pointer into another string object" without a
+			// deeper raw-disassembly pass than was done here.
+			const auto emu = reinterpret_cast<RaidMembersUpdate_Struct*>(__emu_buffer);
+
+			SerializeBuffer buf;
+			buf.WriteUInt32(raidMembers);
+			// Confirmed: 2nd field read, null-terminated/capped (not
+			// length-prefixed like the member names below).
+			buf.WriteString(emu->leader_name);
+			// Confirmed via CRaid::RaidCreated's identical
+			// QuestHistoryData.Quests[47].ElementBitmask mirror for the
+			// raidCreate (action 8) path -- the raid's own numeric id.
+			buf.WriteUInt32(emu->raid_id);
+			// Unconfirmed second dword -- ambiguous in the decompile (possibly
+			// unrelated to the plain wire-value fields around it).
+			buf.WriteUInt32(0);
+			// Two more length-prefixed strings read here on the wire, purpose
+			// unconfirmed (not MOTD -- MOTD/lock state are sent to every
+			// client version via separate calls in SendBulkRaidInfoTo()
+			// regardless, so this doesn't create a functional gap either way).
+			buf.WriteLengthString("");
+			buf.WriteLengthString("");
+
+			// RaidData (MainAssists/MainAssistNames/MainMarkers/MasterLooter)
+			// -- confirmed directly via RaidData::UnSerialize and eqlib's
+			// fully-resolved (not commented-out, unlike RoF2's) RaidData
+			// struct. Names are null-terminated/capped here, not
+			// length-prefixed.
+			for (int i = 0; i < 3; ++i)
+				buf.WriteUInt32(emu->main_assist_id[i]);
+			for (int i = 0; i < 3; ++i)
+				buf.WriteString(emu->main_assist_name[i]);
+			for (int i = 0; i < 3; ++i)
+				buf.WriteUInt32(emu->main_marker_id[i]);
+			buf.WriteUInt32(emu->master_looter_id);
+
+			// Two more unconfirmed bytes read right after RaidData.
+			buf.WriteUInt8(0);
+			buf.WriteUInt8(0);
+
+			buf.WriteUInt32(emu->member_count);
+			// Per-member field order/meaning confirmed via sub_140180270 (the
+			// per-member deserializer) cross-checked against eqlib's
+			// fully-resolved TOB RaidMember struct and this same client's own
+			// consumers (level-average accumulator, "Group Leader" role text,
+			// CRaidWnd::SetRaidMemberRoleString's 3 role-flag args). Name/note
+			// are length-prefixed; class/group_number are full dwords on the
+			// wire here (unlike RoF2, which only spends a byte on class).
+			// is_raid_leader's position is inferred by elimination (matches
+			// eqlib's field list and the one remaining unaccounted-for byte),
+			// not independently confirmed against a consumer the way the
+			// other four per-member flags are.
+			for (uint32 i = 0; i < emu->member_count; ++i) {
+				const auto& m = emu->members[i];
+				buf.WriteLengthString(m.name);
+				buf.WriteLengthString(m.note);
+				buf.WriteUInt32(m._class);
+				buf.WriteUInt32(m.group_number);
+				buf.WriteUInt8(m.level);
+				buf.WriteUInt8(m.is_raid_leader);
+				buf.WriteUInt8(m.is_group_leader);
+				buf.WriteUInt8(m.is_assist);
+				buf.WriteUInt8(m.is_marker);
+				buf.WriteUInt8(m.is_master_looter);
+			}
+
+			// Plausible from the wire shape (count + N length-prefixed
+			// strings, read right after the member array, mirroring the
+			// group_leader_names concept from RoF2's version) but unconfirmed
+			// -- see RaidMembersUpdate_Struct's own comment.
+			buf.WriteUInt32(12);
+			for (int i = 0; i < 12; ++i)
+				buf.WriteLengthString(emu->group_leader_names[i]);
+
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, std::move(buf));
+
+			dest->FastQueuePacket(&outapp);
 			break;
 		}
 		default:

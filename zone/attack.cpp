@@ -2084,15 +2084,13 @@ bool Client::Death(Mob* killer_mob, int64 damage, int32 spell, EQ::skills::Skill
 					new_corpse->SetPlayerKillItemID(0);
 				}
 
-				if (killer_mob->CastToClient()->isgrouped) {
-					auto* group = entity_list.GetGroupByClient(killer_mob->CastToClient());
-					if (group) {
-						for (int i = 0; i < 6; i++) {
-							if (group->members[i]) {
-								new_corpse->AllowPlayerLoot(group->members[i], i);
-							}
-						}
-					}
+				if (killer_mob->CastToClient()->IsGrouped()) {
+					auto* group = killer_mob->CastToClient()->GetGroup();
+					int i = 0;
+					group->ForEachMember([&](Mob *m) {
+						new_corpse->AllowPlayerLoot(m, i);
+						i++;
+					});
 				}
 			}
 
@@ -2132,24 +2130,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, int32 spell, EQ::skills::Skill
 		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000);
 		SendRespawnBinds();
 	} else {
-		if (isgrouped) {
-			auto* g = GetGroup();
-			if (g) {
-				g->MemberZoned(this);
-			}
-		}
-
-		auto* r = entity_list.GetRaidByClient(this);
-
-		if (r) {
-			r->MemberZoned(this);
-		}
-
 		dead_timer.Start(5000, true);
-		m_pp.zone_id = m_pp.binds[0].zone_id;
-		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		database.MoveCharacterToZone(CharacterID(), m_pp.zone_id);
-		Save();
 		GoToDeath();
 	}
 
@@ -2692,25 +2673,22 @@ bool NPC::Death(Mob* killer_mob, int64 damage, int32 spell, EQ::skills::SkillTyp
 			}
 
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
-			for (const auto& m : killer_raid->members) {
-				if (m.is_bot) {
-					continue;
-				}
-
-				if (m.member) {
+			killer_raid->ForEachLocalMember([&](const auto& m) {
+				if (m.kind != RaidMemberBot && m.member->IsClient()) {
+					Client* c = m.member->CastToClient();
 					if (RuleB(NPC, EnableMeritBasedFaction)) {
-						m.member->SetFactionLevel(
-							m.member->CharacterID(),
+						c->SetFactionLevel(
+							c->CharacterID(),
 							GetNPCFactionID(),
-							m.member->GetBaseClass(),
-							m.member->GetBaseRace(),
-							m.member->GetDeity()
+							c->GetBaseClass(),
+							c->GetBaseRace(),
+							c->GetDeity()
 						);
 					}
 
 					player_count++;
 				}
-			}
+			});
 		} else if (give_exp_client->IsGrouped() && killer_group) {
 			if (!is_ldon_treasure && MerchantType == 0) {
 					killer_group->SplitExp(ExpSource::Kill, final_exp, this);
@@ -2727,23 +2705,19 @@ bool NPC::Death(Mob* killer_mob, int64 damage, int32 spell, EQ::skills::SkillTyp
 			}
 
 			/* Update kill tasks for all group members */
-			for (const auto& m : killer_group->members) {
-				if (m && m->IsClient()) {
-					Client* c = m->CastToClient();
-
-					if (RuleB(NPC, EnableMeritBasedFaction)) {
-						c->SetFactionLevel(
-							c->CharacterID(),
-							GetNPCFactionID(),
-							c->GetBaseClass(),
-							c->GetBaseRace(),
-							c->GetDeity()
-						);
-					}
-
-					player_count++;
+			killer_group->ForEachClient([&](Client* c) {
+				if (RuleB(NPC, EnableMeritBasedFaction)) {
+					c->SetFactionLevel(
+						c->CharacterID(),
+						GetNPCFactionID(),
+						c->GetBaseClass(),
+						c->GetBaseRace(),
+						c->GetDeity()
+					);
 				}
-			}
+
+				player_count++;
+			});
 		} else {
 			if (!is_ldon_treasure && !MerchantType) {
 				const uint32 con_level = give_exp->GetLevelCon(GetLevel());
@@ -2862,43 +2836,34 @@ bool NPC::Death(Mob* killer_mob, int64 damage, int32 spell, EQ::skills::SkillTyp
 		if (killer && killer->IsClient()) {
 			corpse->AllowPlayerLoot(killer, 0);
 			if (killer->IsGrouped()) {
-				Group* g = entity_list.GetGroupByClient(killer->CastToClient());
-				if (g) {
-					uint8 slot_id = 0;
+				Group* g = killer->GetGroup();
+				uint8 slot_id = 0;
 
-					for (const auto &m : g->members) {
-						if (m) {
-							corpse->AllowPlayerLoot(m, slot_id);
-						}
+				g->ForEachMember([&](Mob *m) {
+					corpse->AllowPlayerLoot(m, slot_id);
+					slot_id++;
+				});
+			} else if (killer->IsRaided()) {
+				Raid* r = killer->GetRaid();
+				uint8 slot_id = 0;
 
-						slot_id++;
-					}
-				}
-			} else if (killer->IsRaidGrouped()) {
-				Raid* r = entity_list.GetRaidByClient(killer->CastToClient());
-				if (r) {
-					uint8 slot_id = 0;
-
-					for (const auto &m : r->members) {
-						if (m.is_bot) {
-							continue;
-						}
-
+				r->ForEachMember([&](const auto& m) {
+					if (m.kind != RaidMemberBot) {
 						switch (r->GetLootType()) {
 							case RaidLootType::LeaderOnly:
-								if (m.member && m.is_raid_leader) {
+								if (m.member && (m.roles & RaidBitmaskLeader)) {
 									corpse->AllowPlayerLoot(m.member, slot_id);
 									slot_id++;
 								}
 								break;
 							case RaidLootType::LeaderAndGroupLeadersOnly:
-								if (m.member && (m.is_raid_leader || m.is_group_leader)) {
+								if (m.member && ((m.roles & RaidBitmaskLeader) || m.is_group_leader)) {
 									corpse->AllowPlayerLoot(m.member, slot_id);
 									slot_id++;
 								}
 								break;
 							case RaidLootType::LeaderSelected:
-								if (m.member && m.is_looter) {
+								if (m.member && (m.roles & RaidBitmaskLooter)) {
 									corpse->AllowPlayerLoot(m.member, slot_id);
 									slot_id++;
 								}
@@ -2912,7 +2877,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, int32 spell, EQ::skills::SkillTyp
 								break;
 						}
 					}
-				}
+				});
 			}
 		} else if (killer_mob && is_ldon_treasure) {
 			Mob* ultimate_owner = killer_mob->GetUltimateOwner();

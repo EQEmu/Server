@@ -39,14 +39,17 @@ bool Lua_Raid::IsRaidMember(Lua_Client c) {
 	return self->IsRaidMember(c);
 }
 
-void Lua_Raid::CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_id) {
+void Lua_Raid::CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_number) {
 	Lua_Safe_Call_Void();
-	self->CastGroupSpell(caster, spell_id, group_id);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->CastGroupSpell(caster, spell_id);
 }
 
-int Lua_Raid::GroupCount(uint32 group_id) {
+int Lua_Raid::GroupCount(uint32 group_number) {
 	Lua_Safe_Call_Int();
-	return self->GroupCount(group_id);
+	Group* group = self->GetGroupObject(group_number);
+	return group != nullptr ? group->GroupCount() : 0;
 }
 
 int Lua_Raid::RaidCount() {
@@ -56,12 +59,12 @@ int Lua_Raid::RaidCount() {
 
 int Lua_Raid::GetGroup(const char *c) {
 	Lua_Safe_Call_Int();
-	return self->GetGroup(c);
+	return self->GetGroupNumber(c);
 }
 
 int Lua_Raid::GetGroup(Lua_Client c) {
 	Lua_Safe_Call_Int();
-	return self->GetGroup(c);
+	return self->GetGroupNumber(c);
 }
 
 void Lua_Raid::SplitExp(uint64 exp, Lua_Mob other) {
@@ -74,19 +77,24 @@ uint32 Lua_Raid::GetTotalRaidDamage(Lua_Mob other) {
 	return self->GetTotalRaidDamage(other);
 }
 
-void Lua_Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
+void Lua_Raid::SplitMoney(uint32 group_number, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	Lua_Safe_Call_Void();
-	self->SplitMoney(gid, copper, silver, gold, platinum);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->SplitMoney(copper, silver, gold, platinum);
 }
 
-void Lua_Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter) {
+void Lua_Raid::SplitMoney(uint32 group_number, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter) {
 	Lua_Safe_Call_Void();
-	self->SplitMoney(gid, copper, silver, gold, platinum, splitter);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->SplitMoney(copper, silver, gold, platinum, splitter);
 }
 
-void Lua_Raid::BalanceHP(int penalty, uint32 group_id) {
+void Lua_Raid::BalanceHP(int penalty, uint32 group_number) {
 	Lua_Safe_Call_Void();
-	self->BalanceHP(penalty, group_id);
+	auto g = self->GetGroupObject(group_number);
+	g->BalanceHP(penalty);
 }
 
 bool Lua_Raid::IsLeader(const char *c) {
@@ -134,9 +142,11 @@ Lua_Client Lua_Raid::GetClientByIndex(int member_index) {
 	return self->GetClientByIndex(member_index);
 }
 
-void Lua_Raid::TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h, uint32 group_id) {
+void Lua_Raid::TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h, uint32 group_number) {
 	Lua_Safe_Call_Void();
-	self->TeleportGroup(sender, zone_id, instance_id, x, y, z, h, group_id);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->TeleportGroup(sender, zone_id, instance_id, x, y, z, h);
 }
 
 void Lua_Raid::TeleportRaid(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h) {
@@ -156,7 +166,12 @@ Lua_Client Lua_Raid::GetMember(int member_index) {
 		return Lua_Client();
 	}
 
-	return self->members[member_index].member;
+	Mob* m = self->GetMemberByIndex(member_index).member;
+	if (m == nullptr || !m->IsClient()) {
+		return Lua_Client();
+	}
+
+	return m->CastToClient();
 }
 
 int Lua_Raid::GetGroupNumber(int member_index) {
@@ -164,12 +179,12 @@ int Lua_Raid::GetGroupNumber(int member_index) {
 
 	if (
 		!EQ::ValueWithin(member_index, 0, 71) ||
-		self->members[member_index].group_number == RAID_GROUPLESS
+		self->GetMemberByIndex(member_index).group_number == RAID_GROUPLESS
 	) {
 		return -1;
 	}
 
-	return self->members[member_index].group_number;
+	return self->GetMemberByIndex(member_index).group_number;
 }
 
 bool Lua_Raid::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name)

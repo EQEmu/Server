@@ -318,55 +318,30 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
 }
 
-void Client::CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel)
+void Client::CalculateLeadershipExp(uint64& add_exp, uint8 conlevel)
 {
-	if (IsLeadershipEXPOn() && (conlevel == ConsiderColor::DarkBlue || conlevel == ConsiderColor::White || conlevel == ConsiderColor::Yellow || conlevel == ConsiderColor::Red))
-	{
+	if (IsLeadershipEXPOn() && (conlevel == ConsiderColor::DarkBlue || conlevel == ConsiderColor::White ||
+		conlevel == ConsiderColor::Yellow || conlevel == ConsiderColor::Red)) {
 		add_exp = static_cast<uint64>(static_cast<float>(add_exp) * 0.8f);
 
-		if (IsRaidGrouped())
-		{
-			if (Raid *raid = GetRaid()) {
-				// Raid leaders CAN NOT gain group AA XP, other group leaders can though!
-				if (raid->IsLeader(this)) {
-					if (m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel())
-						&& RuleI(Character, KillsPerRaidLeadershipAA) > 0) {
-						AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
-						MessageString(Chat::LeaderShip, GAIN_RAID_LEADERSHIP_EXP);
-					} else {
-						MessageString(Chat::LeaderShip, MAX_RAID_LEADERSHIP_POINTS);
-					}
-				} else {
-					if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
-						&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
-						uint32 group_id = raid->GetGroup(this);
-						uint64 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
-						Client *mentoree = raid->GetMentoree(group_id);
-						if (raid->GetMentorPercent(group_id) && mentoree &&
-							mentoree->GetGroupPoints() < MaxBankedGroupLeadershipPoints(mentoree->GetLevel())) {
-							uint64 mentor_exp = exp * (raid->GetMentorPercent(group_id) / 100.0f);
-							exp -= mentor_exp;
-							mentoree->AddLeadershipEXP(mentor_exp, 0);
-							mentoree->MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
-						}
-
-						if (exp > 0) {
-							AddLeadershipEXP(exp, 0);
-							MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
-						}
-					} else {
-						MessageString(Chat::LeaderShip, MAX_GROUP_LEADERSHIP_POINTS);
-					}
-				}
+		// Raid leaders CAN NOT gain group AA XP, other group leaders can though!
+		Raid* raid = GetRaid();
+		if (raid != nullptr && raid->IsLeader(this)) {
+			if (m_pp.raid_leadership_points < MaxBankedRaidLeadershipPoints(GetLevel())
+				&& RuleI(Character, KillsPerRaidLeadershipAA) > 0) {
+				AddLeadershipEXP(0, RAID_EXP_PER_POINT / RuleI(Character, KillsPerRaidLeadershipAA));
+				MessageString(Chat::LeaderShip, GAIN_RAID_LEADERSHIP_EXP);
+			} else {
+				MessageString(Chat::LeaderShip, MAX_RAID_LEADERSHIP_POINTS);
 			}
-		} else if (GetGroup()) {
+		} else if (Group* g = GetGroup()) {
 			if (m_pp.group_leadership_points < MaxBankedGroupLeadershipPoints(GetLevel())
 				&& RuleI(Character, KillsPerGroupLeadershipAA) > 0) {
 				uint64 exp = GROUP_EXP_PER_POINT / RuleI(Character, KillsPerGroupLeadershipAA);
-				Client *mentoree = GetGroup()->GetMentoree();
-				if (GetGroup()->GetMentorPercent() && mentoree &&
+				Client* mentoree = g->GetMentoree();
+				if (g->GetMentorPercent() && mentoree &&
 					mentoree->GetGroupPoints() < MaxBankedGroupLeadershipPoints(mentoree->GetLevel())) {
-					uint64 mentor_exp = exp * (GetGroup()->GetMentorPercent() / 100.0f);
+					uint64 mentor_exp = exp * (g->GetMentorPercent() / 100.0f);
 					exp -= mentor_exp;
 					mentoree->AddLeadershipEXP(mentor_exp, 0); // ends up rounded down
 					mentoree->MessageString(Chat::LeaderShip, GAIN_GROUP_LEADERSHIP_EXP);
@@ -588,11 +563,9 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 	uint32 i = 0;
 	uint32 membercount = 0;
 	if(GetGroup()) {
-		for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if (GetGroup()->members[i] != nullptr) {
-				membercount++;
-			}
-		}
+		GetGroup()->ForEachMember([&](Mob *m) {
+			membercount++;
+		});
 	}
 
 	if (total_add_exp > total_current_exp) {
@@ -636,7 +609,7 @@ void Client::SetEXP(ExpSource exp_source, uint64 set_exp, uint64 set_aaxp, bool 
 				} else {
 					MessageString(Chat::Experience, GAIN_GROUPXP);
 				}
-			} else if (IsRaidGrouped()) {
+			} else if (IsRaided()) {
 				if (RuleI(Character, ShowExpValues) > 0) {
 					Message(Chat::Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
 				} else if (zone->IsHotzone()) {
@@ -878,12 +851,8 @@ void Client::SetLevel(uint8 set_level, bool command)
 
 	level = set_level;
 
-	if (IsRaidGrouped()) {
-		Raid *r = GetRaid();
-		if (r) {
-			r->UpdateLevel(GetName(), set_level);
-		}
-	}
+	if (IsRaided())
+		GetRaid()->RequestUpdateLevel(this, GetCleanName(), level);
 
 	if (set_level > m_pp.level2) {
 		if (m_pp.level2 == 0) {
@@ -1149,22 +1118,20 @@ void Group::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
 		return;
 	}
 
-	for (const auto& m : members) {
-		if (m && m->IsClient()) {
-			const int32 diff     = m->GetLevel() - highest_level;
-			int32       max_diff = -(m->GetLevel() * 15 / 10 - m->GetLevel());
+	ForEachClient([&](Client* c) {
+		const int32 diff = c->GetLevel() - highest_level;
+		int32 max_diff = -(c->GetLevel() * 15 / 10 - c->GetLevel());
 
-			if (max_diff > -5) {
-				max_diff = -5;
-			}
-
-			if (diff >= max_diff) {
-				const uint64 tmp  = (m->GetLevel() + 3) * (m->GetLevel() + 3) * 75 * 35 / 10;
-				const uint64 tmp2 = group_experience / member_count;
-				m->CastToClient()->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
-			}
+		if (max_diff > -5) {
+			max_diff = -5;
 		}
-	}
+
+		if (diff >= max_diff) {
+			const uint64 tmp = (c->GetLevel() + 3) * (c->GetLevel() + 3) * 75 * 35 / 10;
+			const uint64 tmp2 = group_experience / member_count;
+			c->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
+		}
+	});
 }
 
 void Raid::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
@@ -1200,22 +1167,23 @@ void Raid::SplitExp(ExpSource exp_source, const uint64 exp, Mob* other) {
 		member_modifier = member_count;
 	}
 
-	for (const auto& m : members) {
-		if (m.member && !m.is_bot) {
-			const int32 diff     = m.member->GetLevel() - highest_level;
-			int32       max_diff = -(m.member->GetLevel() * 15 / 10 - m.member->GetLevel());
+	ForEachLocalMember([&](const auto& m) {
+		if (m.member->IsClient()) {
+			Client* c = m.member->CastToClient();
+			const int32 diff     = c->GetLevel() - highest_level;
+			int32       max_diff = -(c->GetLevel() * 15 / 10 - c->GetLevel());
 
 			if (max_diff > -5) {
 				max_diff = -5;
 			}
 
 			if (diff >= max_diff) {
-				const uint64 tmp  = (m.member->GetLevel() + 3) * (m.member->GetLevel() + 3) * 75 * 35 / 10;
+				const uint64 tmp  = (c->GetLevel() + 3) * (c->GetLevel() + 3) * 75 * 35 / 10;
 				const uint64 tmp2 = (raid_experience / member_modifier) + 1;
-				m.member->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
+				c->AddEXP(exp_source, tmp < tmp2 ? tmp : tmp2, consider_level, false, other->CastToNPC());
 			}
 		}
-	}
+	});
 }
 
 void Client::SetLeadershipEXP(uint64 group_exp, uint64 raid_exp) {

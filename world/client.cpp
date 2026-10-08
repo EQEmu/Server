@@ -37,7 +37,6 @@
 #include "common/random.h"
 #include "common/repositories/account_repository.h"
 #include "common/repositories/character_data_repository.h"
-#include "common/repositories/group_id_repository.h"
 #include "common/repositories/inventory_repository.h"
 #include "common/repositories/player_event_logs_repository.h"
 #include "common/rulesys.h"
@@ -931,29 +930,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	if(!is_player_zoning) {
-		GroupIdRepository::DeleteWhere(
-			database,
-			fmt::format(
-				"`character_id` = {} AND `name` = '{}'",
-				charid,
-				Strings::Escape(char_name)
-			)
-		);
 		database.SetLoginFlags(charid, false, false, 1);
-	} else {
-		auto group_id = database.GetGroupID(char_name);
-		if (group_id) {
-			auto leader_name = database.GetGroupLeaderForLogin(char_name);
-			if (!leader_name.empty()) {
-				auto pack = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-				auto gj = (GroupJoin_Struct*) pack->pBuffer;
-				gj->action=8;
-				strn0cpy(gj->yourname, char_name, sizeof(gj->yourname));
-				strn0cpy(gj->membername, leader_name.c_str(), sizeof(gj->membername));
-				QueuePacket(pack);
-				safe_delete(pack);
-			}
-		}
 	}
 
 	auto outapp = new EQApplicationPacket(OP_MOTD);

@@ -189,16 +189,23 @@ public:
 	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
 	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
 	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
-	Group* GetGroupByMob(Mob* mob);
+	Group* GetGroupByMob(const Mob* mob) const;
 	Group* GetGroupByMobName(const char* name);
-	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
-	Group *GetGroupByClient(Client* client);
+	static bool IsInSameGroup(const Client *client1, const Client *client2);
+	Group *GetGroupByClient(const Client* client) const;
+	void SetGroup(Mob* mob, Group* group);
+	void SetRaid(Mob* mob, Raid* raid);
+	// Same pointer swap as SetGroup/SetRaid, but for a member whose
+	// membership isn't changing -- only becoming (or ceasing to be)
+	// locally resolvable in this zone. See Mob::SetZoneWithGroup's comment.
+	void SetGroupZoned(Mob* mob, Group* group);
+	void SetRaidZoned(Mob* mob, Raid* raid);
 	Group *GetGroupByID(uint32 id);
 	Group *GetGroupByLeaderName(const char* leader);
-	Raid *GetRaidByClient(Client* client);
+	Raid *GetRaidByClient(const Client* client) const;
 	Raid *GetRaidByID(uint32 id);
 	Raid* GetRaidByBotName(const char* name);
-	Raid* GetRaidByBot(Bot* bot);
+	Raid* GetRaidByBot(const Bot* bot) const;
 	Raid* GetRaidByName(const char* name);
 
 	Corpse *GetCorpseByOwner(Client* client);
@@ -303,6 +310,7 @@ public:
 	bool	RemoveNPC(uint16 delete_id);
 	bool	RemoveMerc(uint16 delete_id);
 	bool	RemoveGroup(uint32 delete_id);
+	bool	RemoveRaid(uint32 delete_id);
 	bool	RemoveCorpse(uint16 delete_id);
 	bool	RemoveDoor(uint16 delete_id);
 	bool	RemoveTrap(uint16 delete_id);
@@ -509,9 +517,6 @@ public:
 	NPC*	GetClosestBanker(Mob* sender, uint32 &distance);
 	void	CameraEffect(uint32 duration, float intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, uint8 BodyType, bool skip_client_pets=false);
-	void	ForceGroupUpdate(uint32 gid);
-	void	SendGroupLeave(uint32 gid, const char *name);
-	void	SendGroupJoin(uint32 gid, const char *name);
 
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int task_id=0);

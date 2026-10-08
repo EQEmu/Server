@@ -345,7 +345,7 @@ bool Bot::BotCastCure(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 	if (AIDoSpellCast(bot_spell.SpellIndex, tar, bot_spell.ManaCost)) {
 		if (IsGroupSpell(bot_spell.SpellId)) {
 			if (!IsCommandedSpell()) {
-				for (Mob* m : GatherSpellTargets(false, tar)) {
+				for (Mob* m : GatherSpellTargets(tar)) {
 					SetBotSpellRecastTimer(spell_type, m, true);
 				}
 			}
@@ -526,7 +526,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spe
 		if (IsGroupSpell(bot_spell.SpellId)) {
 			if (bot_class != Class::Bard) {
 				if (!IsCommandedSpell()) {
-					for (Mob* m : GatherSpellTargets(false, tar)) {
+					for (Mob* m : GatherSpellTargets(tar)) {
 						SetBotSpellRecastTimer(spell_type, m, true);
 					}
 				}
@@ -694,7 +694,7 @@ bool Bot::AI_IdleCastCheck() {
 		bool pre_combat = false;
 		Client* test_against = nullptr;
 
-		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient()) {
+		if (IsGrouped() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient()) {
 			test_against = GetGroup()->GetLeader()->CastToClient();
 		}
 		else if (GetOwner() && GetOwner()->IsClient()) {
@@ -1086,7 +1086,7 @@ std::vector<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* cas
 				}
 
 				if (
-					!caster->IsInGroupOrRaid(tar, true) &&
+					!caster->IsInGroup(tar) &&
 					(
 						!RuleB(Bots, EnableBotTGB) ||
 						(
@@ -2046,7 +2046,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* caster, Mob* tar, uint16 spell_type) {
 					continue;
 				}
 
-				for (Mob* m : (IsGroupBotSpellType(spell_type) ? caster->GetSpellTargetList() : caster->GetSpellTargetList(true))) {
+				for (Mob* m : (IsGroupBotSpellType(spell_type) ? caster->GetSpellTargetList() : caster->GetSpellTargetList())) {
 					if (caster->GetNeedsCured(m)) {
 						if (caster->CastChecks(itr->SpellId, m, spell_type, true, IsGroupBotSpellType(spell_type))) {
 							if (m->FindType(SpellEffect::PoisonCounter)) {

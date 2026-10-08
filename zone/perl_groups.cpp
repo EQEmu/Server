@@ -25,7 +25,7 @@
 
 void Perl_Group_DisbandGroup(Group* self) // @categories Script Utility, Group
 {
-	self->DisbandGroup();
+	self->RequestDisband();
 }
 
 bool Perl_Group_IsGroupMember(Group* self, Mob* c) // @categories Account and Character, Script Utility, Group
@@ -80,7 +80,7 @@ void Perl_Group_SplitMoney(Group* self, uint32 copper, uint32 silver, uint32 gol
 
 void Perl_Group_SetLeader(Group* self, Mob* new_leader) // @categories Account and Character, Script Utility, Group
 {
-	self->SetLeader(new_leader);
+	self->RequestMakeLeader(new_leader);
 }
 
 Mob* Perl_Group_GetLeader(Group* self) // @categories Account and Character, Script Utility, Group
@@ -95,7 +95,8 @@ std::string Perl_Group_GetLeaderName(Group* self) // @categories Account and Cha
 
 void Perl_Group_SendHPPacketsTo(Group* self, Mob* new_member) // @categories Script Utility, Group
 {
-	self->SendHPManaEndPacketsTo(new_member);
+	if (new_member->IsClient())
+		self->SendHPManaEndPacketsTo(new_member->CastToClient());
 }
 
 void Perl_Group_SendHPPacketsFrom(Group* self, Mob* new_member) // @categories Script Utility, Group
@@ -137,7 +138,7 @@ Client* Perl_Group_GetMember(Group* self, int member_index) // @categories Accou
 {
 	Mob* member = nullptr;
 	if (EQ::ValueWithin(member_index, 0, 5)) {
-		member = self->members[member_index];
+		member = self->GetMember(member_index);
 	}
 
 	return member ? member->CastToClient() : nullptr;

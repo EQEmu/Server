@@ -28,6 +28,9 @@
 #include "zone/object.h"
 #include "zone/quest_parser_collection.h"
 #include "zone/raids.h"
+#include "zone/worldserver.h"
+
+extern WorldServer worldserver;
 
 /*
 TODO bot rewrite:
@@ -36,7 +39,7 @@ TODO bot rewrite:
 */
 
 // This constructor is used during the bot create command
-Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), m_ping_timer(1) {
+Bot::Bot(NPCType *npcTypeData, Client* botOwner) : Mixed<NPC, HasGroup, HasRaid>(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), m_ping_timer(1) {
 	GiveNPCTypeData(npcTypeData);
 
 	if (botOwner) {
@@ -116,10 +119,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	bot_timers.clear();
 	bot_blocked_buffs.clear();
 	_spell_target_list.clear();
-	_group_spell_target_list.clear();
-	SetStoredRaid(nullptr);
 	SetVerifiedRaid(false);
-	p_raid_instance = nullptr;
 
 	// Calculate HitPoints Last As It Uses Base Stats
 	current_hp = GenerateBaseHitPoints();
@@ -144,7 +144,7 @@ Bot::Bot(
 	uint32 lastZoneId,
 	NPCType *npcTypeData
 )
-	: NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), m_ping_timer(1)
+	: Mixed<NPC, HasGroup, HasRaid>(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), m_ping_timer(1)
 {
 	GiveNPCTypeData(npcTypeData);
 
@@ -274,10 +274,7 @@ Bot::Bot(
 	}
 
 	_spell_target_list.clear();
-	_group_spell_target_list.clear();
-	SetStoredRaid(nullptr);
 	SetVerifiedRaid(false);
-	p_raid_instance = nullptr;
 	LoadAAs();
 
 	if (database.botdb.LoadBuffs(this)) {
@@ -491,16 +488,6 @@ Bot::~Bot() {
 
 	if (HasPet()) {
 		GetPet()->Depop();
-	}
-
-	entity_list.RemoveBot(GetID());
-
-	if (GetGroup()) {
-		GetGroup()->MemberZoned(this);
-	}
-
-	if (GetRaid()) {
-		GetRaid()->MemberZoned(CastToClient());
 	}
 }
 
@@ -1351,6 +1338,13 @@ bool Bot::IsValidRaceClassCombo()
 	return Bot::IsValidRaceClassCombo(GetRace(), GetClass());
 }
 
+void Bot::SetFollowOwner()
+{
+	const Mob* owner = GetOwner();
+	if (owner != nullptr && m_group != nullptr && m_group->IsGroupMember(owner) && m_group->IsGroupMember(this))
+		SetFollowID(owner->GetID());
+}
+
 bool Bot::IsValidRaceClassCombo(uint16 bot_race, uint8 bot_class)
 {
 	bool is_valid = false;
@@ -1462,7 +1456,7 @@ bool Bot::DeleteBot()
 	}
 
 	if (GetGroup()) {
-		RemoveBotFromGroup(this, GetGroup());
+		RemoveBotFromGroup();
 	}
 
 	if (GetRaid()) {
@@ -2132,27 +2126,38 @@ void Bot::AI_Process()
 	}
 
 	Raid* raid = entity_list.GetRaidByBot(this);
-	SetStoredRaid(raid);
 	uint32 r_group = RAID_GROUPLESS;
 
 	if (raid) {
 		if (!GetVerifiedRaid()) {
-			raid->VerifyRaid();
+			raid->MemberZonedIn(CastToClient());
 			SetVerifiedRaid(true);
 		}
 
-		if (mana_timer.Check() || send_hp_update_timer.Check()) {
-			raid->SendHPManaEndPacketsFrom(this);
-		}
-
-		r_group = raid->GetGroup(GetName());
+		r_group = raid->GetGroupNumber(GetName());
 	}
 
 	auto bot_group = GetGroup();
+	if (bot_group != nullptr && (mana_timer.Check() || send_hp_update_timer.Check()))
+		bot_group->SendHPManaEndPacketsFrom(this); // TODO: Should this also send in range/raid?
 
 	// Primary reasons for not processing AI
 	if (!IsAIProcessValid(bot_owner, bot_group, raid)) {
 		return;
+	}
+
+	// Lazily recompute group casting roles (healer/slower) only when the
+	// group's roster has actually changed since this bot last checked --
+	// Group itself never pushes this anymore (it just bumps a generic,
+	// Bot-agnostic revision counter on roster changes). Redundant across
+	// multiple bots in the same group polling in the same tick, but that's
+	// harmless: the recompute is idempotent and cheap for realistic group
+	// sizes.
+	if (RuleB(Bots, Enabled) && bot_group &&
+	    (bot_group != m_last_group_roster_group || bot_group->GetRosterRevision() != m_last_group_roster_revision)) {
+		Bot::UpdateGroupCastingRoles(bot_group);
+		m_last_group_roster_group    = bot_group;
+		m_last_group_roster_revision = bot_group->GetRosterRevision();
 	}
 
 	Client* leash_owner = bot_owner;
@@ -2200,7 +2205,6 @@ void Bot::AI_Process()
 	}
 
 	_spell_target_list.clear();
-	_group_spell_target_list.clear();
 	SetTempSpellType(UINT16_MAX);
 
 // HEAL ROTATION CASTING CHECKS
@@ -2622,8 +2626,8 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 			NOT_HOLDING &&
 			NOT_PASSIVE
 		) {
-			XTargetAutoHaters* temp_haters;
-			std::vector<XTargetAutoHaters*> assistee_haters;
+			const XTargetAutoHaters* temp_haters;
+			std::vector<const XTargetAutoHaters*> assistee_haters;
 			std::vector<Client*> assistee_members;
 			bool found = false;
 
@@ -2640,52 +2644,39 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 				(!bot_owner->GetAssistee() || !entity_list.GetClientByCharID(bot_owner->GetAssistee())) &&
 				RuleB(Bots, AllowCrossGroupRaidAssist)
 			) {
-				XTargetAutoHaters* temp_xhaters = bot_owner->GetXTargetAutoMgr();
+				const XTargetAutoHaters* temp_xhaters = bot_owner->GetXTargetAutoMgr();
 				bool assistee_found = false;
 
-				if (IsRaidGrouped()) {
-					Raid* raid = GetStoredRaid();
-					if (raid) {
-						for (const auto& m : raid->members) {
-							if (
-								m.member &&
-								m.member->IsClient() &&
-								m.member->GetAggroCount() &&
-								raid->IsAssister(m.member_name)
-							) {
-								temp_xhaters = m.member->GetXTargetAutoMgr();
+				if (IsRaided()) {
+					Raid* raid = GetRaid();
+					raid->ForEachLocalMember([&](const auto& m) {
+						if (m.member->IsClient() && raid->IsAssister(m.name.c_str())) {
+							Client* c = m.member->CastToClient();
+							if (c->GetAggroCount()) {
+								temp_xhaters = c->GetXTargetAutoMgr();
 
-								if (!temp_xhaters || temp_xhaters->empty()) {
-									continue;
+								if (temp_xhaters && !temp_xhaters->empty()) {
+									assistee_haters.emplace_back(temp_xhaters);
+									assistee_members.emplace_back(c);
 								}
-
-								assistee_haters.emplace_back(temp_xhaters);
-								assistee_members.emplace_back(m.member);
 							}
 						}
-					}
+					});
 				}
-				else if (HasGroup()) {
+				else if (IsGrouped()) {
 					Group* g = GetGroup();
-					if (g) {
-						for (auto& m : g->members) {
-							if (
-								m &&
-								m->IsClient() &&
-								m->CastToClient()->GetAggroCount() &&
-								g->AmIMainAssist(m->GetName())
-							) {
-								temp_xhaters = m->CastToClient()->GetXTargetAutoMgr();
+					g->ForEachClient([&](Client *m) {
+						if (m->GetAggroCount() && g->AmIMainAssist(m->GetName())) {
+							temp_xhaters = m->GetXTargetAutoMgr();
 
-								if (!temp_xhaters || temp_xhaters->empty()) {
-									continue;
-								}
-
-								assistee_haters.emplace_back(temp_xhaters);
-								assistee_members.emplace_back(m->CastToClient());
+							if (!temp_xhaters || temp_xhaters->empty()) {
+								return;
 							}
+
+							assistee_haters.emplace_back(temp_xhaters);
+							assistee_members.emplace_back(m);
 						}
-					}
+					});
 				}
 				else {
 					return false;
@@ -2707,7 +2698,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 			}
 
 			if (!assistee_haters.empty()) {
-				for (XTargetAutoHaters* x_haters : assistee_haters) {
+				for (const XTargetAutoHaters* x_haters : assistee_haters) {
 					if (!x_haters->empty()) {
 						for (auto hater_iter : x_haters->get_list()) {
 							if (!hater_iter.spawn_id) {
@@ -3477,23 +3468,6 @@ Mob* Bot::SetFollowMob(Client* leash_owner) {
 	return follow_mob;
 }
 
-Client* Bot::SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint32 r_group) const {
-	Client* leash_owner = nullptr;
-
-	if (raid && r_group < MAX_RAID_GROUPS && raid->GetGroupLeader(r_group)) {
-		leash_owner =
-			raid->GetGroupLeader(r_group) &&
-			raid->GetGroupLeader(r_group)->IsClient() ?
-				raid->GetGroupLeader(r_group)->CastToClient() : bot_owner;
-	} else if (bot_group) {
-		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
-	} else {
-		leash_owner = bot_owner;
-	}
-
-	return leash_owner;
-}
-
 void Bot::SetOwnerTarget(Client* bot_owner) {
 	if (GetPet() && (PULLING_BOT || RETURNING_BOT)) {
 		GetPet()->SetPetOrder(PetOrder::Follow);
@@ -3688,25 +3662,22 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			if (owner && !raid->IsRaidMember(owner->GetCleanName())) {
 				Bot::RemoveBotFromRaid(this);
 			} else {
-				SetRaidGrouped(true);
-				raid->LearnMembers();
-				raid->VerifyRaid();
-				SetStoredRaid(raid);
-				p_raid_instance = raid;
+				// The owner must already be zoned in here. MemberZonedIn()
+				// -> AttachLocalMember() calls entity_list.SetRaid(this,
+				// raid) once it attaches this bot's Mob*, which is what
+				// IsRaided() now derives from (m_raid != nullptr).
+				raid->MemberZonedIn(CastToClient());
 				SetVerifiedRaid(true);
 			}
 		}
 		else if (auto group = entity_list.GetGroupByMobName(GetName())) {
 			// Safety Check to confirm we have a valid group
 			auto owner = GetBotOwner();
-			if (owner && !group->IsGroupMember(owner->GetCleanName())) {
-				Bot::RemoveBotFromGroup(this, group);
-			} else {
-				SetGrouped(true);
-				group->LearnMembers();
-				group->VerifyGroup();
-			}
+			if (owner && !group->IsGroupMember(owner->GetCleanName()))
+				group->RequestDisband(GetOwnerCharacterID(), group->GetLeaderName(), GetCleanName());
 		}
+
+		Group::RequestPartyState(GetCleanName());
 
 		if (IsBotRanged()) {
 			ChangeBotRangedWeapons(true);
@@ -3880,7 +3851,7 @@ Bot* Bot::LoadBot(uint32 botID)
 
 // Load and spawn all zoned bots by bot owner character
 void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
-	if (bot_owner && bot_owner->HasGroup()) {
+	if (bot_owner && bot_owner->IsGrouped()) {
 		std::vector<int> bot_class_spawn_limits;
 		std::vector<int> bot_class_spawned_count = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -3891,15 +3862,30 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 
 		auto* g = bot_owner->GetGroup();
 		if (g) {
-			uint32 group_id = g->GetID();
 			std::list<uint32> active_bots;
 
 			auto spawned_bots_count = 0;
 			auto bot_spawn_limit = bot_owner->GetBotSpawnLimit();
 
-			if (!database.botdb.LoadGroupedBotsByGroupID(bot_owner->CharacterID(), group_id, active_bots)) {
+			// Cross-reference this owner's bots against the group's own
+			// membername[] (already world-authoritative and correctly
+			// populated by this point) instead of a group_id-table query --
+			// group membership no longer has a DB row to query at all.
+			std::list<BotsAvailableList> owned_bots;
+			if (!database.botdb.LoadBotsList(bot_owner->CharacterID(), owned_bots)) {
 				bot_owner->Message(Chat::White, "Failed to load grouped bots by group ID.");
 				return;
+			}
+
+			for (const auto &ob : owned_bots) {
+				g->ForEachMemberName([&active_bots, &ob](const char* mn) {
+					if (strcasecmp(mn, ob.bot_name) == 0) {
+						active_bots.push_back(ob.bot_id);
+						return false;
+					}
+
+					return true;
+				});
 			}
 
 			if (!active_bots.empty()) {
@@ -3910,8 +3896,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 					}
 
 					if (bot_spawn_limit >= 0 && spawned_bots_count >= bot_spawn_limit) {
-						Group::RemoveFromGroup(b);
-						g->UpdatePlayer(bot_owner);
+						safe_delete(b);
 						continue;
 					}
 
@@ -3922,8 +3907,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 						bot_spawn_limit_class >= 0 &&
 						spawned_bot_count_class >= bot_spawn_limit_class
 					) {
-						Group::RemoveFromGroup(b);
-						g->UpdatePlayer(bot_owner);
+						safe_delete(b);
 						continue;
 					}
 
@@ -3935,36 +3919,11 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 					spawned_bots_count++;
 					bot_class_spawned_count[b->GetClass() - 1]++;
 
-					g->UpdatePlayer(b);
-
-					if (g->IsGroupMember(bot_owner) && g->IsGroupMember(b)) {
-						b->SetFollowID(bot_owner->GetID());
-					}
-
-					if (!bot_owner->HasGroup()) {
-						Group::RemoveFromGroup(b);
-					}
+					Group::RequestPartyState(b->GetCleanName());
 				}
 			}
 		}
 	}
-}
-
-// Returns TRUE if there is atleast 1 bot in the specified group
-bool Bot::GroupHasBot(Group* group) {
-	bool Result = false;
-	if (group) {
-		for (int Counter = 0; Counter < MAX_GROUP_MEMBERS; Counter++) {
-			if (group->members[Counter] == nullptr)
-				continue;
-
-			if (group->members[Counter]->IsBot()) {
-				Result = true;
-				break;
-			}
-		}
-	}
-	return Result;
 }
 
 uint32 Bot::SpawnedBotCount(const uint32 owner_id, uint8 class_id) {
@@ -4191,54 +4150,25 @@ void Bot::RemoveBotItem(uint32 item_id) {
 	}
 }
 
-bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
-	bool Result = false;
-	if (bot && group && bot->HasGroup())  {
-		if (!group->IsLeader(bot)) {
-			bot->SetFollowID(0);
-			if (group->DelMember(bot)) {
-				group->DelMemberOOZ(bot->GetName());
-				Group::RemoveFromGroup(bot);
-				if (group->GroupCount() < 2) {
-					group->DisbandGroup();
-				}
-			}
+// World now owns group membership; this forwards the removal intent(s) and
+// clears zone-local follow-target bookkeeping that doesn't depend on it.
+bool Bot::RemoveBotFromGroup() {
+	Group* group = GetGroup();
+	if  (group != nullptr) {
+		const Client *owner = GetOwner() != nullptr ? GetOwner()->CastToClient() : nullptr;
+		const uint32 requestor_character_id = owner ? owner->CharacterID() : 0;
+		const std::string requestor_name    = owner ? owner->GetName()    : "";
+
+		if (!group->IsLeader(this)) {
+			group->RequestDisband(requestor_character_id, requestor_name, GetName());
 		} else {
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (!group->members[i]) {
-					continue;
-				}
-
-				group->members[i]->SetFollowID(0);
-			}
-			group->DisbandGroup();
-			Group::RemoveFromGroup(bot);
+			group->RequestDisband(requestor_character_id, requestor_name);
 		}
-		Result = true;
-	}
-	return Result;
-}
 
-bool Bot::AddBotToGroup(Bot* bot, Group* group) {
-	bool result = false;
-	if (!group || group->GroupCount() >= MAX_GROUP_MEMBERS) {
-		return result;
+		return true;
 	}
 
-	if (bot && group->AddMember(bot)) {
-		if (group->GetLeader()) {
-			// Need to send this only once when a group is formed with a bot so the client knows it is also the group leader
-			if (group->GroupCount() == 2 && group->GetLeader()->IsClient()) {
-				group->UpdateGroupAAs();
-				Mob *TempLeader = group->GetLeader();
-				group->SendUpdate(groupActUpdate, TempLeader);
-			}
-		}
-		group->VerifyGroup();
-		group->SendGroupJoinOOZ(bot);
-		result = true;
-	}
-	return result;
+	return false;
 }
 
 // Completes a trade with a client bot owner
@@ -4960,9 +4890,6 @@ bool Bot::Death(Mob *killer_mob, int64 damage, int32 spell_id, EQ::skills::Skill
 		parse->EventBot(EVENT_DEATH_COMPLETE, this, killer_mob, export_string, 0);
 	}
 
-	Zone();
-	entity_list.RemoveBot(GetID());
-
 	return true;
 }
 
@@ -5008,13 +4935,10 @@ void Bot::Damage(Mob *from, int64 damage, int32 spell_id, EQ::skills::SkillType 
 
 	// Aggro the bot's group members
 	if (IsGrouped()) {
-		Group *g = GetGroup();
-		if (g) {
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (g->members[i] && g->members[i]->IsBot() && from && !g->members[i]->CheckAggro(from) && g->members[i]->IsAttackAllowed(from))
-					g->members[i]->AddToHateList(from, 1);
-			}
-		}
+		GetGroup()->ForEachBot([&](Bot *b) {
+			if (from && !b->CheckAggro(from) && b->IsAttackAllowed(from))
+				b->AddToHateList(from, 1);
+		});
 	}
 }
 
@@ -5719,7 +5643,6 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 				if (tempBot) {
 					tempBot->SetTarget(nullptr);
 					tempBot->SetBotOwner(nullptr);
-					tempBot->Zone();
 				}
 			}
 		}
@@ -5853,23 +5776,6 @@ float Bot::GetAOERange(int32 spell_id) {
 	}
 	range = GetActSpellRange(spell_id, range);
 	return range;
-}
-
-bool Bot::SpellEffect(Mob* caster, int32 spell_id, float partial) {
-	bool Result = false;
-	Result = Mob::SpellEffect(caster, spell_id, partial);
-	if (IsGrouped()) {
-		Group *g = GetGroup();
-		if (g) {
-			EQApplicationPacket hp_app;
-			CreateHPPacket(&hp_app);
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (g->members[i] && g->members[i]->IsClient())
-					g->members[i]->CastToClient()->QueuePacket(&hp_app);
-			}
-		}
-	}
-	return Result;
 }
 
 void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
@@ -6169,7 +6075,7 @@ bool Bot::DoFinishedSpellSingleTarget(int32 spell_id, Mob* spellTarget, EQ::spel
 	if (
 		spellTarget &&
 		GetClass() != Class::Bard &&
-		(IsGrouped() || (IsRaidGrouped() && GetStoredRaid()->GetGroup(GetCleanName()) != RAID_GROUPLESS)) &&
+		IsGrouped() &&
 		(spellTarget->IsBot() || spellTarget->IsClient()) &&
 		(RuleB(Bots, GroupBuffing) || RuleB(Bots, RaidBuffing))
 	) {
@@ -6966,7 +6872,7 @@ void Bot::Camp(bool save_to_database) {
 		Save();
 	}
 
-	if (HasGroup() || HasRaid()) {
+	if (IsGrouped() || IsRaided()) {
 		Zone();
 	} else {
 		Depop();
@@ -6974,13 +6880,6 @@ void Bot::Camp(bool save_to_database) {
 }
 
 void Bot::Zone() {
-	if (auto raid = entity_list.GetRaidByBot(this)) {
-		raid->MemberZoned(CastToClient());
-	}
-	else if (HasGroup()) {
-		GetGroup()->MemberZoned(this);
-	}
-
 	Save();
 	Depop();
 }
@@ -7004,33 +6903,35 @@ bool Bot::IsAtRange(Mob *target) {
 	return result;
 }
 
-void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
+void Bot::OnRemoveFromGroup(Group* prev_group)
+{
+	SetFollowID(0);
+	SetGroupHealer(false);
+	SetGroupSlower(false);
+	SetGroupNuker(false);
+	SetGroupDoter(false);
+}
+
+void Bot::UpdateGroupCastingRoles(const Group* group)
 {
 	if (!group)
 		return;
 
-	for (auto iter : group->members) {
-		if (!iter)
-			continue;
-
-		if (iter->IsBot()) {
-			iter->CastToBot()->SetGroupHealer(false);
-			iter->CastToBot()->SetGroupSlower(false);
-			iter->CastToBot()->SetGroupNuker(false);
-			iter->CastToBot()->SetGroupDoter(false);
-		}
-	}
-
-	if (disband)
-		return;
+	// Clear every bot's flags before picking new winners below -- without
+	// this, a role changing hands (membership/class change) would leave
+	// the old holder's flag still set alongside the new holder's, so two
+	// bots would both think they're the group healer.
+	group->ForEachBot([](Bot *iter) {
+		iter->SetGroupHealer(false);
+		iter->SetGroupSlower(false);
+		iter->SetGroupNuker(false);
+		iter->SetGroupDoter(false);
+	});
 
 	Mob* healer = nullptr;
 	Mob* slower = nullptr;
 
-	for (auto iter : group->members) {
-		if (!iter)
-			continue;
-
+	group->ForEachMember([&](Mob* iter) {
 		// GroupHealer
 		switch (iter->GetClass()) {
 			case Class::Cleric:
@@ -7135,7 +7036,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 				default:
 					break;
 		}
-	}
+	});
 
 	if (healer && healer->IsBot())
 		healer->CastToBot()->SetGroupHealer();
@@ -7159,8 +7060,11 @@ Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName
 	return Result;
 }
 
+// World now owns group membership; this keeps the local ownership/target
+// validation (which needs live Bot*/Group* lookups only zone has) and
+// forwards the actual add as an intent instead of mutating locally.
 void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
-	if (c && !c->HasRaid()) {
+	if (c && !c->IsRaided()) {
 		Bot* invitedBot = entity_list.GetBotByBotName(botName);
 
 		if (!invitedBot) {
@@ -7171,7 +7075,7 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 			invitedBot->GetBotOwnerCharacterID() != c->CharacterID() &&
 			!(
 				c->GetGroup() &&
-				!invitedBot->HasGroup() &&
+				!invitedBot->IsGrouped() &&
 				invitedBot->GetOwner()->HasGroup() &&
 				c->GetGroup() == invitedBot->GetOwner()->GetGroup()
 			)
@@ -7181,60 +7085,28 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 			return;
 		}
 
-		if (!invitedBot->HasGroup() && !invitedBot->HasRaid()) {
-			if (!c->IsGrouped()) {
-				auto g = new Group(c);
-				if (AddBotToGroup(invitedBot, g)) {
-					entity_list.AddGroup(g);
-					database.SetGroupLeaderName(g->GetID(), c->GetName());
-					g->SaveGroupLeaderAA();
-					g->AddToGroup(c);
-					g->AddToGroup(invitedBot);
-				} else {
-					delete g;
-				}
-			} else {
-				if (AddBotToGroup(invitedBot, c->GetGroup())) {
-					c->GetGroup()->AddToGroup(invitedBot);
-				}
-			}
-		} else if (invitedBot->HasGroup()) {
+		if (!invitedBot->IsGrouped() && !invitedBot->IsRaided()) {
+			Group::RequestAddMember(c, invitedBot);
+		} else if (invitedBot->IsGrouped()) {
 			c->MessageString(Chat::LightGray, TARGET_ALREADY_IN_GROUP, invitedBot->GetCleanName());
 		}
 	}
 }
 
 // Processes a group disband request from a Client for a Bot.
-void Bot::ProcessBotGroupDisband(Client* c, const std::string& botName) {
-	if (c) {
-		Bot* tempBot = nullptr;
-
-		if (botName.empty())
-			tempBot = GetFirstBotInGroup(c->GetGroup());
-		else
-			tempBot = GetBotByBotClientOwnerAndBotName(c, botName);
-
-		RemoveBotFromGroup(tempBot, c->GetGroup());
-	}
-}
-
-// Processes a raid disband request from a Client for a Bot.
+// Processes a raid disband request from a Client for a Bot -- e.g. bot
+// camp/deletion while raided, not a direct client raid command (those go
+// through Client::Handle_OP_RaidCommand's RaidCommandDisband forward
+// instead). World now owns the actual removal; this only forwards the
+// intent and clears zone-local bot bookkeeping that doesn't depend on it.
 void Bot::RemoveBotFromRaid(Bot* bot) {
 
 	Raid* bot_raid = entity_list.GetRaidByBot(bot);
 	if (bot_raid) {
-		uint32 gid = bot_raid->GetGroup(bot->GetName());
-		bot_raid->SendRaidGroupRemove(bot->GetName(), gid);
-		bot_raid->RemoveRaidDelegates(bot->GetName());
-		bot_raid->RemoveMember(bot->GetName());
-		bot_raid->GroupUpdate(gid);
-		if (!bot_raid->RaidCount()) {
-			bot_raid->DisbandRaid();
-		}
+		Client *owner = bot->GetOwner() ? bot->GetOwner()->CastToClient() : nullptr;
+		bot_raid->RequestRemoveMember(owner, bot->GetName());
 	}
 
-	bot->SetStoredRaid(nullptr);
-	bot->p_raid_instance = nullptr;
 	bot->SetVerifiedRaid(false);
 }
 
@@ -7251,7 +7123,7 @@ void Bot::ProcessClientZoneChange(Client* botOwner) {
 				if (raid) {
 					tempBot->Zone();
 				}
-				else if (tempBot->HasGroup()) {
+				else if (tempBot->IsGrouped()) {
 					Group* g = tempBot->GetGroup();
 					if (g && g->IsGroupMember(botOwner)) {
 						if (botOwner->IsClient()) {
@@ -7271,26 +7143,6 @@ void Bot::ProcessClientZoneChange(Client* botOwner) {
 			}
 		}
 	}
-}
-
-// Finds and returns the first Bot object found in specified group
-Bot* Bot::GetFirstBotInGroup(Group* group) {
-	Bot* Result = nullptr;
-
-	if (group) {
-		for (int Counter = 0; Counter < MAX_GROUP_MEMBERS; Counter++) {
-			if (group->members[Counter] == nullptr) {
-				continue;
-			}
-
-			if (group->members[Counter]->IsBot()) {
-				Result = group->members[Counter]->CastToBot();
-				break;
-			}
-		}
-	}
-
-	return Result;
 }
 
 // Processes a client request to inspect a bot's equipment.
@@ -7413,21 +7265,15 @@ bool Bot::AttemptCloseBeneficialSpells(uint16 spell_type) {
 	bool result = false;
 	Mob* tar = nullptr;
 
-	for (Mob* m : GetSpellTargetList(RuleB(Bots, CrossRaidBuffingAndHealing))) {
+	for (Mob* m : GetSpellTargetList()) {
 		tar = m;
 
 		if (!tar) {
 			continue;
 		}
 
-		if (RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupTargetOnlyBotSpellType(spell_type)) {
-			Raid* raid = GetStoredRaid();
-
-			if (raid &&
-				(raid->GetGroup(GetName()) == raid->GetGroup(tar->GetName()))
-			) {
-				continue;
-			}
+		if (RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupTargetOnlyBotSpellType(spell_type) && IsInGroup(tar)) {
+			continue;
 		}
 
 		result = AttemptAICastSpell(spell_type, tar);
@@ -7701,7 +7547,7 @@ uint8 Bot::GetNumberNeedingHealedInGroup(Mob* tar, uint16 spell_type, int32 spel
 	}
 
 	uint8 count = 0;
-	std::vector<Mob*> target_list = tar->IsClient() ? GatherSpellTargets(false, tar) : tar->CastToBot()->GetSpellTargetList();
+	std::vector<Mob*> target_list = tar->IsClient() ? GatherSpellTargets(tar) : tar->CastToBot()->GetSpellTargetList();
 
 	for (auto* m : target_list) {
 		if (
@@ -7934,23 +7780,17 @@ void Bot::RaidGroupSay(const char* msg, ...) {
 	vsnprintf(buf, 1000, msg, ap);
 	va_end(ap);
 
-	if (IsRaidGrouped()) {
-		Raid* r = GetStoredRaid() ? GetStoredRaid() : GetRaid();
-
-		if (r) {
-			for (const auto& m : r->members) {
-				if (m.member && m.member->IsClient()) {
-					m.member->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
-				}
+	if (IsRaided()) {
+		GetRaid()->ForEachLocalMember([&](const auto& m) {
+			if (m.member->IsClient()) {
+				m.member->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
 			}
-		}
+		});
 	}
-	else if (HasGroup()) {
-			for (auto& m : GetGroup()->members) {
-				if (m && m->IsClient()) {
-					m->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
-				}
-			}
+	else if (IsGrouped()) {
+			GetGroup()->ForEachClient([&](Client *m) {
+				m->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
+			});
 	}
 	else if (GetOwner()) {
 		GetOwner()->FilteredMessageString(this,Chat::PetResponse,FilterSocials,GENERIC_SAY,GetCleanName(),buf);
@@ -8523,66 +8363,33 @@ std::string Bot::GetHPString(int8 min_hp, int8 max_hp)
 	return hp_string;
 }
 
-std::vector<Mob*> Bot::GetApplySpellList(
-	ApplySpellType apply_type,
-	bool allow_pets,
-	bool is_raid_group_only
-) {
+std::vector<Mob*> Bot::GetApplySpellList(ApplySpellType apply_type, bool allow_pets)
+{
 	std::vector<Mob*> l;
+	auto add_to_l = [&l, allow_pets](Mob* c) {
+		l.push_back(c);
 
-	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
-		auto* r = GetRaid();
-		if (r) {
-			auto group_id = r->GetGroup(GetCleanName());
-			if (EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-				for (const auto& m: r->members) {
-					if (m.is_bot) {
-						continue;
-					}
-					if (m.member && m.member->IsClient() &&
-						(!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
-						l.push_back(m.member);
+		if (allow_pets && c->HasPet())
+			l.push_back(c->GetPet());
 
-						if (allow_pets && m.member->HasPet()) {
-							l.push_back(m.member->GetPet());
-						}
-
-						const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
-						for (const auto& b: sbl) {
-							l.push_back(b);
-						}
-					}
-				}
-			}
+		// CharacterID() is only meaningful on Client -- a Bot's own id is a
+		// bot-id, not an owning character's id, so it has no bots "of its
+		// own" to pull in here via GetBotListByCharacterID.
+		if (c->IsClient()) {
+			for (const auto& b : entity_list.GetBotListByCharacterID(c->CastToClient()->CharacterID()))
+				l.push_back(b);
 		}
+	};
+
+	if (apply_type == ApplySpellType::Raid && IsRaided()) {
+		GetRaid()->ForEachLocalMember([&](const auto& m) {
+			if (m.kind != RaidMemberBot)
+				add_to_l(m.member);
+		});
 	} else if (apply_type == ApplySpellType::Group && IsGrouped()) {
-		auto* g = GetGroup();
-		if (g) {
-			for (auto i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				auto* m = g->members[i];
-				if (m && m->IsClient()) {
-					l.push_back(m->CastToClient());
-
-					if (allow_pets && m->HasPet()) {
-						l.push_back(m->GetPet());
-					}
-					const auto& sbl = entity_list.GetBotListByCharacterID(m->CastToClient()->CharacterID());
-					for (const auto& b : sbl) {
-						l.push_back(b);
-					}
-				}
-			}
-		}
+		GetGroup()->ForEachClient([&add_to_l](Client* c) { add_to_l(c); });
 	} else {
-		l.push_back(this);
-
-		if (allow_pets && HasPet()) {
-			l.push_back(GetPet());
-		}
-		const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
-		for (const auto& b : sbl) {
-			l.push_back(b);
-		}
+		add_to_l(this);
 	}
 
 	return l;
@@ -8593,14 +8400,12 @@ void Bot::ApplySpell(
 	int duration,
 	int level,
 	ApplySpellType apply_type,
-	bool allow_pets,
-	bool is_raid_group_only
+	bool allow_pets
 ) {
-	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only);
+	const auto& l = GetApplySpellList(apply_type, allow_pets);
 
-	for (const auto& m : l) {
+	for (const auto& m : l)
 		m->ApplySpellBuff(spell_id, duration, level);
-	}
 }
 
 void Bot::SetSpellDuration(
@@ -8608,14 +8413,12 @@ void Bot::SetSpellDuration(
 	int duration,
 	int level,
 	ApplySpellType apply_type,
-	bool allow_pets,
-	bool is_raid_group_only
+	bool allow_pets
 ) {
-	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only);
+	const auto& l = GetApplySpellList(apply_type, allow_pets);
 
-	for (const auto& m : l) {
+	for (const auto& m : l)
 		m->SetBuffDuration(spell_id, duration, level);
-	}
 }
 
 void Bot::Escape()
@@ -8718,15 +8521,18 @@ bool Bot::CheckCampSpawnConditions(Client* c) {
 
 		auto* owner_group = c->GetGroup();
 		if (owner_group) {
-			std::list<Client*> member_list;
-			owner_group->GetClientList(member_list);
-			member_list.remove(nullptr);
-
-			for (auto member_iter : member_list) {
+			bool group_engaged = false;
+			owner_group->ForEachClient([&](Client *member_iter) -> bool {
 				if (member_iter->IsEngaged() || member_iter->GetAggroCount() > 0) {
-					c->Message(Chat::White, "You cannot camp or spawn bots while your group is engaged,");
+					group_engaged = true;
 					return false;
 				}
+				return true;
+			});
+
+			if (group_engaged) {
+				c->Message(Chat::White, "You cannot camp or spawn bots while your group is engaged,");
+				return false;
 			}
 		}
 		else {
@@ -10109,7 +9915,7 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, int32 spell_id) {
 
 	uint16 target_id = tar->GetID();
 
-	for (Mob* m : GetSpellTargetList(RuleB(Bots, CrossRaidBuffingAndHealing))) {
+	for (Mob* m : GetSpellTargetList()) {
 		if (
 			m->IsBot() &&
 			m->IsCasting() &&
@@ -10121,7 +9927,7 @@ bool Bot::IsTargetAlreadyReceivingSpell(Mob* tar, int32 spell_id) {
 			}
 
 			if (!RuleB(Bots, CrossRaidBuffingAndHealing) && IsGroupSpell(spell_id)) {
-				for (Mob* x : GatherSpellTargets(false, tar)) {
+				for (Mob* x : GatherSpellTargets(tar)) {
 					if (x->GetID() == m->CastToBot()->casting_spell_targetid) {
 						return true;
 					}
@@ -10260,7 +10066,7 @@ bool Bot::IsMobEngagedByAnyone(Mob* tar) {
         return false;
     }
 
-    for (Mob* m : GetSpellTargetList(true)) {
+    for (Mob* m : GetSpellTargetList()) {
         if (m->GetTarget() != tar) {
             continue;
         }
@@ -11484,7 +11290,7 @@ bool Bot::AttemptForcedCastSpell(Mob* tar, int32 spell_id, bool is_disc) {
 		return false;
 	}
 
-	if (!IsInGroupOrRaid(tar, true) &&
+	if (!IsInGroup(tar) &&
 		(!RuleB(Bots, EnableBotTGB) || (IsGroupSpell(spell_id) && !IsTGBCompatibleSpell(spell_id)))) {
 		return false;
 	}
@@ -12464,7 +12270,7 @@ bool Bot::BotPassiveCheck() {
 	return false;
 }
 
-bool Bot::ValidStateCheck(Mob* other, bool same_raid_group) {
+bool Bot::ValidStateCheck(Mob* other) {
 	if (
 		GetBotStance() == Stance::Passive ||
 		GetHoldFlag() ||
@@ -12473,7 +12279,7 @@ bool Bot::ValidStateCheck(Mob* other, bool same_raid_group) {
 		IsSilenced() ||
 		IsAmnesiad() ||
 		GetHP() < 0 ||
-		!IsInGroupOrRaid(other, same_raid_group)
+		!IsInGroupOrRaid(other)
 	) {
 		return false;
 	}
@@ -12780,61 +12586,33 @@ void Bot::AssignBotSpellsToTypes(std::vector<BotSpells>& AIBot_spells, std::unor
 	}
 }
 
-std::vector<Mob*> Bot::GatherSpellTargets(bool entire_raid, Mob* target, bool no_clients, bool no_bots) {
+std::vector<Mob*> Bot::GatherSpellTargets(Mob* target)
+{
 	std::vector<Mob*> valid_spell_targets;
+	if (target == nullptr)
+		target = this;
 
-	auto is_valid_target = [no_clients, no_bots](Mob* member) {
-		return member &&
-			   ((member->IsClient() && !no_clients) || (member->IsBot() && !no_bots));
+	auto add_valid_target = [&valid_spell_targets](Mob* member) {
+		if (member != nullptr)
+			valid_spell_targets.emplace_back(member);
 	};
 
-	if (IsRaidGrouped()) {
-		Raid* raid = IsBot() ? CastToBot()->GetStoredRaid() : GetRaid();
-
-		if (raid) {
-			if (entire_raid) {
-				for (const auto& m : raid->members) {
-					if (is_valid_target(m.member) && m.group_number != RAID_GROUPLESS) {
-						valid_spell_targets.emplace_back(m.member);
-					}
-				}
-			}
-			else {
-				auto group_name = target ? raid->GetGroup(target->GetName()) : raid->GetGroup(GetName());
-				auto raid_group = raid->GetRaidGroupMembers(group_name);
-
-				for (const auto& m : raid_group) {
-					if (is_valid_target(m.member) && m.group_number != RAID_GROUPLESS) {
-						valid_spell_targets.emplace_back(m.member);
-					}
-				}
-			}
-		}
-	}
-	else if (IsGrouped()) {
-		Group* group = GetGroup();
-
-		if (group) {
-			for (const auto& m : group->members) {
-				if (is_valid_target(m)) {
-					valid_spell_targets.emplace_back(m);
-				}
-			}
-		}
-	}
-	else {
-		valid_spell_targets.emplace_back(this);
+	if (target->IsRaided() && RuleB(Bots, CrossRaidBuffingAndHealing)) {
+		target->GetRaid()->ForEachLocalMember([&](const auto& m) { add_valid_target(m.member); });
+	} else if (target->IsGrouped()) {
+		target->GetGroup()->ForEachMember([&](Mob* m) { add_valid_target(m); });
+	} else {
+		add_valid_target(target);
 	}
 
 	return valid_spell_targets;
 }
 
 std::vector<Mob*> Bot::GetBuffTargets(Mob* spellTarget) {
-	if (RuleB(Bots, RaidBuffing)) {
-		return GetSpellTargetList(true);
-	}
+	if (RuleB(Bots, RaidBuffing))
+		return GetSpellTargetList();
 
-	return GatherSpellTargets(false, spellTarget);
+	return GatherSpellTargets(spellTarget);
 }
 
 uint8 Bot::GetHPRatioForSpellType(uint16 spell_type, Mob* tar) {
@@ -13424,15 +13202,12 @@ bool Bot::IsImmuneToBotSpell(int32 spell_id, Mob* caster) {
 	return false;
 }
 
-std::vector<Mob*> Bot::GetSpellTargetList(bool entire_raid) {
-	if (entire_raid && _spell_target_list.empty()) {
-		_spell_target_list = GatherSpellTargets(RuleB(Bots, CrossRaidBuffingAndHealing));
-	}
-	else if (!entire_raid && _group_spell_target_list.empty()) {
-		_group_spell_target_list = GatherSpellTargets();
-	}
+std::vector<Mob*> Bot::GetSpellTargetList()
+{
+	if (_spell_target_list.empty())
+		_spell_target_list = GatherSpellTargets();
 
-	return entire_raid ? _spell_target_list : _group_spell_target_list;
+	return _spell_target_list;
 }
 
 bool Bot::IsValidBotStance(uint8 stance) {
@@ -13460,4 +13235,16 @@ bool Bot::HasControllablePet(uint8 ranks_required) {
 	return GetClass() != Class::Enchanter ||
 		GetPet()->GetPetType() != PetType::Animation ||
 		GetAA(aaAnimationEmpathy) >= ranks_required;
+}
+
+void Bot::OnAddToGroup()
+{
+	SetFollowOwner();
+	HasGroup::OnAddToGroup();
+}
+
+void Bot::OnZonedInWithGroup()
+{
+	SetFollowOwner();
+	HasGroup::OnZonedInWithGroup();
 }

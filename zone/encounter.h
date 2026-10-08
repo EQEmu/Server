@@ -38,10 +38,6 @@ public:
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override {
 		return false;
 	}
-	virtual bool HasRaid() { return false; }
-	virtual bool HasGroup() { return false; }
-	virtual Raid* GetRaid() { return 0; }
-	virtual Group* GetGroup() { return 0; }
 
 	bool IsEncounter() const { return true; }
 	const char* GetEncounterName() const { return encounter_name; }

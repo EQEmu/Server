@@ -21,7 +21,7 @@ enum {	//raid packet types:
 	raidAdd = 0,
 	raidRemove2 = 1,	//parameter=0
 	raidMemberNameChange = 2,
-	raidRemove1 = 3,	//parameter=0xFFFFFFFF
+	raidMoveGroup = 3,	//parameter=0xFFFFFFFF
 	raidNoLongerLeader = 4,
 	raidDisband = 5,
 	raidMembers = 6,	//len 395+, details + members list

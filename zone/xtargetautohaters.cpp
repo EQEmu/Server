@@ -121,7 +121,7 @@ void XTargetAutoHaters::demerge(XTargetAutoHaters &other)
 	}
 }
 
-bool XTargetAutoHaters::contains_mob(int spawn_id)
+bool XTargetAutoHaters::contains_mob(int spawn_id) const
 {
 	auto it = std::find_if(m_haters.begin(), m_haters.end(),
 			       [spawn_id](const HatersCount &c) { return c.spawn_id == spawn_id; });

@@ -893,22 +893,9 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		if (IsClient() && spell_target && spell_target->IsClient()) {
 			if (spell_target && spell_target->GetID() != GetID()) {
 				bool cast_failed = true;
-				if (spell_target->IsGrouped()) {
-					Group *target_group = spell_target->GetGroup();
-					Group *my_group = GetGroup();
-					if (target_group &&
-						my_group &&
-						(target_group->GetID() == my_group->GetID())) {
-						cast_failed = false;
-					}
-				} else if (spell_target->IsRaidGrouped()) {
-					Raid *target_raid = spell_target->GetRaid();
-					Raid *my_raid = GetRaid();
-					if (target_raid &&
-						my_raid &&
-						(target_raid->GetGroup(spell_target->CastToClient()) == my_raid->GetGroup(CastToClient()))) {
-						cast_failed = false;
-					}
+				if (spell_target->IsGrouped() && IsGrouped() &&
+					spell_target->GetGroup()->GetID() == GetGroup()->GetID()) {
+					cast_failed = false;
 				}
 
 				if (cast_failed) {
@@ -1880,7 +1867,7 @@ bool Mob::DetermineSpellTargets(int32 spell_id, Mob *&spell_target, Mob *&ae_cen
 		&& !spell_target->IsNPC() // still self only if NPC targetted
 		&& IsOfClientBot()
 		&& (IsGrouped() // still self only if not grouped
-		|| IsRaidGrouped())
+		|| IsRaided())
 		&& (HasProjectIllusion())){
 			LogAA("Project Illusion overwrote target caster: [{}] spell id: [{}] was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
@@ -2181,134 +2168,33 @@ bool Mob::DetermineSpellTargets(int32 spell_id, Mob *&spell_target, Mob *&ae_cen
 				return false;
 			}
 
-			if(spell_target != this)
-			{
-				if(spell_target == GetPet())
-				{
-					CastAction = SingleTarget;
+			if (spell_target != this && spell_target != GetPet() && spell_target != GetOwner()) {
+				Group* group_caster = nullptr;
+				if (!IsPet() && IsGrouped())
+					group_caster = GetGroup();
+				else if (IsPet()) {
+					Mob* owner = GetOwner();
+					if (owner != nullptr && owner->IsPet())
+						group_caster = owner->GetGroup();
 				}
-				else if(spell_target == GetOwner())
-				{
-					CastAction = SingleTarget;
+
+				Group* group_target = nullptr;
+				if (!spell_target->IsPet() && spell_target->IsGrouped())
+					group_target = spell_target->GetGroup();
+				else if (spell_target->IsPet()) {
+					Mob* owner = spell_target->GetOwner();
+					if (owner != nullptr && owner->IsPet())
+						group_target = owner->GetGroup();
 				}
-				else
-				{
-					uint32 group_id_caster = 0;
-					uint32 group_id_target = 0;
-					if(IsClient())
-					{
-						if(IsGrouped())
-						{
-							if (Group* group = GetGroup()) {
-								group_id_caster = group->GetID();
-							}
-						}
-						else if(IsRaidGrouped())
-						{
-							if (Raid* raid = GetRaid()) {
-								uint32 group_id = raid->GetGroup(CastToClient());
-								group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
-							}
-						}
-					}
-					else if(IsPet())
-					{
-						Mob *owner = GetOwner();
-						if(owner->IsGrouped())
-						{
-							if (Group* group = owner->GetGroup()) {
-								group_id_caster = group->GetID();
-							}
-						}
-						else if(owner->IsRaidGrouped())
-						{
-							if (Raid* raid = owner->GetRaid()) {
-								uint32 group_id = raid->GetGroup(owner->CastToClient());
-								group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
-							}
-						}
-					}
-					else if(IsBot())
-					{
-						if (IsGrouped()) {
-							if (auto group = GetGroup()) {
-								group_id_caster = group->GetID();
-							}
-						} else if (IsRaidGrouped()) {
-							if (auto raid = GetRaid()) {
-								uint32 group_id = raid->GetGroup(GetName());
-								group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
-							}
-						}
-					}
 
-					if(spell_target->IsClient())
-					{
-						if(spell_target->IsGrouped())
-						{
-							if (Group* group = spell_target->GetGroup()) {
-								group_id_target = group->GetID();
-							}
-						}
-						else if(spell_target->IsRaidGrouped())
-						{
-							if (Raid* raid = spell_target->GetRaid()) {
-								uint32 group_id = raid->GetGroup(spell_target->CastToClient());
-								group_id_target = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
-							}
-						}
-					}
-					else if(spell_target->IsPet())
-					{
-						Mob *owner = spell_target->GetOwner();
-						if(owner->IsGrouped())
-						{
-							if (Group* group = owner->GetGroup()) {
-								group_id_target = group->GetID();
-							}
-						}
-						else if(owner->IsRaidGrouped())
-						{
-							if (Raid* raid = owner->GetRaid()) {
-								uint32 group_id = raid->GetGroup(owner->CastToClient());
-								group_id_target = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
-							}
-						}
-					}
-					else if(spell_target->IsBot())
-					{
-						if(spell_target->IsGrouped())
-						{
-							group_id_target = spell_target->GetGroup()->GetID();
-						}
-						else if(spell_target->IsRaidGrouped())
-						{
-							if(spell_target->GetOwner())
-								group_id_target = (spell_target->GetRaid()->GetGroup(spell_target->GetOwner()->CastToClient()) == 0xFFFF) ? 0 : (spell_target->GetRaid()->GetGroup(spell_target->GetOwner()->CastToClient()) + 1);
-						}
-					}
-
-					if(group_id_caster == 0 || group_id_target == 0)
-					{
-						LogSpells("Spell [{}] canceled: Attempted to cast a Single Target Group spell on a ungrouped member", spell_id);
-						MessageString(Chat::Red, TARGET_GROUP_MEMBER);
-						return false;
-					}
-
-					if(group_id_caster != group_id_target)
-					{
-						LogSpells("Spell [{}] canceled: Attempted to cast a Single Target Group spell on a ungrouped member", spell_id);
-						MessageString(Chat::Red, TARGET_GROUP_MEMBER);
-						return false;
-					}
-
-					CastAction = SingleTarget;
+				if (group_caster == nullptr || group_target == nullptr || group_caster != group_target) {
+					LogSpells("Spell [{}] canceled: Attempted to cast a Single Target Group spell on a ungrouped member", spell_id);
+					MessageString(Chat::Red, TARGET_GROUP_MEMBER);
+					return false;
 				}
 			}
-			else
-			{
-				CastAction = SingleTarget;
-			}
+
+			CastAction = SingleTarget;
 			break;
 		}
 
@@ -2646,35 +2532,15 @@ bool Mob::SpellFinished(int32 spell_id, Mob *spell_target, CastingSlot slot, int
 				// Allow pets who cast group spells to affect the group.
 				if (spell_target->IsPetOwnerOfClientBot() && IsPetOwnerOfClientBot()) {
 					Mob* owner =  spell_target->GetOwner();
-
-					if (owner) {
+					if (owner)
 						spell_target = owner;
-					}
 				}
 
 				if (spell_target->IsGrouped()) {
-					Group *target_group = entity_list.GetGroupByMob(spell_target);
-					if (target_group) {
-						target_group->CastGroupSpell(this, spell_id);
-						if (target_group != GetGroup() && GetClass() != Class::Bard) {
-							SpellOnTarget(spell_id, this);
-						}
-					}
-				} else if (spell_target->IsRaidGrouped() && spell_target->IsOfClientBot()) {
-					Raid *target_raid = entity_list.GetRaidByClient(spell_target->CastToClient());
-					if (IsBot()) {
-						target_raid = entity_list.GetRaidByBot(spell_target->CastToBot());
-					}
-
-					uint32 gid = 0xFFFFFFFF;
-					if (target_raid) {
-						gid = target_raid->GetGroup(spell_target->GetName());
-						if (gid < 12) {
-							target_raid->CastGroupSpell(this, spell_id, gid);
-						} else {
-							SpellOnTarget(spell_id, spell_target);
-						}
-					}
+					Group* target_group = spell_target->GetGroup();
+					target_group->CastGroupSpell(this, spell_id);
+					if (target_group != GetGroup() && GetClass() != Class::Bard)
+						SpellOnTarget(spell_id, this);
 				} else {
 					// if target is grouped, CastGroupSpell will cast it on the caster
 					// too, but if not then we have to do that here.
@@ -4135,76 +4001,17 @@ bool Mob::SpellOnTarget(
 		// Beneficial spells check
 		if (IsBeneficialSpell(spell_id)) {
 			if (IsClient() && spelltar != this) {//let NPCs do beneficial spells on anybody if they want, should be the job of the AI, not the spell code to prevent this from going wrong
-				Client* pClient = nullptr;
-				Raid* pRaid = nullptr;
-				Group* pBasicGroup = nullptr;
-				uint32 nGroup = 0; //raid group
+				bool basic_allowed = IsAllianceSpell(spell_id) || IsBeneficialAllowed(spelltar);
+				bool group_allowed = IsGrouped();
+				if (group_allowed) {
+					if (spelltar->IsGrouped())
+						group_allowed = GetGroup() == spelltar->GetGroup();
+					else if (spelltar->IsPet())
+						group_allowed = GetGroup() == spelltar->GetOwner()->GetGroup();
+				} else if (spelltar->IsPet())
+					group_allowed = spelltar == GetPet(); //should be able to cast grp spells on self and pet despite grped status.
 
-				Client* pClientTarget = nullptr;
-				Raid* pRaidTarget = nullptr;
-				Group* pBasicGroupTarget = nullptr;
-				uint32 nGroupTarget = 0; //raid group
-
-				Client* pClientTargetPet = nullptr;
-				Raid* pRaidTargetPet = nullptr;
-				Group* pBasicGroupTargetPet = nullptr;
-				uint32 nGroupTargetPet = 0; //raid group
-
-				const uint32 cnWTF = 0xFFFFFFFF + 1; //this should be zero unless on 64bit? forced uint64?
-
-				//Caster client pointers
-				pClient = CastToClient();
-				pRaid = entity_list.GetRaidByClient(pClient);
-				pBasicGroup = entity_list.GetGroupByMob(this);
-				if (pRaid) {
-					nGroup = pRaid->GetGroup(pClient) + 1;
-				}
-
-				//Target client pointers
-				if (spelltar->IsClient()) {
-					pClientTarget = spelltar->CastToClient();
-					pRaidTarget = entity_list.GetRaidByClient(pClientTarget);
-					pBasicGroupTarget = entity_list.GetGroupByMob(spelltar);
-					if (pRaidTarget) {
-						nGroupTarget = pRaidTarget->GetGroup(pClientTarget) + 1;
-					}
-				}
-
-				if (spelltar->IsPet()) {
-					Mob *owner = spelltar->GetOwner();
-					if (owner->IsClient()) {
-						pClientTargetPet = owner->CastToClient();
-						pRaidTargetPet = entity_list.GetRaidByClient(pClientTargetPet);
-						pBasicGroupTargetPet = entity_list.GetGroupByMob(owner);
-						if (pRaidTargetPet) {
-							nGroupTargetPet = pRaidTargetPet->GetGroup(pClientTargetPet) + 1;
-						}
-					}
-
-				}
-
-				if (
-					(!IsAllianceSpell(spell_id) && !IsBeneficialAllowed(spelltar)) ||
-					(IsGroupOnlySpell(spell_id) &&
-						!(
-							(
-								pBasicGroup &&
-								(
-									pBasicGroup == pBasicGroupTarget ||
-									pBasicGroup == pBasicGroupTargetPet
-								)
-							) || //Basic Group
-							(
-								nGroup != cnWTF &&
-								(
-									nGroup == nGroupTarget ||
-									nGroup == nGroupTargetPet
-								)
-							) || //Raid group
-							spelltar == GetPet() //should be able to cast grp spells on self and pet despite grped status.
-						)
-					)
-				) {
+				if (!basic_allowed || (IsGroupOnlySpell(spell_id) && !group_allowed)) {
 					if (spells[spell_id].target_type == ST_AEBard) {
 						//if it was a beneficial AE bard song don't spam the window that it would not hold
 						LogSpells(

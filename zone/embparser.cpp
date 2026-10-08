@@ -1891,7 +1891,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_GROUP_CHANGE: {
 			if (mob && mob->IsClient()) {
 				ExportVar(package_name.c_str(), "grouped", mob->IsGrouped());
-				ExportVar(package_name.c_str(), "raided", mob->IsRaidGrouped());
+				ExportVar(package_name.c_str(), "raided", mob->IsRaided());
 			}
 			break;
 		}

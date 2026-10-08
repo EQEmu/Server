@@ -2218,13 +2218,14 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 
 void Zone::weatherSend(Client *client)
 {
-	auto outapp = new EQApplicationPacket(OP_Weather, 8);
+	auto outapp = new EQApplicationPacket(OP_Weather, sizeof(Weather_Struct));
+	auto ws = (Weather_Struct *) outapp->pBuffer;
 	if (zone_weather > EQ::constants::WeatherTypes::None) {
-		outapp->pBuffer[0] = zone_weather - 1;
+		ws->val1 = zone_weather - 1;
 	}
 
 	if (zone_weather > EQ::constants::WeatherTypes::None) {
-		outapp->pBuffer[4] = zone->weather_intensity;
+		ws->type = zone->weather_intensity;
 	}
 
 	if (client) {

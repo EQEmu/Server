@@ -34,6 +34,7 @@ set(world_sources
 	login_server.cpp
 	login_server_list.cpp
 	main.cpp
+	party_state.cpp
 	queryserv.cpp
 	shared_task_manager.cpp
 	shared_task_world_messaging.cpp
@@ -68,6 +69,7 @@ set(world_headers
 	lfplist.h
 	login_server.h
 	login_server_list.h
+	party_state.h
 	queryserv.h
 	shared_task_manager.h
 	shared_task_world_messaging.h

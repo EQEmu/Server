@@ -7268,16 +7268,15 @@ ALTER TABLE `character_pet_buffs`
 	ManifestEntry{
 		.version = 9331,
 		.description = "2026_07_21_group_leaders_masterlooter.sql",
-		.check = "SHOW COLUMNS FROM `group_leaders` LIKE 'masterlooter'",
-		.condition = "empty",
+		.check = "SELECT table_name FROM information_schema.tables WHERE table_name IN ('group_id', 'group_leaders', 'raid_details', 'raid_leaders', 'raid_members')",
+		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
-ALTER TABLE `group_leaders` ADD COLUMN `masterlooter` VARCHAR(64) NOT NULL DEFAULT '' AFTER `marknpc`;
-ALTER TABLE `raid_leaders` ADD COLUMN `masterlooter` VARCHAR(64) NOT NULL DEFAULT '' AFTER `puller`;
-ALTER TABLE `raid_leaders` ADD COLUMN `id` INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`id`);
-ALTER TABLE `raid_leaders` ADD UNIQUE KEY `rid_gid` (`rid`, `gid`);
-ALTER TABLE `raid_members` ADD COLUMN `is_master_looter` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `islooter`;
-ALTER TABLE `raid_details` ADD COLUMN `group_on_invite` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `loottype`;
+DROP TABLE IF EXISTS `group_id`;
+DROP TABLE IF EXISTS `group_leaders`;
+DROP TABLE IF EXISTS `raid_details`;
+DROP TABLE IF EXISTS `raid_leaders`;
+DROP TABLE IF EXISTS `raid_members`;
 )",
 	},
 // -- template; copy/paste this when you need to create a new entry

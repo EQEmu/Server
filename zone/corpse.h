@@ -108,10 +108,6 @@ public:
 		return false;
 	}
 
-	virtual bool HasRaid() { return false; }
-	virtual bool HasGroup() { return false; }
-	virtual Raid *GetRaid() { return nullptr; }
-	virtual Group *GetGroup() { return nullptr; }
 	inline uint32 GetCorpseDBID() { return m_corpse_db_id; }
 	inline char *GetOwnerName() { return corpse_name; }
 	bool IsEmpty() const;

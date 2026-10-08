@@ -295,12 +295,6 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		return 1;
 	}
 
-	LogInfo("Clearing groups");
-	database.ClearGroup();
-	LogInfo("Clearing raids");
-	database.ClearRaid();
-	database.ClearRaidDetails();
-	database.ClearRaidLeader();
 	LogInfo("Clearing guild online status");
 	database.ClearGuildOnlineStatus();
 	LogInfo("Clearing inventory snapshots");

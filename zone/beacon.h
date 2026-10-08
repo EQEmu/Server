@@ -34,10 +34,6 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killer_mob, int64 damage, int32 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by = KilledByTypes::Killed_NPC, bool is_buff_tic = false) { return true; }
 	virtual void Damage(Mob* from, int64 damage, int32 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
-	virtual bool HasRaid() { return false; }
-	virtual bool HasGroup() { return false; }
-	virtual Raid* GetRaid() { return 0; }
-	virtual Group* GetGroup() { return 0; }
 	bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr) override { return false; }
 
