@@ -971,7 +971,6 @@ type', in which case, the answer is yes.
 	return false;
 }
 
-
 // this is to check if non detrimental things are allowed to be done
 // to the target. clients cannot affect npcs and vice versa, and clients
 // cannot affect other clients that are not of the same pvp flag as them.

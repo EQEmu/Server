@@ -69,7 +69,7 @@ public:
 	void	ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl);
 	void	CLERemoveZSRef(ZoneServer* iZS);
 	ClientListEntry* CheckAuth(uint32 loginserver_account_id, const char* key);
-	ClientListEntry* FindCharacter(const char* name);
+	ClientListEntry* FindCharacter(std::string_view name);
 	ClientListEntry* FindCLEByAccountID(uint32 iAccID);
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
 	void	GetCLEIP(uint32 in_ip);

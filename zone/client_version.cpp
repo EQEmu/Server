@@ -53,14 +53,13 @@ static bool ShouldSendTargetBuffs(Client* c) {
 		return true;
 	}
 
-	if (c->IsRaidGrouped()) {
+	if (c->IsRaided()) {
 		Raid* raid = c->GetRaid();
-		if (raid) {
-			uint32 gid = raid->GetGroup(c);
-			if (gid < MAX_RAID_GROUPS && raid->GroupCount(gid) >= 3) {
-				if (raid->GetLeadershipAA(groupAAInspectBuffs, gid))
-					return true;
-			}
+		uint32 group_number = raid->GetGroupNumber(c);
+		Group* group = raid->GetGroupObject(group_number);
+		if (group && group->GroupCount() >= 3) {
+			if (group->GetLeadershipAA(groupAAInspectBuffs))
+				return true;
 		}
 	} else {
 		Group* group = c->GetGroup();
@@ -81,7 +80,7 @@ static void SetRefreshType(std::unique_ptr<EQApplicationPacket>& packet, Mob* so
 		type = 1;
 	else if (source->IsPet())
 		type = 2;
-	else if (target->HasGroup() && source->GetGroup() == target->GetGroup())
+	else if (target->IsGrouped() && source->GetGroup() == target->GetGroup())
 		type = 4;
 	else if (source->IsClient())
 		type = 5;

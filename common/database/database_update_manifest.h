@@ -7265,6 +7265,20 @@ ALTER TABLE `character_pet_buffs`
 	CHANGE COLUMN `instrument_mod` `instrument_mod` INT(10) UNSIGNED NOT NULL DEFAULT 10 AFTER `ExtraDIChance`;
 )",
 	},
+	ManifestEntry{
+		.version = 9331,
+		.description = "2026_07_21_group_leaders_masterlooter.sql",
+		.check = "SELECT table_name FROM information_schema.tables WHERE table_name IN ('group_id', 'group_leaders', 'raid_details', 'raid_leaders', 'raid_members')",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+DROP TABLE IF EXISTS `group_id`;
+DROP TABLE IF EXISTS `group_leaders`;
+DROP TABLE IF EXISTS `raid_details`;
+DROP TABLE IF EXISTS `raid_leaders`;
+DROP TABLE IF EXISTS `raid_members`;
+)",
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

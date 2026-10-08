@@ -512,7 +512,7 @@ void bot_command_cast(Client* c, const Seperator* sep)
 			if (
 				IsBotSpellTypeBeneficial(spell_type) &&
 				!RuleB(Bots, CrossRaidBuffingAndHealing) &&
-				!bot_iter->IsInGroupOrRaid(new_tar, true)
+				!bot_iter->IsInGroup(new_tar)
 			) {
 				continue;
 			}

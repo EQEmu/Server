@@ -31,7 +31,7 @@
 
 void Lua_Group::DisbandGroup() {
 	Lua_Safe_Call_Void();
-	self->DisbandGroup();
+	self->RequestDisband();
 }
 
 bool Lua_Group::IsGroupMember(const char* name) {
@@ -81,7 +81,7 @@ void Lua_Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 pla
 
 void Lua_Group::SetLeader(Lua_Mob c) {
 	Lua_Safe_Call_Void();
-	self->SetLeader(c);
+	self->RequestMakeLeader(c);
 }
 
 Lua_Mob Lua_Group::GetLeader() {
@@ -136,7 +136,7 @@ Lua_Mob Lua_Group::GetMember(int member_index) {
 		return Lua_Mob();
 	}
 
-	return self->members[member_index];
+	return self->GetMember(member_index);
 }
 
 uint8 Lua_Group::GetMemberRole(Lua_Mob member) {

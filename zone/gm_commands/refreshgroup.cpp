@@ -39,12 +39,12 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 		return;
 	}
 
-	database.RefreshGroupFromDB(target);
+	group->RequestRefresh();
 
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Group has been refreshed for {}.",
+			"Requesting a group refresh for {}.",
 			c->GetTargetDescription(target)
 		).c_str()
 	);
@@ -53,7 +53,7 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 		target->Message(
 			Chat::White,
 			fmt::format(
-				"Your group has been refreshed by {}.",
+				"Your group is being refreshed by {}.",
 				c->GetCleanName()
 			).c_str()
 		);

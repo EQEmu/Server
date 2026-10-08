@@ -86,7 +86,6 @@
 #define	ServerOP_WebInterfaceCall   0x002F
 #define ServerOP_GroupIDReq			0x0030
 #define ServerOP_GroupIDReply		0x0031
-#define ServerOP_GroupLeave			0x0032	// for disbanding out of zone folks
 #define ServerOP_RezzPlayerAccept	0x0033
 #define ServerOP_SpawnCondition		0x0034
 #define ServerOP_SpawnEvent			0x0035
@@ -95,10 +94,7 @@
 #define ServerOP_SpawnPlayerCorpse	0x0038
 #define ServerOP_Consent			0x0039
 #define ServerOP_Consent_Response	0x003a
-#define ServerOP_ForceGroupUpdate	0x003b
 #define ServerOP_OOZGroupMessage	0x003c
-#define ServerOP_DisbandGroup		0x003d //for disbanding a whole group cross zone
-#define ServerOP_GroupJoin			0x003e //for joining ooz folks
 #define ServerOP_UpdateSpawn		0x003f
 #define ServerOP_SpawnStatusChange	0x0040
 #define ServerOP_DropClient         0x0041	// DropClient
@@ -133,27 +129,46 @@
 #define ServerOP_ParcelDelivery                   0x0090
 #define ServerOP_ParcelPrune                      0x0091
 
-#define ServerOP_RaidAdd			0x0100 //in use
-#define ServerOP_RaidRemove			0x0101 //in use
-#define	ServerOP_RaidDisband		0x0102 //in use
-#define ServerOP_RaidLockFlag		0x0103 //in use
-#define ServerOP_RaidGroupLeader	0x0104 //in use
-#define ServerOP_RaidLeader			0x0105 //in use
-#define	ServerOP_RaidGroupSay		0x0106 //in use
 #define	ServerOP_RaidSay			0x0107 //in use
-#define	ServerOP_DetailsChange		0x0108 //in use
 
-#define ServerOP_UpdateGroup		0x010A //in use
-#define ServerOP_RaidGroupDisband	0x010B //in use
-#define ServerOP_RaidChangeGroup	0x010C //in use
-#define ServerOP_RaidGroupAdd		0x010D
-#define ServerOP_RaidGroupRemove	0x010E
-#define ServerOP_GroupInvite		0x010F
-#define ServerOP_GroupFollow		0x0110
-#define ServerOP_GroupFollowAck		0x0111
-#define ServerOP_GroupCancelInvite	0x0112
-#define ServerOP_RaidMOTD			0x0113
-#define ServerOP_RaidNote           0x0114
+#define ServerOP_GroupInvite			0x010F
+#define ServerOP_GroupCancelInvite		0x0112
+#define ServerOP_GroupState				0x0117
+#define ServerOP_PartyStateRequest		0x0119
+
+// Zone->world player requests for the world-authoritative group/raid system
+// -- world owns all validation/mutation; these carry only what zone can't
+// derive itself (resolved local data, live PP-sourced AA snapshots), never a
+// pre-computed decision. World replies asynchronously via
+// ServerOP_RaidUpdate/GroupState/*Disbanded (see below), or
+// ServerOP_PartyActionFailed if the request is rejected.
+// ServerOP_RaidInvite/RaidAcceptInvite/RaidRemoveMember/RaidMoveGroup (and
+// ServerOP_RaidDisbanded above) used to be separate opcodes here -- folded
+// into ServerOP_RaidAction's RaidActionType (see common/servertalk.h's
+// RaidActionType enum) for consistency with every other raid request.
+#define ServerOP_RaidAction          0x0174
+// Consolidated group request opcode, mirroring ServerOP_RaidAction exactly --
+// one opcode + one shared header (ServerGroupActionHeader_Struct) for every
+// zone->world group mutation request (join/disband/leadership/roles/mentor/
+// add-bot-or-merc/refresh), discriminated by GroupActionType. ServerOP_
+// GroupFollow/Disband/Leadership/Mentor/AddMember/RefreshRequest used to be
+// separate opcodes here -- folded in for the same reason RaidAction's own
+// family was. ServerOP_GroupInvite/GroupCancelInvite are NOT folded in --
+// those are pure relays of an already-client-facing packet (mirrors
+// ServerOP_RaidInvitePushed staying separate from RaidAction), not a
+// state-mutation request.
+#define ServerOP_GroupAction         0x0177
+#define ServerOP_PartyActionFailed   0x017B
+#define ServerOP_RaidInvitePushed    0x017C
+
+// Consolidated raid state push, mirroring ServerOP_GroupState/GroupUpdateType
+// -- update_type tags which payload follows, one opcode instead of older,
+// per-purpose opcodes. world/raid_state.cpp now sends every world->zone raid
+// broadcast on this single opcode (confirmed live, see its own many
+// ServerPacket(ServerOP_RaidUpdate, ...) call sites). ServerOP_RaidState and
+// ServerOP_RaidMemberUpsert were the older mechanism this replaced -- both
+// confirmed to have no sender left anywhere and have been deleted entirely.
+#define ServerOP_RaidUpdate               0x017F
 
 #define ServerOP_TraderMessaging    0x0120
 #define ServerOP_BazaarPurchase     0x0121
@@ -492,23 +507,6 @@ struct ServerChangeWID_Struct {
 	uint32	charid;
 	uint32	newwid;
 };
-struct SendGroup_Struct{
-	uint8	grouptotal;
-	uint32	zoneid;
-	char	leader[64];
-	char	thismember[64];
-	char	members[5][64];
-};
-
-struct ServerGroupFollow_Struct {
-	uint32 CharacterID;
-	GroupGeneric_Struct gf;
-};
-
-struct ServerGroupFollowAck_Struct {
-	char Name[64];
-};
-
 
 struct ServerChannelMessage_Struct {
 	char deliverto[64];
@@ -925,38 +923,12 @@ struct ServerGroupIDReply_Struct {
 	uint32 end;
 };
 
-struct ServerGroupLeave_Struct {
-	uint32 zoneid;
-	uint16 instance_id;
-	uint32 gid;
-	char member_name[64];	//kick this member from the group
-};
-
-struct ServerGroupJoin_Struct {
-	uint32 zoneid;
-	uint16 instance_id;
-	uint32 gid;
-	char member_name[64];	//this person is joining the group
-};
-
-struct ServerForceGroupUpdate_Struct {
-	uint32 origZoneID;
-	uint16 instance_id;
-	uint32 gid;
-};
-
 struct ServerGroupChannelMessage_Struct {
 	uint32 zoneid;
 	uint16 instanceid;
 	uint32 groupid;
 	char from[64];
 	char message[0];
-};
-
-struct ServerDisbandGroup_Struct {
-	uint32 zoneid;
-	uint16 instance_id;
-	uint32 groupid;
 };
 
 struct SimpleName_Struct{
@@ -1085,85 +1057,6 @@ struct ServerDepopPlayerCorpse_Struct
 	uint32 DBID;
 	uint32 ZoneID;
 	uint16 InstanceID;
-};
-
-struct ServerRaidGeneralAction_Struct {
-	uint32 zoneid;
-	uint16 instance_id;
-	uint32 rid;
-	uint32 gid;
-	char playername[64];
-};
-
-struct ServerRaidGroupAction_Struct { //add / remove depends on opcode.
-	char membername[64]; //member who's adding / leaving
-	uint32 gid; //group id to send to.
-	uint32 rid; //raid id to send to.
-};
-
-struct ServerRaidMessage_Struct {
-	uint32 rid;
-	uint32 gid;
-	uint8 language;
-	uint8 lang_skill;
-	char from[64];
-	char message[0];
-};
-
-struct ServerRaidMOTD_Struct {
-	uint32 rid;
-	char motd[1024];
-};
-
-struct ServerRaidNote_Struct {
-	uint32 rid;
-};
-
-struct ServerLFGMatchesRequest_Struct {
-	uint32	FromID;
-	uint8	QuerierLevel;
-	char	FromName[64];
-	uint8	FromLevel;
-	uint8	ToLevel;
-	uint32	Classes;
-};
-
-struct ServerLFGMatchesResponse_Struct {
-	char Name[64];
-	uint8 Level;
-	uint8 Class_;
-	uint16 Zone;
-	uint16 GuildID;
-	uint16 Anon;
-	char Comments[64];
-};
-
-struct ServerLFPUpdate_Struct {
-	uint32 LeaderID;
-	uint8 Action;
-	uint8 MatchFilter;
-	uint32	FromLevel;
-	uint32	ToLevel;
-	uint32	Classes;
-	char	Comments[64];
-	GroupLFPMemberEntry Members[MAX_GROUP_MEMBERS];
-};
-
-struct ServerLFPMatchesResponse_Struct {
-	uint32	FromLevel;
-	uint32	ToLevel;
-	uint32	Classes;
-	GroupLFPMemberEntry Members[MAX_GROUP_MEMBERS];
-	char Comments[64];
-};
-
-struct ServerLFPMatchesRequest_Struct {
-	uint32	FromID;
-	uint8	FromLevel;
-	uint8	ToLevel;
-	uint8	QuerierClass;
-	uint8	QuerierLevel;
-	char	FromName[64];
 };
 
 struct UpdateSpawnTimer_Struct {

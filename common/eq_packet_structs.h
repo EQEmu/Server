@@ -896,7 +896,6 @@ static const uint32 MAX_PP_LANGUAGE = 28;
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 240;
-static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
 
 /*
@@ -2519,6 +2518,39 @@ struct GroupUpdate2_Struct {
 /*0780*/	uint8	unknown780[56];
 /*0836*/
 };
+// Server-internal (fixed-size) counterpart to the TOB/RoF2 clients'
+// OP_GroupUpdateB full-roster packet -- Group::SendFullGroupUpdate() builds
+// this once, client-version-agnostically; each client's own
+// ENCODE(OP_GroupUpdateB) (common/patches/tob.cpp, common/patches/rof2.cpp)
+// reads these named fields and serializes them into that client's own wire
+// format. Confirmed via TOB's CGroupBase::Unserialize (2025-09-11 build,
+// 0x1406736d0) and RoF2's equivalent (2013-05-10 build, sub_7D6320): both
+// read group_id, member_count, leader_name, then per member: index, name,
+// type, owner_name, level, then a client-specific tail. TOB's tail is 5 role
+// bytes (tank/assist/puller/mark/master looter) + offline + a handful of
+// fields confirmed unused by the client (UniquePlayerID/OnlineTimestamp/one
+// more) that are always sent as 0. RoF2's tail is only 3 role bytes
+// (tank/assist/puller -- no mark/master-looter bits) + offline + one more
+// confirmed-present-but-not-meaningfully-consumed dword, also sent as 0.
+struct GroupMembersUpdateMember_Struct {
+	char   name[64];
+	char   owner_name[64]; // only meaningful for GroupMemberMerc/GroupMemberBot
+	uint16 type;
+	uint32 level;
+	uint8  is_tank;
+	uint8  is_assist;
+	uint8  is_puller;
+	uint8  is_mark;          // TOB only -- ignored by RoF2's encoder
+	uint8  is_master_looter; // TOB only -- ignored by RoF2's encoder
+	uint8  offline;
+};
+
+struct GroupMembersUpdate_Struct {
+	char   leader_name[64];
+	uint32 member_count;
+	GroupMembersUpdateMember_Struct members[6]; // MAX_GROUP_MEMBERS (common/eq_constants.h)
+};
+
 struct GroupJoin_Struct {
 /*0000*/	uint32	action;
 /*0004*/	char	yourname[64];
@@ -4837,6 +4869,7 @@ struct UpdateLeadershipAA_Struct {
 enum
 {
 	GroupLeadershipAbility_MarkNPC = 0,
+	GroupLeadershipAbility_InspectBuffs = 6,
 	RaidLeadershipAbility_MarkNPC = 16,
 	RaidLeadershipAbility_MainAssist = 19
 };
@@ -4893,6 +4926,12 @@ struct RaidAddMember_Struct {
 /*137*/	uint8 level;
 /*138*/	uint8 isGroupLeader;
 /*139*/	uint8 flags[5]; //no idea if these are needed...
+};
+
+struct RaidUpdateClassLevel_Struct {
+/*000*/ RaidGeneral_Struct general; //parameter unused
+/*140*/ uint32 _class;
+/*144*/ uint8  level;
 };
 
 struct RaidNote_Struct {
@@ -4956,6 +4995,73 @@ struct RaidMembers_Struct {
 /*358*/	uint32					member_count;		//including leader
 /*362*/	RaidMemberInfo_Struct	members[1];
 /*...*/	RaidMemberInfo_Struct	empty;	//seem to have an extra member with a 0 length name on the end
+};
+
+// Server-internal (fixed-size) counterpart to the RoF2/TOB clients' action=6
+// ("raidMembers") bulk raid-join packet -- Raid::SendRaidMembers() builds
+// this once, client-version-agnostically; each client's own
+// ENCODE(OP_RaidUpdate) raidMembers case (common/patches/rof2.cpp,
+// common/patches/tob.cpp) reads these named fields and serializes them into
+// that client's own, structurally different wire format (RoF2: fixed/simple
+// packed fields; TOB: length-prefixed strings via CUnSerializeBuffer). Every
+// per-member field matches both eqlib's RoF2 (emu-rof2 branch) AND TOB
+// (emu-tob branch) RaidMember structs at github.com/macroquest/eqlib
+// (include/eqlib/game/EQData.h) -- RoF2's RaidMember is 0x94/148 bytes,
+// TOB's is 0x9c/156, both matching each client's own per-member stride
+// byte-for-byte. raid_id/member_count/leader name/MOTD/locked are likewise
+// confirmed against those headers or a direct client accessor
+// (IsRaidLocked, RaidCreated) -- for RoF2. TOB's per-member fields are
+// confirmed the same way, but MOTD/locked were never located on TOB's wire
+// for this action (not a functional gap: SendBulkRaidInfoTo() sends those to
+// every client version via separate calls regardless). Main assist/marker/
+// master looter are confirmed via eqlib's RaidData struct for both clients
+// (fully resolved on the TOB branch; still commented-out/unresolved on the
+// RoF2 branch, though the shape is identical and independently confirmed via
+// RoF2's own RaidData::UnSerialize-equivalent). What remains genuinely
+// unresolved: for RoF2, a leading ~256-byte block and a ~56-byte trailing
+// block (still "unknown" even in eqlib's own model); for TOB, one outer
+// dword and two outer strings whose exact purpose couldn't be pinned down
+// (see the TOB encoder's own comments for why). Both encoders zero-fill
+// what's unresolved for their client.
+struct RaidMembersUpdateMember_Struct {
+	char   name[64];
+	char   note[64];  // RaidMember::RaidNote
+	uint8  level;      // RaidMember::nLevel
+	uint8  _class;     // RaidMember::nClass
+	uint8  is_raid_leader;   // RaidMember::RaidLeader
+	uint8  is_group_leader;  // RaidMember::GroupLeader
+	uint8  is_assist;        // RaidMember::RaidMainAssist
+	uint8  is_marker;        // RaidMember::RaidMarker
+	uint8  is_master_looter; // RaidMember::MasterLooter
+	uint32 group_number;     // RaidMember::GroupNumber
+};
+
+struct RaidMembersUpdate_Struct {
+	uint32 action; // = raidMembers (6)
+	char   leader_name[64];
+	// MainAssists/MainAssistNames/MainMarkers/MasterLooter -- confirmed via
+	// eqlib's commented-out RaidData struct (MAX_RAID_ASSISTS=3 for both
+	// assist and marker slots), which is the exact same shape TOB's separate
+	// RaidData::UnSerialize (action 0xF there) already independently
+	// confirmed -- this RoF2 build embeds the identical mini-struct inline in
+	// the bulk-join blob instead of sending it as its own action. entity ids
+	// are resolved the same opportunistic way as
+	// SendRaidAssister/SendRaidMarker/SendRaidMasterLooter (0 if the named
+	// member isn't physically resolvable in this zone).
+	uint32 main_assist_id[3];
+	char   main_assist_name[3][64];
+	uint32 main_marker_id[3];
+	uint32 master_looter_id;
+	uint32 raid_id; // CRaid::raidId -- the raid's own numeric id, not a character id
+	uint32 member_count;
+	RaidMembersUpdateMember_Struct members[72]; // MAX_RAID_MEMBERS (common/party_state.h)
+	// One name per raid subgroup -- plausible from the wire shape (count +
+	// N strings, read right after the member array) but NOT independently
+	// confirmed: this read lands inside eqlib's own CRaid::unknown2[0x400],
+	// which that project hasn't resolved either.
+	char   group_leader_names[12][64];
+	char   motd[1024];
+	uint8  locked; // confirmed via CRaid::IsRaidLocked's backing field
 };
 
 struct DynamicWall_Struct {

@@ -38,7 +38,6 @@
 #include "common/repositories/bot_stances_repository.h"
 #include "common/repositories/bot_timers_repository.h"
 #include "common/repositories/character_data_repository.h"
-#include "common/repositories/group_id_repository.h"
 #include "common/rulesys.h"
 #include "common/strings.h"
 #include "zone/bot.h"
@@ -1910,28 +1909,6 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t,
 	}
 
 	return false;
-}
-
-bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list)
-{
-	if (!group_id || !owner_id) {
-		return false;
-	}
-
-	const auto& l = GroupIdRepository::GetWhere(
-		database,
-		fmt::format(
-			"`group_id` = {} AND `bot_id` != 0 AND `name` IN (SELECT `name` FROM `bot_data` WHERE `owner_id` = {})",
-			group_id,
-			owner_id
-		)
-	);
-
-	for (const auto& e : l) {
-		group_list.emplace_back(e.bot_id);
-	}
-
-	return true;
 }
 
 bool BotDatabase::LoadHealRotationIDByBotID(const uint32 bot_id, uint32& hr_index)

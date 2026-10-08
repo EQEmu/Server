@@ -27,6 +27,7 @@
 #include "common/zone_store.h"
 #include "world/client.h"
 #include "world/clientlist.h"
+#include "world/party_state.h"
 #include "world/web_interface.h"
 #include "world/wguild_mgr.h"
 #include "world/worlddb.h"
@@ -240,15 +241,14 @@ void ClientList::DisconnectByIP(uint32 in_ip) {
 	}
 }
 
-ClientListEntry* ClientList::FindCharacter(const char* name) {
+ClientListEntry* ClientList::FindCharacter(std::string_view name) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if (strcasecmp(iterator.GetData()->name(), name) == 0) {
+	while(iterator.MoreElements()) {
+		if (Strings::EqualFold(iterator.GetData()->name(), name))
 			return iterator.GetData();
-		}
+
 		iterator.Advance();
 	}
 	return nullptr;
@@ -427,14 +427,26 @@ void ClientList::ClientUpdate(ZoneServer *zoneserver, ServerClientList_Struct *s
 		if (iterator.GetData()->GetID() == scl->wid) {
 			cle = iterator.GetData();
 			if (scl->remove == 2) {
+				const std::string character_name = cle->name();
 				cle->LeavingZone(zoneserver, CLE_Status::Offline);
+				PartyStateManager::Instance().HandleCharacterOffline(character_name);
 			}
 			else if (scl->remove == 1) {
 				cle->LeavingZone(zoneserver, CLE_Status::Zoning);
 			}
 			else {
+				// Captured before Update() overwrites it -- only a genuine
+				// offline/char-select -> InZone transition (reconnect) needs
+				// a group re-push; an already-InZone character re-reports
+				// via this same path on every UpdateWhoTimer tick, and that
+				// must not re-push on every single one of those.
+				const bool was_offline = cle->Online() != CLE_Status::InZone && cle->Online() != CLE_Status::Zoning;
+				const std::string character_name = cle->name();
 				cle->Update(zoneserver, scl);
 				AddToZoneServerCaches(cle);
+				if (was_offline) {
+					PartyStateManager::Instance().HandleCharacterOnline(character_name);
+				}
 			}
 			return;
 		}

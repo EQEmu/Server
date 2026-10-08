@@ -135,7 +135,7 @@ void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id, int duration, int level, b
 
 void Perl_Bot_ApplySpellRaid(Bot* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+	self->ApplySpell(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 uint32 Perl_Bot_CountBotItem(Bot* self, uint32 item_id)
@@ -505,7 +505,7 @@ void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration, int le
 
 void Perl_Bot_SetSpellDurationRaid(Bot* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+	self->SetSpellDuration(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 bool Perl_Bot_ReloadBotDataBuckets(Bot* self)

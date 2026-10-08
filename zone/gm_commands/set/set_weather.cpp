@@ -42,14 +42,15 @@ void SetWeather(Client *c, const Seperator *sep)
 		}
 
 		zone->zone_weather = new_weather;
-		auto outapp = new EQApplicationPacket(OP_Weather, 8);
+		auto outapp = new EQApplicationPacket(OP_Weather, sizeof(Weather_Struct));
+		auto ws = (Weather_Struct *) outapp->pBuffer;
 
 		if (new_weather != EQ::constants::WeatherTypes::None) {
 			if (new_weather == EQ::constants::WeatherTypes::Snowing) {
-				outapp->pBuffer[0] = EQ::constants::WeatherTypes::Snowing;
+				ws->val1 = EQ::constants::WeatherTypes::Snowing;
 			}
 
-			outapp->pBuffer[4] = new_intensity;
+			ws->type = new_intensity;
 		}
 
 		c->Message(Chat::White, weather_message.c_str());
@@ -84,25 +85,27 @@ void SetWeather(Client *c, const Seperator *sep)
 			}
 
 			zone->zone_weather = new_weather;
-			auto outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, sizeof(Weather_Struct));
+			auto ws = (Weather_Struct *) outapp->pBuffer;
 
 			if (new_weather != EQ::constants::WeatherTypes::Raining) {
-				outapp->pBuffer[0] = new_weather;
+				ws->val1 = new_weather;
 			}
 
-			outapp->pBuffer[4] = new_intensity;
+			ws->type = new_intensity;
 
 			c->Message(Chat::White, weather_message.c_str());
 			entity_list.QueueClients(c, outapp);
 
 			safe_delete(outapp);
 		} else {
-			auto outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, sizeof(Weather_Struct));
+			auto ws = (Weather_Struct *) outapp->pBuffer;
 			weather_message = "The sky clears.";
 
 			if (zone->zone_weather == EQ::constants::WeatherTypes::Snowing) {
 				weather_message = "The sky clears as the snow stops falling.";
-				outapp->pBuffer[0] = 1; // Snow has it's own shutoff packet
+				ws->val1 = 1; // Snow has it's own shutoff packet
 			} else if (zone->zone_weather == EQ::constants::WeatherTypes::Raining) {
 				weather_message = "The sky clears as the rain ceases to fall.";
 			}

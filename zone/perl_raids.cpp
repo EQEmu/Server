@@ -34,14 +34,17 @@ bool Perl_Raid_IsRaidMember(Raid* self, Client* c) // @categories Raid
 	return self->IsRaidMember(c);
 }
 
-void Perl_Raid_CastGroupSpell(Raid* self, Mob* caster, int32 spell_id, uint32 group_id) // @categories Group, Raid
+void Perl_Raid_CastGroupSpell(Raid* self, Mob* caster, int32 spell_id, uint32 group_number) // @categories Group, Raid
 {
-	self->CastGroupSpell(caster, spell_id, group_id);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->CastGroupSpell(caster, spell_id);
 }
 
-int Perl_Raid_GroupCount(Raid* self, uint32_t group_id) // @categories Group, Raid
+int Perl_Raid_GroupCount(Raid* self, uint32_t group_number) // @categories Group, Raid
 {
-	return self->GroupCount(group_id);
+	Group* group = self->GetGroupObject(group_number);
+	return group != nullptr ? group->GroupCount() : 0;
 }
 
 int Perl_Raid_RaidCount(Raid* self) // @categories Raid
@@ -51,12 +54,12 @@ int Perl_Raid_RaidCount(Raid* self) // @categories Raid
 
 uint32_t Perl_Raid_GetGroup(Raid* self, const char* name) // @categories Group, Raid
 {
-	return self->GetGroup(name);
+	return self->GetGroupNumber(name);
 }
 
 uint32_t Perl_Raid_GetGroup(Raid* self, Client* client) // @categories Group, Raid
 {
-	return self->GetGroup(client);
+	return self->GetGroupNumber(client);
 }
 
 void Perl_Raid_SplitExp(Raid* self, uint32 experience, Mob* other) // @categories Experience and Level, Raid
@@ -69,19 +72,24 @@ uint32_t Perl_Raid_GetTotalRaidDamage(Raid* self, Mob* other) // @categories Rai
 	return self->GetTotalRaidDamage(other);
 }
 
-void Perl_Raid_SplitMoney(Raid* self, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points, Raid
+void Perl_Raid_SplitMoney(Raid* self, uint32 group_number, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points, Raid
 {
-	self->SplitMoney(gid, copper, silver, gold, platinum);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->SplitMoney(copper, silver, gold, platinum);
 }
 
-void Perl_Raid_SplitMoney(Raid* self, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client* splitter) // @categories Currency and Points, Raid
+void Perl_Raid_SplitMoney(Raid* self, uint32 group_number, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client* splitter) // @categories Currency and Points, Raid
 {
-	self->SplitMoney(gid, copper, silver, gold, platinum, splitter);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->SplitMoney(copper, silver, gold, platinum, splitter);
 }
 
-void Perl_Raid_BalanceHP(Raid* self, int32_t penalty, uint32_t group_id) // @categories Raid
+void Perl_Raid_BalanceHP(Raid* self, int32_t penalty, uint32_t group_number) // @categories Raid
 {
-	self->BalanceHP(penalty, group_id);
+	auto* g = self->GetGroupObject(group_number);
+	g->BalanceHP(penalty);
 }
 
 bool Perl_Raid_IsLeader(Raid* self, const char* name) // @categories Raid
@@ -129,9 +137,11 @@ Client* Perl_Raid_GetClientByIndex(Raid* self, uint16_t member_index) // @catego
 	return self->GetClientByIndex(member_index);
 }
 
-void Perl_Raid_TeleportGroup(Raid* self, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id) // @categories Group, Raid
+void Perl_Raid_TeleportGroup(Raid* self, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_number) // @categories Group, Raid
 {
-	self->TeleportGroup(sender, zone_id, 0, x, y, z, heading, group_id);
+	Group* group = self->GetGroupObject(group_number);
+	if (group != nullptr)
+		group->TeleportGroup(sender, zone_id, 0, x, y, z, heading);
 }
 
 void Perl_Raid_TeleportRaid(Raid* self, Mob* sender, uint32 zone_id, float x, float y, float z, float heading) // @categories Raid
@@ -150,7 +160,12 @@ Client* Perl_Raid_GetMember(Raid* self, int member_index) // @categories Raid
 		return nullptr;
 	}
 
-	return self->members[member_index].member;
+	Mob* m = self->GetMemberByIndex(member_index).member;
+	if (m == nullptr || !m->IsClient()) {
+		return nullptr;
+	}
+
+	return m->CastToClient();
 }
 
 bool Perl_Raid_DoesAnyMemberHaveExpeditionLockout(Raid* self, std::string expedition_name, std::string event_name)
@@ -166,12 +181,12 @@ bool Perl_Raid_DoesAnyMemberHaveExpeditionLockout(Raid* self, std::string expedi
 int Perl_Raid_GetGroupNumber(Raid* self, int member_index) {
 	if (
 		!EQ::ValueWithin(member_index, 0, 71) ||
-		self->members[member_index].group_number == RAID_GROUPLESS
+		self->GetMemberByIndex(member_index).group_number == RAID_GROUPLESS
 	) {
 		return -1;
 	}
 
-	return self->members[member_index].group_number;
+	return self->GetMemberByIndex(member_index).group_number;
 }
 
 void perl_register_raid()

@@ -62,7 +62,7 @@ struct MercTimer {
 	uint32 time_cancast; // when we can cast this spell next
 };
 
-class Merc : public NPC {
+class Merc : public Mixed<NPC, HasGroup> {
 public:
 	Merc(const NPCType* d, float x, float y, float z, float heading);
 	virtual ~Merc();
@@ -72,10 +72,6 @@ public:
 	virtual void Damage(Mob* from, int64 damage, int32 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
-	virtual bool HasRaid() { return false; }
-	virtual bool HasGroup() { return (GetGroup() ? true : false); }
-	virtual Raid* GetRaid() { return 0; }
-	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Start(int32 iMoveDelay = 0);
@@ -91,9 +87,6 @@ public:
 
 	virtual bool Process();
 
-	// Static Merc Group Methods
-	static bool AddMercToGroup(Merc* merc, Group* group);
-	static bool RemoveMercFromGroup(Merc* merc, Group* group);
 	void ProcessClientZoneChange(Client* mercOwner);
 	static void MercGroupSay(Mob *speaker, const char *msg, ...);
 	Corpse* GetGroupMemberCorpse();
@@ -152,11 +145,9 @@ public:
 	bool Spawn(Client *owner);
 	bool Suspend();
 	bool Unsuspend(bool setMaxStats);
-	bool MercJoinClientGroup();
 	void Zone();
 	virtual void Depop();
 	virtual bool Save();
-	bool GetDepop() { return p_depop; }
 
 	bool IsDead() { return GetHP() < 0;};
 	bool IsMedding() { return _medding; };
@@ -174,6 +165,7 @@ public:
 	virtual Mob* GetOwnerOrSelf();
 	uint32 GetMercenaryID() { return _MercID; }
 	uint32 GetMercenaryCharacterID( ) { return owner_char_id; }
+	uint32 GetOwnerCharacterID() const override { return owner_char_id; }
 	uint32 GetMercenaryTemplateID() { return _MercTemplateID; }
 	uint32 GetMercenaryType() { return _MercType; }
 	uint32 GetMercenarySubType() { return _MercSubType; }
@@ -390,7 +382,6 @@ private:
 	int64 cur_end;
 	bool _medding;
 	bool _suspended;
-	bool p_depop;
 	bool _check_confidence;
 	bool _lost_confidence;
 	int _hatedCount;
@@ -399,4 +390,10 @@ private:
 	Timer rest_timer;
 	Timer confidence_timer;
 	Timer check_target_timer;
+
+protected:
+	//callbacks
+	void OnAddToGroup() override;
+	void OnRemoveFromGroup() override;
+	void OnZonedInWithGroup() override;
 };

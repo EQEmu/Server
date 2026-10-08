@@ -227,7 +227,7 @@ namespace BotAnimEmpathy {
 	constexpr uint8 BackOff             = 3;
 };
 
-class Bot : public NPC {
+class Bot : public Mixed<NPC, HasGroup, HasRaid> {
 	friend class Mob;
 public:
 	// Class enums
@@ -274,14 +274,10 @@ public:
 	void Damage(Mob* from, int64 damage, int32 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1,
 		bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) override;
 
-	bool HasRaid() final { return GetRaid() != nullptr; }
-	bool HasGroup() final { return GetGroup() != nullptr; }
-	Raid* GetRaid() final { return entity_list.GetRaidByBot(this); }
-	Group* GetGroup() final { return entity_list.GetGroupByMob(this); }
-	Group* GetGroupByLeaderName() { return entity_list.GetGroupByLeaderName(GetName()); }
+	Group* GetGroupByLeaderName() const { return entity_list.GetGroupByLeaderName(GetName()); }
+	void OnRemoveFromGroup(Group* prev_group) override;
 
 	// Common, but informal "interfaces" with Client object
-	uint32 CharacterID() const { return GetBotID(); }
 	inline bool IsInAGuild() const { return (_guildId != GUILD_NONE && _guildId != 0); }
 	inline bool IsInGuild(uint32 in_gid) const { return (in_gid == _guildId && IsInAGuild()); }
 	inline uint32 GuildID() const { return _guildId; }
@@ -289,6 +285,7 @@ public:
 
 	// Class Methods
 	bool IsValidRaceClassCombo();
+	void SetFollowOwner();
 	static bool IsValidRaceClassCombo(uint16 r, uint8 c);
 	bool IsValidName();
 	static bool IsValidName(std::string& name);
@@ -497,7 +494,6 @@ public:
 	void SpellProcess() override;
 	int32 GetActSpellDuration(int32 spell_id, int32 duration) override;
 	float GetAOERange(int32 spell_id) override;
-	virtual bool SpellEffect(Mob* caster, int32 spell_id, float partial = 100);
 	void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr) override;
 	virtual bool CastSpell(int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0,
 						uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr, uint32 aa_id = 0);
@@ -524,9 +520,7 @@ public:
 	void DoAttackRounds(Mob* target, int hand);
 
 	bool BotPassiveCheck();
-	bool ValidStateCheck(Mob* other, bool same_raid_group = false);
-	Raid* GetStoredRaid() { return _storedRaid; }
-	void SetStoredRaid(Raid* stored_raid) { _storedRaid = stored_raid; }
+	bool ValidStateCheck(Mob* other);
 	bool GetVerifiedRaid() { return _verifiedRaid; }
 	void SetVerifiedRaid(bool status) { _verifiedRaid = status; }
 	uint16 GetTempSpellType() { return _tempSpellType; }
@@ -535,7 +529,7 @@ public:
 	void SetBotTimers(std::vector<BotTimer> timers) { bot_timers = timers; }
 
 	// Targeting
-	std::vector<Mob*> GatherSpellTargets(bool entireRaid = false, Mob* target = nullptr, bool no_clients = false, bool no_bots = false);
+	std::vector<Mob*> GatherSpellTargets(Mob* target = nullptr);
 	bool HasValidAETarget(Bot* caster, int32 spell_id, uint16 spell_type, Mob* tar);
 	void SetHasLoS(bool has_los) { _hasLoS = has_los; }
 	bool HasLoS() const { return _hasLoS; }
@@ -558,10 +552,7 @@ public:
 
 	// Movement checks
 	bool PlotBotPositionAroundTarget(const FindPositionInput& input);
-	std::vector<Mob*> GetSpellTargetList(bool entire_raid = false);
-	void SetSpellTargetList(std::vector<Mob*> spell_target_list) { _spell_target_list = spell_target_list; }
-	std::vector<Mob*> GetGroupSpellTargetList() { return _group_spell_target_list; }
-	void SetGroupSpellTargetList(std::vector<Mob*> spell_target_list) { _group_spell_target_list = spell_target_list; }
+	std::vector<Mob*> GetSpellTargetList();
 	std::vector<Mob*> GetBuffTargets(Mob* spellTarget);
 
 	// Bot settings
@@ -710,22 +701,15 @@ public:
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName);
 	static void ProcessBotGroupInvite(Client* c, std::string const& botName);
-	static void ProcessBotGroupDisband(Client* c, const std::string& botName);
 	static void BotOrderCampAll(Client* c, uint8 class_id = Class::None);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
 	static void LoadAndSpawnAllZonedBots(Client* bot_owner);
-	static bool GroupHasBot(Group* group);
-	static Bot* GetFirstBotInGroup(Group* group);
 	static void ProcessClientZoneChange(Client* botOwner);
 	static void ProcessBotOwnerRefDelete(Mob* botOwner); // Removes a Client* reference when the Client object is destroyed
 
 	//Raid methods
-	static void ProcessRaidInvite(Mob* invitee, Client* invitor, bool group_invite = false);
 	static void RemoveBotFromRaid(Bot* bot);
-	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
-	static void CreateBotRaid(Mob* invitee, Client* invitor, bool group_invite, Raid* raid);
-	static void
-	ProcessBotGroupAdd(Group* group, Raid* raid, Client* client = nullptr, bool new_raid = false, bool initial = false);
+	inline void SetDirtyAutoHaters() override { m_dirtyautohaters = true; }
 
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* caster, uint16 spell_type, int spell_effect);
@@ -770,14 +754,13 @@ public:
 
 	void AddBotStartingItems(uint16 race_id, uint8 class_id);
 
-	// Static Bot Group Methods
-	static bool AddBotToGroup(Bot* bot, Group* group);
-	static bool RemoveBotFromGroup(Bot* bot, Group* group);
+	bool RemoveBotFromGroup();
 	void RaidGroupSay(const char *msg, ...);
 
 	// "GET" Class Methods
 	uint32 GetBotID() const { return _botID; }
 	uint32 GetBotOwnerCharacterID() const { return _botOwnerCharacterID; }
+	uint32 GetOwnerCharacterID() const override { return _botOwnerCharacterID; }
 	int32 GetBotSpellID() const { return npc_spells_id; }
 	Mob* GetBotOwner() { return this->_botOwner; }
 	uint32 GetBotRangedValue();
@@ -799,7 +782,7 @@ public:
 	bool IsGroupSlower() const { return m_CastingRoles.GroupSlower; }
 	bool IsGroupNuker() const { return m_CastingRoles.GroupNuker; }
 	bool IsGroupDoter() const { return m_CastingRoles.GroupDoter; }
-	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
+	static void UpdateGroupCastingRoles(const Group* group);
 
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
 	bool IsBotHybrid() { return IsHybridClass(GetClass()); }
@@ -891,16 +874,16 @@ public:
 	// "Quest API" Methods
 	bool HasBotSpellEntry(int32 spell_id);
 	bool CanUseBotSpell(int32 spell_id);
-	void ApplySpell(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
+	void ApplySpell(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false);
 	void BreakInvis();
 	void Escape();
 	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clip_through_walls = false, bool calculate_speed = false);
-	std::vector<Mob*> GetApplySpellList(ApplySpellType apply_type, bool allow_pets, bool is_raid_group_only);
+	std::vector<Mob*> GetApplySpellList(ApplySpellType apply_type, bool allow_pets);
 	int32 GetItemIDAt(int16 slot_id);
 	int32 GetAugmentIDAt(int16 slot_id, uint8 augslot);
 	int32 GetRawItemAC();
 	void SendSpellAnim(uint16 targetid, int32 spell_id);
-	void SetSpellDuration(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false, bool is_raid_group_only = true);
+	void SetSpellDuration(int spell_id, int duration = 0, int level = -1, ApplySpellType apply_type = ApplySpellType::Solo, bool allow_pets = false);
 
 	// "SET" Class Methods
 	void SetBotSpellID(int32 newSpellID);
@@ -1043,9 +1026,6 @@ public:
 	void SendPayload(int payload_id, std::string payload_value = std::string());
 	void OwnerMessage(const std::string& message);
 
-	//Raid additions
-	Raid* p_raid_instance;
-
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND];
 
 	bool BotCastMez(Mob* tar, uint8 bot_class, BotSpell& bot_spell, uint16 spell_type);
@@ -1057,7 +1037,6 @@ public:
 	bool CheckIfIncapacitated();
 	bool IsAIProcessValid(const Client* bot_owner, const Group* bot_group, const Raid* raid);
 
-	Client* SetLeashOwner(Client* bot_owner, Group* bot_group, Raid* raid, uint32 r_group) const;
 	Mob* SetFollowMob(Client* leash_owner);
 
 	Mob* GetBotTarget(Client* bot_owner);
@@ -1179,6 +1158,14 @@ private:
 	bool is_using_item_click;
 
 	BotCastingRoles m_CastingRoles;
+	// Last (Group*, GetRosterRevision()) pair this bot recomputed casting
+	// roles against -- starts mismatched so the first AI tick after joining
+	// always recomputes at least once. Tracking the Group* too (not just
+	// the revision) avoids a false "nothing changed" if this bot switches
+	// to a different group whose revision counter happens to coincide with
+	// the old one's.
+	const Group *m_last_group_roster_group = nullptr;
+	uint32 m_last_group_roster_revision = 0xFFFFFFFF;
 
 	std::map<uint16, BotSpellSetting> bot_spell_settings;
 
@@ -1206,8 +1193,6 @@ private:
 	bool _illusionBlock;
 	std::vector<BotSpellSettings> m_bot_spell_settings;
 	std::vector<Mob*> _spell_target_list;
-	std::vector<Mob*> _group_spell_target_list;
-	Raid* _storedRaid;
 	bool _verifiedRaid;
 	uint16 _tempSpellType; // this is used to check the spell type being cast against ^spellannouncecasts status
 
@@ -1255,6 +1240,11 @@ private:
 	public:
 
 	int32 CalcItemATKCap() final;
+
+protected:
+	// callbacks
+	void OnAddToGroup() override;
+	void OnZonedInWithGroup() override;
 };
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, int32 spell_id);

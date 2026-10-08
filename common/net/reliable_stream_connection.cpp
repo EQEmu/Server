@@ -1102,7 +1102,7 @@ void EQ::Net::ReliableStreamConnection::Compress(Packet &p, size_t offset, size_
 	bool send_uncompressed = true;
 
 	if (length > 30) {
-		new_length = Deflate(buffer, (uint32_t)length, new_buffer + 1, 2048) + 1;
+		new_length = Deflate(buffer, (uint32_t)length, new_buffer + 1, sizeof(new_buffer) - 1) + 1;
 		new_buffer[0] = 0x5a;
 		send_uncompressed = (new_length > length);
 	}

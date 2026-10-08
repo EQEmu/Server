@@ -62,8 +62,8 @@ bool ExpeditionRequest::Validate()
 bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 {
 	m_leader = raid->GetLeader();
-	m_leader_name = raid->leadername;
-	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(raid->leadername);
+	m_leader_name = raid->GetLeaderName();
+	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(raid->GetLeaderName());
 
 	// live (as of September 16, 2020) supports creation even if raid count exceeds
 	// expedition max. members are added up to the max ordered by group number.
@@ -73,9 +73,9 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 	{
 		// leader first then raid group, order within a raid group may not be what is displayed
 		std::sort(raid_members.begin(), raid_members.end(),
-			[&](const RaidMember& lhs, const RaidMember& rhs) {
-				if (m_leader_name == lhs.member_name) { return true; }
-				if (m_leader_name == rhs.member_name) { return false; }
+			[&](const auto& lhs, const auto& rhs) {
+				if (m_leader_name == lhs.name) { return true; }
+				if (m_leader_name == rhs.name) { return false; }
 				return lhs.group_number < rhs.group_number;
 			});
 	}
@@ -84,7 +84,7 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 	std::vector<std::string> member_names;
 	for (int i = 0; i < raid_members.size(); ++i)
 	{
-		member_names.emplace_back(raid_members[i].member_name);
+		member_names.emplace_back(raid_members[i].name);
 	}
 
 	return CanMembersJoin(member_names);
@@ -107,9 +107,9 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 
 	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
-		if (group->membername[i][0] && m_leader_name != group->membername[i])
+		if (group->GetMemberName(i)[0] != '\0' && m_leader_name != group->GetMemberName(i))
 		{
-			member_names.emplace_back(group->membername[i]);
+			member_names.emplace_back(group->GetMemberName(i));
 		}
 	}
 

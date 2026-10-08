@@ -38,12 +38,12 @@ public:
 	void increment_count(Mob *in);
 	void decrement_count(Mob *in);
 
-	bool contains_mob(int spawn_id);
+	bool contains_mob(int spawn_id) const;
 
-	inline const std::vector<HatersCount> &get_list() { return m_haters; }
-	inline void SetOwner(Client *c, Group *g, Raid *r) {m_client = c; m_group = g; m_raid = r; }
-	inline void clear() { m_haters.clear(); }
-	inline bool empty() { return m_haters.empty(); }
+	[[nodiscard]] const std::vector<HatersCount> &get_list() const { return m_haters; }
+	void SetOwner(Client *c, Group *g, Raid *r) {m_client = c; m_group = g; m_raid = r; }
+	void clear() { m_haters.clear(); }
+	[[nodiscard]] bool empty() const { return m_haters.empty(); }
 
 private:
 	/* This will contain all of the mobs that are possible to fill in an autohater

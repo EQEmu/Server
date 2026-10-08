@@ -66,27 +66,27 @@ void ShowGroupInfo(Client *c, const Seperator *sep)
 	const std::string no  = DialogueWindow::ColorMessage("red_1", "N");
 
 	for (int group_member = 0; group_member < MAX_GROUP_MEMBERS; group_member++) {
-		if (g->membername[group_member][0] == '\0') {
+		if (g->GetMemberName(group_member)[0] == '\0') {
 			continue;
 		}
 
-		const bool is_assist = g->MemberRoles[group_member] & RoleAssist;
-		const bool is_puller = g->MemberRoles[group_member] & RolePuller;
-		const bool is_tank   = g->MemberRoles[group_member] & RoleTank;
+		const bool is_assist = g->GetMemberRoles(group_member) & GroupBitmaskMainAssist;
+		const bool is_puller = g->GetMemberRoles(group_member) & GroupBitmaskPuller;
+		const bool is_tank   = g->GetMemberRoles(group_member) & GroupBitmaskMainTank;
 
 		popup_table += DialogueWindow::TableRow(
 			fmt::format(
 				"{}{}{}{}{}{}",
 				DialogueWindow::TableCell(std::to_string(group_member)),
 				DialogueWindow::TableCell(
-					strcmp(g->membername[group_member], c->GetCleanName()) ?
-					g->membername[group_member] :
+					strcmp(g->GetMemberName(group_member), c->GetCleanName()) ?
+					g->GetMemberName(group_member) :
 					fmt::format(
 						"{} (You)",
-						g->membername[group_member]
+						g->GetMemberName(group_member)
 					)
 				),
-				DialogueWindow::TableCell(g->members[group_member] ? yes : no),
+				DialogueWindow::TableCell(g->GetMember(group_member) ? yes : no),
 				DialogueWindow::TableCell(is_assist ? yes : no),
 				DialogueWindow::TableCell(is_puller ? yes : no),
 				DialogueWindow::TableCell(is_tank ? yes : no)

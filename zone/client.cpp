@@ -78,7 +78,7 @@ extern volatile bool RunLoops;
 void UpdateWindowTitle(char* iNewTitle);
 
 // client constructor purely for testing / mocking
-Client::Client() : Mob(
+Client::Client() : Mixed<Mob, HasRaid, HasGroup>(
 	"No name", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
@@ -105,82 +105,83 @@ Client::Client() : Mob(
 	0, // in_int
 	0, // in_wis
 	0, // in_cha
-	0, // in_haircolor
-	0, // in_beardcolor
-	0, // in_eyecolor1
-	0, // in_eyecolor2
-	0, // in_hairstyle
-	0, // in_luclinface
-	0, // in_beard
-	0, // in_drakkin_heritage
-	0, // in_drakkin_tattoo
-	0, // in_drakkin_details
-	EQ::TintProfile(), // in_armor_tint
-	0xff, // in_aa_title
-	0, // in_see_invis
-	0, // in_see_invis_undead
-	0, // in_see_hide
-	0, // in_see_improved_hide
-	0, // in_hp_regen
-	0, // in_mana_regen
-	0, // in_qglobal
-	0, // in_maxlevel
-	0, // in_scalerate
-	0, // in_armtexture
-	0, // in_bracertexture
-	0, // in_handtexture
-	0, // in_legtexture
-	0, // in_feettexture
-	0, // in_usemodel
-	false, // in_always_aggros_foes
-	0, // in_heroic_strikethrough
-	false // in_keeps_sold_items
-),
-				   hpupdate_timer(2000),
-				   camp_timer(29000),
-				   process_timer(100),
-				   consume_food_timer(CONSUMPTION_TIMER),
-				   zoneinpacket_timer(1000),
-				   linkdead_timer(RuleI(Zone, ClientLinkdeadMS)),
-				   dead_timer(2000),
-				   global_channel_timer(1000),
-				   fishing_timer(8000),
-				   endupkeep_timer(1000),
-				   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-				   m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
-				   m_client_bulk_npc_pos_update_timer(60 * 1000),
-				   tribute_timer(Tribute_duration),
-				   proximity_timer(ClientProximity_interval),
-				   TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
-				   charm_update_timer(6000),
-				   rest_timer(1),
-				   pick_lock_timer(1000),
-				   charm_class_attacks_timer(3000),
-				   charm_cast_timer(3500),
-				   qglobal_purge_timer(30000),
-				   TrackingTimer(2000),
-				   RespawnFromHoverTimer(0),
-				   merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-				   ItemQuestTimer(500),
-				   anon_toggle_timer(250),
-				   afk_toggle_timer(250),
-				   helm_toggle_timer(250),
-				   aggro_meter_timer(AGGRO_METER_UPDATE_MS),
-				   m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
-				   m_ZoneSummonLocation(-2.0f, -2.0f, -2.0f, -2.0f),
-				   m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
-				   m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-				   last_region_type(RegionTypeUnsupported),
-				   m_dirtyautohaters(false),
-				   m_position_update_timer(10000),
-				   consent_throttle_timer(2000),
-				   tmSitting(0),
-				   parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
-				   lazy_load_bank_check_timer(1000),
-				   bandolier_throttle_timer(0)
+		0,                  // in_haircolor
+		0,                  // in_beardcolor
+		0,                  // in_eyecolor1
+		0,                  // in_eyecolor2
+		0,                  // in_hairstyle
+		0,                  // in_luclinface
+		0,                  // in_beard
+		0,                  // in_drakkin_heritage
+		0,                  // in_drakkin_tattoo
+		0,                  // in_drakkin_details
+		EQ::TintProfile(),  // in_armor_tint
+		0xff,               // in_aa_title
+		0,                  // in_see_invis
+		0,                  // in_see_invis_undead
+		0,                  // in_see_hide
+		0,                  // in_see_improved_hide
+		0,                  // in_hp_regen
+		0,                  // in_mana_regen
+		0,                  // in_qglobal
+		0,                  // in_maxlevel
+		0,                  // in_scalerate
+		0,                  // in_armtexture
+		0,                  // in_bracertexture
+		0,                  // in_handtexture
+		0,                  // in_legtexture
+		0,                  // in_feettexture
+		0,                  // in_usemodel
+		false,              // in_always_aggros_foes
+		0,                  // in_heroic_strikethrough
+		false               // in_keeps_sold_items
+	),
+	hpupdate_timer(2000),
+	camp_timer(29000),
+	process_timer(100),
+	consume_food_timer(CONSUMPTION_TIMER),
+	zoneinpacket_timer(1000),
+	linkdead_timer(RuleI(Zone, ClientLinkdeadMS)),
+	dead_timer(2000),
+	global_channel_timer(1000),
+	fishing_timer(8000),
+	endupkeep_timer(1000),
+	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
+	m_client_npc_aggro_scan_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
+	m_client_bulk_npc_pos_update_timer(60 * 1000),
+	tribute_timer(Tribute_duration),
+	proximity_timer(ClientProximity_interval),
+	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
+	charm_update_timer(6000),
+	rest_timer(1),
+	pick_lock_timer(1000),
+	charm_class_attacks_timer(3000),
+	charm_cast_timer(3500),
+	qglobal_purge_timer(30000),
+	TrackingTimer(2000),
+	RespawnFromHoverTimer(0),
+	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
+	ItemQuestTimer(500),
+	anon_toggle_timer(250),
+	afk_toggle_timer(250),
+	helm_toggle_timer(250),
+	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
+	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
+	m_ZoneSummonLocation(-2.0f, -2.0f, -2.0f, -2.0f),
+	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
+	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+	last_region_type(RegionTypeUnsupported),
+	m_dirtyautohaters(false),
+	m_position_update_timer(10000),
+	consent_throttle_timer(2000),
+	tmSitting(0),
+	parcel_timer(RuleI(Parcel, ParcelDeliveryDelay)),
+	lazy_load_bank_check_timer(1000),
+	bandolier_throttle_timer(0)
 {
 	eqs = nullptr;
-	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
+	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter =
+	     eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
 	}
 
@@ -214,8 +215,8 @@ Client::Client() : Mob(
 	last_reported_endurance_percent = 0;
 	last_reported_mana_percent = 0;
 	gm_hide_me = false;
-	m_is_afk   = false;
-	LFG        = false;
+	m_is_afk = false;
+	LFG = false;
 	LFGFromLevel = 0;
 	LFGToLevel = 0;
 	LFGMatchFilter = false;
@@ -231,9 +232,9 @@ Client::Client() : Mob(
 	linkdead_timer.Disable();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
-	bZoning              = false;
+	bZoning = false;
 	m_lock_save_position = false;
-	zone_mode            = ZoneUnsolicited;
+	zone_mode = ZoneUnsolicited;
 	casting_spell_id = 0;
 	npcflag = false;
 	npclevel = 0;
@@ -257,11 +258,10 @@ Client::Client() : Mob(
 	tgb = false;
 	tribute_master_id = 0xFFFFFFFF;
 	tribute_timer.Disable();
-	task_state         = nullptr;
+	task_state = nullptr;
 	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
-	p_raid_instance = nullptr;
 	mercid = 0;
 	mercSlot = 0;
 	InitializeMercInfo();
@@ -322,8 +322,7 @@ Client::Client() : Mob(
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
 
-	for(int i = 0; i < XTARGET_HARDCAP; ++i)
-	{
+	for (int i = 0; i < XTARGET_HARDCAP; ++i) {
 		XTargets[i].Type = Auto;
 		XTargets[i].ID = 0;
 		XTargets[i].Name[0] = 0;
@@ -332,7 +331,6 @@ Client::Client() : Mob(
 	MaxXTargets = 5;
 	XTargetAutoAddHaters = true;
 	m_autohatermgr.SetOwner(this, nullptr, nullptr);
-	m_activeautohatermgr = &m_autohatermgr;
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
@@ -367,12 +365,12 @@ Client::Client() : Mob(
 	bot_owner_options[booBuffCounter] = false;
 	bot_owner_options[booMonkWuMessage] = false;
 
-	m_parcel_platinum         = 0;
-	m_parcel_gold             = 0;
-	m_parcel_silver           = 0;
-	m_parcel_copper           = 0;
-	m_parcel_count            = 0;
-	m_parcel_enabled          = true;
+	m_parcel_platinum = 0;
+	m_parcel_gold = 0;
+	m_parcel_silver = 0;
+	m_parcel_copper = 0;
+	m_parcel_count = 0;
+	m_parcel_enabled = true;
 	m_parcel_merchant_engaged = false;
 	m_parcels.clear();
 
@@ -382,10 +380,9 @@ Client::Client() : Mob(
 	SetBotPrecombat(false);
 
 	AI_Init();
-
 }
 
-Client::Client(EQStreamInterface *ieqs) : Mob(
+Client::Client(EQStreamInterface *ieqs) : Mixed<Mob, HasRaid, HasGroup>(
 	"No name", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
@@ -572,7 +569,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
-	p_raid_instance = nullptr;
 	mercid = 0;
 	mercSlot = 0;
 	InitializeMercInfo();
@@ -643,7 +639,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	MaxXTargets = 5;
 	XTargetAutoAddHaters = true;
 	m_autohatermgr.SetOwner(this, nullptr, nullptr);
-	m_activeautohatermgr = &m_autohatermgr;
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
@@ -763,11 +758,15 @@ Client::~Client() {
 	if(GetTarget())
 		GetTarget()->IsTargeted(-1);
 
-	//if we are in a group and we are not zoning, force leave the group
-	if(isgrouped && !bZoning && is_zone_loaded)
-		LeaveGroup();
-
-	UpdateWho(2);
+	// Membership itself never changes just because this Client object is
+	// being torn down -- world reacts to the resulting online/offline
+	// status change instead (promote to the next online member if we were
+	// leader, disband if nobody's left online). bZoning distinguishes an
+	// ordinary cross-zone transfer (status -> Zoning, matches the
+	// UpdateWho(1) already sent by worldserver.cpp's ZoneToZone approval,
+	// so this doesn't stomp it back to Offline mid-transfer) from a real
+	// departure -- camp, linkdead, kick, disconnect (status -> Offline).
+	UpdateWho(bZoning ? 1 : 2);
 
 	if(IsHoveringForRespawn())
 	{
@@ -1358,22 +1357,15 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		break;
 	}
 	case ChatChannel_Group: { /* Group Chat */
-		Raid* raid = entity_list.GetRaidByClient(this);
-		if(raid) {
-			raid->RaidGroupSay((const char*) message, this, language, lang_skill);
-			break;
-		}
+		if (IsGrouped())
+			GetGroup()->GroupMessage(this, language, lang_skill, message);
 
-		Group* group = GetGroup();
-		if(group != nullptr) {
-			group->GroupMessage(this,language,lang_skill,(const char*) message);
-		}
 		break;
 	}
 	case ChatChannel_Raid: { /* Raid Say */
 		Raid* raid = entity_list.GetRaidByClient(this);
 		if(raid){
-			raid->RaidSay((const char*) message, this, language, lang_skill);
+			raid->RaidMessage((const char*) message, this, language, lang_skill);
 		}
 		break;
 	}
@@ -2441,14 +2433,8 @@ void Client::CheckManaEndUpdate() {
 		/* Let others know when our mana percent has changed */
 		if (GetManaPercent() != last_reported_mana_percent) {
 			Group *group = GetGroup();
-			Raid *raid = GetRaid();
-
-			if (raid) {
-				raid->SendManaPacketFrom(this);
-			}
-			else if (group) {
+			if (group)
 				group->SendManaPacketFrom(this);
-			}
 
 			auto mana_packet = new EQApplicationPacket(OP_ManaUpdate, sizeof(ManaUpdate_Struct));
 			ManaUpdate_Struct* mana_update = (ManaUpdate_Struct*)mana_packet->pBuffer;
@@ -2466,14 +2452,8 @@ void Client::CheckManaEndUpdate() {
 		/* Let others know when our endurance percent has changed */
 		if (GetEndurancePercent() != last_reported_endurance_percent) {
 			Group *group = GetGroup();
-			Raid *raid = GetRaid();
-
-			if (raid) {
-				raid->SendEndurancePacketFrom(this);
-			}
-			else if (group) {
+			if (group)
 				group->SendEndurancePacketFrom(this);
-			}
 
 			auto endurance_packet = new EQApplicationPacket(OP_EnduranceUpdate, sizeof(EnduranceUpdate_Struct));
 			EnduranceUpdate_Struct* endurance_update = (EnduranceUpdate_Struct*)endurance_packet->pBuffer;
@@ -2645,7 +2625,6 @@ bool Client::ChangeFirstName(const std::string in_firstname)
 	// update pp
 	memset(m_pp.name, 0, sizeof(m_pp.name));
 	snprintf(m_pp.name, sizeof(m_pp.name), "%s", in_firstname.c_str());
-	strcpy(name, m_pp.name);
 	Save();
 
 	// Update the active char in account table
@@ -3874,7 +3853,7 @@ void Client::MessageString(const CZClientMessageString_Struct* msg)
 }
 
 // helper function, returns true if the client should get the packet based on the filter and sender
-bool Client::ShouldGetPacket(Mob *sender, eqFilterType filter)
+bool Client::ShouldGetPacket(const Mob *sender, eqFilterType filter) const
 {
 	eqFilterMode mode = GetFilter(filter);
 
@@ -3888,37 +3867,21 @@ bool Client::ShouldGetPacket(Mob *sender, eqFilterType filter)
 	if (sender != this && mode == FilterShowSelfOnly)
 		return false;
 
-	if (sender != nullptr && mode == FilterShowGroupOnly) {
-		if (sender == this)
-			return true;
-
-		Group* g = GetGroup();
-		if (g && g->IsGroupMember(sender))
-			return true;
-
-		Raid* r = GetRaid();
-		if (r && sender->IsClient()) {
-			uint32 rgid1 = r->GetGroup(this);
-			uint32 rgid2 = r->GetGroup(sender->CastToClient());
-			if (rgid1 != RAID_GROUPLESS && rgid1 == rgid2)
-				return true;
-		} else {
-			return false;
-		}
-	}
+	if (sender != nullptr && mode == FilterShowGroupOnly)
+		return sender == this || (IsGrouped() && GetGroup()->IsGroupMember(sender));
 
 	// fallback case (send by default)
 	return true;
 }
 
-void Client::FilteredMessageString(Mob *sender, uint32 type,
+void Client::FilteredMessageString(const Mob *sender, uint32 type,
 		eqFilterType filter, uint32 string_id)
 {
 	if (ShouldGetPacket(sender, filter))
 		MessageString(type, string_id);
 }
 
-void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
+void Client::FilteredMessageString(const Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
 		const char *message1, const char *message2, const char *message3,
 		const char *message4, const char *message5, const char *message6,
 		const char *message7, const char *message8, const char *message9)
@@ -4015,19 +3978,8 @@ void Client::SetLanguageSkill(uint8 language_id, uint8 language_skill)
 
 void Client::LinkDead()
 {
-	if (GetGroup())
-	{
+	if (IsGrouped())
 		entity_list.MessageGroup(this,true,15,"%s has gone linkdead.",GetName());
-		GetGroup()->DelMember(this);
-		if (GetMerc())
-		{
-			GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
-		}
-	}
-	Raid *raid = entity_list.GetRaidByClient(this);
-	if(raid){
-		raid->MemberZoned(this);
-	}
 
 	SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 
@@ -4367,14 +4319,6 @@ void Client::Sacrifice(Mob *caster)
 
 			BuffFadeAll();
 			UnmemSpellAll();
-			Group *g = GetGroup();
-			if (g) {
-				g->MemberZoned(this);
-			}
-			Raid *r = entity_list.GetRaidByClient(this);
-			if (r) {
-				r->MemberZoned(this);
-			}
 			ClearAllProximities();
 			if (RuleB(Character, LeaveCorpses)) {
 				auto new_corpse = new Corpse(this, 0);
@@ -4382,7 +4326,6 @@ void Client::Sacrifice(Mob *caster)
 				SetID(0);
 				entity_list.QueueClients(this, &app2, true);
 			}
-			Save();
 			GoToDeath();
 			if (caster && caster->IsClient()) {
 				caster->CastToClient()->SummonItem(RuleI(Spells, SacrificeItemID));
@@ -4954,6 +4897,9 @@ void Client::DiscoverItem(uint32 item_id) {
 
 void Client::UpdateLFP() {
 
+	if (IsRaided())
+		return;
+
 	Group *g = GetGroup();
 
 	if(g && !g->IsLeader(this)) {
@@ -4985,193 +4931,45 @@ void Client::UpdateLFP() {
 		// for us, if it can.
 		int NextFreeSlot = 1;
 		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if((g->membername[i][0] != '\0') && strcasecmp(g->membername[i], LFPMembers[0].Name))
-				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
+			if((g->GetMemberName(i)[0] != '\0') && strcasecmp(g->GetMemberName(i), LFPMembers[0].Name))
+				strcpy(LFPMembers[NextFreeSlot++].Name, g->GetMemberName(i));
 		}
 	}
 	worldserver.UpdateLFP(CharacterID(), LFPMembers);
 }
 
-bool Client::GroupFollow(Client* inviter) {
-
-	if (inviter) {
-		isgrouped = true;
-		Raid* raid = entity_list.GetRaidByClient(inviter);
-		Raid* iraid = entity_list.GetRaidByClient(this);
-
-		//inviter has a raid don't do group stuff instead do raid stuff!
-		if (raid) {
-			// Suspend the merc while in a raid (maybe a rule could be added for this)
-			if (GetMerc()) {
-				GetMerc()->Suspend();
-			}
-
-			uint32 groupToUse = 0xFFFFFFFF;
-			for (const auto& m : raid->members) {
-				if (m.member && m.member == inviter) {
-					groupToUse = m.group_number;
-					break;
-				}
-			}
-			if (iraid == raid) {
-				//both in same raid
-				uint32 ngid = raid->GetGroup(inviter->GetName());
-				if (raid->GroupCount(ngid) < MAX_GROUP_MEMBERS) {
-					raid->MoveMember(GetName(), ngid);
-					raid->SendGroupDisband(this);
-					raid->GroupUpdate(ngid);
-				}
-				return false;
-			}
-			if (raid->RaidCount() < MAX_RAID_MEMBERS)
-			{
-				// okay, so we now have a single client (this) joining a group in a raid
-				// And they're not already in the raid (which is above and doesn't need xtarget shit)
-				if (!GetXTargetAutoMgr()->empty()) {
-					raid->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
-					GetXTargetAutoMgr()->clear();
-					RemoveAutoXTargets();
-				}
-
-				SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
-				if (!GetXTargetAutoMgr()->empty())
-					SetDirtyAutoHaters();
-
-				if (raid->GroupCount(groupToUse) < MAX_GROUP_MEMBERS)
-				{
-					raid->SendRaidCreate(this);
-					raid->SendMakeLeaderPacketTo(raid->leadername, this);
-					raid->AddMember(this, groupToUse);
-					raid->SendBulkRaid(this);
-					//raid->SendRaidGroupAdd(GetName(), groupToUse);
-					//raid->SendGroupUpdate(this);
-					raid->GroupUpdate(groupToUse); //break
-					if (raid->IsLocked())
-					{
-						raid->SendRaidLockTo(this);
-					}
-					return false;
-				}
-				else
-				{
-					raid->SendRaidCreate(this);
-					raid->SendMakeLeaderPacketTo(raid->leadername, this);
-					raid->AddMember(this);
-					raid->SendBulkRaid(this);
-					if (raid->IsLocked())
-					{
-						raid->SendRaidLockTo(this);
-					}
-					return false;
-				}
-			}
-		}
-
-		Group* group = entity_list.GetGroupByClient(inviter);
-
-		if (!group)
-		{
-			//Make new group
-			group = new Group(inviter);
-
-			if (!group)
-			{
-				return false;
-			}
-
-			entity_list.AddGroup(group);
-
-			if (group->GetID() == 0)
-			{
-				Message(Chat::Red, "Unable to get new group id. Cannot create group.");
-				inviter->Message(Chat::Red, "Unable to get new group id. Cannot create group.");
-				return false;
-			}
-
-			//now we have a group id, can set inviter's id
-			group->AddToGroup(inviter);
-			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
-			group->UpdateGroupAAs();
-
-			//Invite the inviter into the group first.....dont ask
-			if (inviter->ClientVersion() < EQ::versions::ClientVersion::SoD)
-			{
-				auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-				GroupJoin_Struct* outgj = (GroupJoin_Struct*)outapp->pBuffer;
-				strcpy(outgj->membername, inviter->GetName());
-				strcpy(outgj->yourname, inviter->GetName());
-				outgj->action = groupActInviteInitial; // 'You have formed the group'.
-				group->GetGroupAAs(&outgj->leader_aas);
-				inviter->QueuePacket(outapp);
-				safe_delete(outapp);
-			}
-			else
-			{
-				// SoD and later
-				inviter->SendGroupCreatePacket();
-				inviter->SendGroupLeaderChangePacket(inviter->GetName());
-				inviter->SendGroupJoinAcknowledge();
-			}
-			group->GetXTargetAutoMgr()->merge(*inviter->GetXTargetAutoMgr());
-			inviter->GetXTargetAutoMgr()->clear();
-			inviter->SetXTargetAutoMgr(group->GetXTargetAutoMgr());
-		}
-
-		if (!group)
-		{
-			return false;
-		}
-
-		// Remove merc from old group before adding client to the new one
-		if (GetMerc() && GetMerc()->HasGroup())
-		{
-			GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
-		}
-
-		if (!group->AddMember(this))
-		{
-			// If failed to add client to new group, regroup with merc
-			if (GetMerc())
-			{
-				GetMerc()->MercJoinClientGroup();
-			}
-			else
-			{
-				isgrouped = false;
-			}
-			return false;
-		}
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoD)
-		{
-			SendGroupJoinAcknowledge();
-		}
-
-		// Temporary hack for SoD, as things seem to work quite differently
-		if (inviter->IsClient() && inviter->ClientVersion() >= EQ::versions::ClientVersion::SoD)
-		{
-			database.RefreshGroupFromDB(inviter);
-		}
-
-		// Add the merc back into the new group if possible
-		if (GetMerc())
-		{
-			GetMerc()->MercJoinClientGroup();
-		}
-
-		if (inviter->IsLFP())
-		{
-			// If the player who invited us to a group is LFP, have them update world now that we have joined their group.
-			inviter->UpdateLFP();
-		}
-
-		database.RefreshGroupFromDB(this);
-		group->SendHPManaEndPacketsTo(this);
-		//send updates to clients out of zone...
-		group->SendGroupJoinOOZ(this);
-		return true;
+// World now owns all topology resolution (join existing raid/group, move
+// within the same raid, create a new group, size caps) -- see
+// RaidStateManager::AddPartyToRaid / GroupStateManager::HandleFollow.
+// Zone only resolves what only it can (accepter's own live class/level/AA,
+// and whether the inviter happens to be raid-grouped, which changes which
+// request this becomes) and forwards. Doesn't require the inviter to be
+// physically present in this zone -- always routed through world now,
+// matching this function's old "inviter in another zone" branch for every
+// case, not just the cross-zone one.
+// TODO: This should not require a raid object, probably requires a small refactor to ensure a raid or group invite is ready
+void Client::GroupFollow(const char *inviter_name) {
+	if (!inviter_name || !inviter_name[0]) {
+		return;
 	}
-	return false;
+
+	Mob *local_inviter = entity_list.GetClientByName(inviter_name);
+	Raid *raid = local_inviter ? entity_list.GetRaidByClient(local_inviter->CastToClient()) : nullptr;
+
+	if (raid) {
+		Raid *my_raid = entity_list.GetRaidByClient(this);
+		if (my_raid == raid) {
+			// Already in the same raid -- just move to the inviter's subgroup.
+			uint32 dest_group = raid->GetGroupNumber(inviter_name);
+			raid->RequestMoveGroup(this, GetName(), dest_group);
+			return;
+		}
+
+		Raid::RequestFollow(this, inviter_name);
+		return;
+	}
+
+	Group::RequestFollow(this, inviter_name);
 }
 
 uint16 Client::GetPrimarySkillValue()
@@ -5308,39 +5106,15 @@ void Client::UpdateGroupAAs(int32 points, uint32 type) {
 	SendLeadershipEXPUpdate();
 }
 
-bool Client::IsLeadershipEXPOn() {
+bool Client::IsLeadershipEXPOn() const
+{
 
-	if(!m_pp.leadAAActive)
-		return false;
-
-	Group *g = GetGroup();
-
-	if (g && g->IsLeader(this) && g->GroupCount() > 2)
-		return true;
-
-	Raid *r = GetRaid();
-
-	if (!r)
-		return false;
-
-	// raid leaders can only gain raid AA XP
-	if (r->IsLeader(this)) {
-		if (r->RaidCount() > 17)
-			return true;
-		else
-			return false;
+	if ( m_pp.leadAAActive != 0 && IsGrouped()) {
+		Group* g = GetGroup();
+		return g->IsLeader(this) && g->GroupCount() > 2;
 	}
 
-	uint32 gid = r->GetGroup(this);
-
-	if (gid > 11) // not in a group
-		return false;
-
-	if (r->IsGroupLeader(GetName()) && r->GroupCount(gid) > 2)
-		return true;
-
 	return false;
-
 }
 
 uint32 Client::GetAggroCount() {
@@ -6623,52 +6397,6 @@ void Client::ClearGuildBank()
 	FastQueuePacket(&outapp);
 }
 
-void Client::SendGroupCreatePacket()
-{
-	// For SoD and later clients, this is sent the Group Leader upon initial creation of the group
-	//
-	auto outapp = new EQApplicationPacket(OP_GroupUpdateB, 32 + strlen(GetName()));
-
-	char *Buffer = (char *)outapp->pBuffer;
-	// Header
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// group ID probably
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);	// count of members in packet
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// Null Leader name, shouldn't be null besides this case
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Member 0, index
-	VARSTRUCT_ENCODE_STRING(Buffer, GetName());	// group member name
-	VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);	// merc flag
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// owner name (if merc)
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, GetLevel());	// level
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// group tank flag
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// group assist flag
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// group puller flag
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// offline flag
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// timestamp
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::SendGroupLeaderChangePacket(const char *LeaderName)
-{
-	// For SoD and later, send name of Group Leader to this client
-
-	auto outapp = new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
-
-	GroupLeaderChange_Struct *glcs = (GroupLeaderChange_Struct*)outapp->pBuffer;
-
-	strn0cpy(glcs->LeaderName, LeaderName, sizeof(glcs->LeaderName));
-
-	FastQueuePacket(&outapp);
-}
-
-void Client::SendGroupJoinAcknowledge()
-{
-	// For SoD and later, This produces the 'You have joined the group' message.
-	auto outapp = new EQApplicationPacket(OP_GroupAcknowledge, 4);
-	FastQueuePacket(&outapp);
-}
-
 void Client::SendAdventureError(const char *error)
 {
 	size_t error_size = strlen(error);
@@ -7483,7 +7211,7 @@ void Client::AddAutoXTarget(Mob *m, bool send)
 		return;
 	}
 
-	m_activeautohatermgr->increment_count(m);
+	IncrementActiveAutoHater(m);
 
 	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m)) {
 		return;
@@ -7513,11 +7241,11 @@ void Client::AddAutoXTarget(Mob *m, bool send)
 
 void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 {
-	if (!XTargettingAvailable() || !m || !m_activeautohatermgr) {
+	if (!XTargettingAvailable() || !m) {
 		return;
 	}
 
-	m_activeautohatermgr->decrement_count(m);
+	DecrementActiveAutoHater(m);
 	// now we may need to clean up our CurrentTargetNPC entries
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].Type == CurrentTargetNPC && XTargets[i].ID == m->GetID()) {
@@ -7540,7 +7268,7 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 	);
 }
 
-void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
+void Client::UpdateXTargetType(XTargetType Type, const Mob* m, const char *Name)
 {
 	if (!XTargettingAvailable()) {
 		return;
@@ -7558,13 +7286,59 @@ void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
 			if (Name) {
 				strncpy(XTargets[i].Name, Name, 64);
 			}
+			else if (!m) {
+				// Clearing with no explicit Name override -- without this,
+				// the stale name from the previous occupant survives (only
+				// ID gets zeroed) and keeps getting sent back to the client,
+				// so a cleared group assist/tank/puller target never
+				// actually reads as cleared.
+				XTargets[i].Name[0] = '\0';
+			}
 
 			SendXTargetPacket(i, m);
 		}
 	}
 }
 
-void Client::SendXTargetPacket(uint32 Slot, Mob *m)
+void Client::ClearXTargetsOfType(XTargetType Type)
+{
+	if (!XTargettingAvailable()) {
+		return;
+	}
+
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type == Type) {
+			XTargets[i].ID = 0;
+			XTargets[i].Name[0] = 0;
+			SendXTargetPacket(i, nullptr);
+		}
+	}
+}
+
+void Client::ClearAllRaidXTargets()
+{
+	if (!XTargettingAvailable()) {
+		return;
+	}
+
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type == RaidAssist1 ||
+			XTargets[i].Type == RaidAssist2 ||
+			XTargets[i].Type == RaidAssist3 ||
+			XTargets[i].Type == RaidAssist1Target ||
+			XTargets[i].Type == RaidAssist2Target ||
+			XTargets[i].Type == RaidAssist3Target ||
+			XTargets[i].Type == RaidMarkTarget1 ||
+			XTargets[i].Type == RaidMarkTarget2 ||
+			XTargets[i].Type == RaidMarkTarget3) {
+			XTargets[i].ID = 0;
+			XTargets[i].Name[0] = 0;
+			SendXTargetPacket(i, nullptr);
+		}
+	}
+}
+
+void Client::SendXTargetPacket(uint32 Slot, const Mob *m)
 {
 	if(!XTargettingAvailable())
 		return;
@@ -7734,6 +7508,27 @@ void Client::ShowXTargets(Client *c)
 	}
 }
 
+const XTargetAutoHaters* Client::GetXTargetAutoMgr() const
+{
+	if (m_group) return m_group->GetXTargetAutoMgr();
+	if (m_raid)  return m_raid->GetXTargetAutoMgr();
+	return &m_autohatermgr;
+}
+
+void Client::IncrementActiveAutoHater(Mob* m)
+{
+	if (m_group) m_group->IncrementAutoHater(m);
+	else if (m_raid) m_raid->IncrementAutoHater(m);
+	else m_autohatermgr.increment_count(m);
+}
+
+void Client::DecrementActiveAutoHater(Mob* m)
+{
+	if (m_group) m_group->DecrementAutoHater(m);
+	else if (m_raid) m_raid->DecrementAutoHater(m);
+	else m_autohatermgr.decrement_count(m);
+}
+
 void Client::ProcessXTargetAutoHaters()
 {
 	if (!XTargettingAvailable())
@@ -7788,54 +7583,60 @@ void Client::ProcessXTargetAutoHaters()
 	SendXTargetUpdates();
 }
 
-// This function is called when a client is added to a group
-// Group leader joining isn't handled by this function
-void Client::JoinGroupXTargets(Group *g)
+void Client::JoinGroupXTargets()
 {
-	if (!g)
-		return;
+	if (m_group != nullptr) {
+		if (!m_autohatermgr.empty()) {
+			m_group->MergeAutoHaters(m_autohatermgr);
+			m_autohatermgr.clear();
+			RemoveAutoXTargets();
+		}
 
-	if (!GetXTargetAutoMgr()->empty()) {
-		g->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
-		GetXTargetAutoMgr()->clear();
+		if (!m_group->GetXTargetAutoMgr()->empty())
+			SetDirtyAutoHaters();
+	}
+}
+
+void Client::LeaveGroupXTargets()
+{
+	if (m_group != nullptr) {
 		RemoveAutoXTargets();
-	}
-
-	SetXTargetAutoMgr(g->GetXTargetAutoMgr());
-
-	if (!GetXTargetAutoMgr()->empty())
-		SetDirtyAutoHaters();
-}
-
-// This function is called when a client leaves a group
-void Client::LeaveGroupXTargets(Group *g)
-{
-	if (!g)
-		return;
-
-	SetXTargetAutoMgr(nullptr); // this will set it back to our manager
-	RemoveAutoXTargets();
-	entity_list.RefreshAutoXTargets(this); // this will probably break the temporal ordering, but whatever
-	// We now have a rebuilt, valid auto hater manager, so we need to demerge from the groups
-	if (!GetXTargetAutoMgr()->empty()) {
-		GetXTargetAutoMgr()->demerge(*g->GetXTargetAutoMgr()); // this will remove entries where we only had aggro
-		SetDirtyAutoHaters();
+		entity_list.RefreshAutoXTargets(this); // this will probably break the temporal ordering, but whatever
+		// We now have a rebuilt, valid (own) auto hater manager, so we need to
+		// demerge it from the group's.
+		if (!m_autohatermgr.empty()) {
+			m_group->DemergeAutoHaters(m_autohatermgr); // this will remove entries where we only had aggro
+			SetDirtyAutoHaters();
+		}
 	}
 }
 
-// This function is called when a client leaves a group
-void Client::LeaveRaidXTargets(Raid *r)
+void Client::JoinRaidXTargets()
 {
-	if (!r)
-		return;
+	if (m_raid != nullptr) {
+		if (!m_autohatermgr.empty()) {
+			r->MergeAutoHaters(m_autohatermgr);
+			m_autohatermgr.clear();
+			RemoveAutoXTargets();
+		}
 
-	SetXTargetAutoMgr(nullptr); // this will set it back to our manager
-	RemoveAutoXTargets();
-	entity_list.RefreshAutoXTargets(this); // this will probably break the temporal ordering, but whatever
-	// We now have a rebuilt, valid auto hater manager, so we need to demerge from the groups
-	if (!GetXTargetAutoMgr()->empty()) {
-		GetXTargetAutoMgr()->demerge(*r->GetXTargetAutoMgr()); // this will remove entries where we only had aggro
-		SetDirtyAutoHaters();
+		// See JoinGroupXTargets's comment -- same reasoning, query r directly.
+		if (!m_raid->GetXTargetAutoMgr()->empty())
+			SetDirtyAutoHaters();
+	}
+}
+
+void Client::LeaveRaidXTargets()
+{
+	if (m_raid != nullptr) {
+		RemoveAutoXTargets();
+		entity_list.RefreshAutoXTargets(this); // this will probably break the temporal ordering, but whatever
+		// We now have a rebuilt, valid (own) auto hater manager, so we need to
+		// demerge it from the raid's.
+		if (!m_autohatermgr.empty()) {
+			m_raid->DemergeAutoHaters(m_autohatermgr); // this will remove entries where we only had aggro
+			SetDirtyAutoHaters();
+		}
 	}
 }
 
@@ -9391,35 +9192,15 @@ void Client::ProcessAggroMeter()
 		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, has_aggro ? cur_tar->GetHateRatio(this, secondary) : secondary ? 100 : 0))
 			add_entry(AggroMeter::AT_Secondary);
 
-		if (IsRaidGrouped()) {
-			auto raid = GetRaid();
-			if (raid) {
-				auto gid = raid->GetGroup(this);
-				if (gid < MAX_RAID_GROUPS) {
-					int at_id = AggroMeter::AT_Group1;
-					for (const auto& m : raid->members) {
-						if (m.member && m.member != this && m.group_number == gid) {
-							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), m.member)))
-								add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
-							at_id++;
-							if (at_id > AggroMeter::AT_Group5)
-								break;
-						}
-					}
+		if (IsGrouped()) {
+			int at_id = AggroMeter::AT_Group1;
+			GetGroup()->ForEachMember([&](Mob* m) {
+				if (m != this) {
+					if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), m)))
+						add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
+					++at_id;
 				}
-			}
-		} else if (IsGrouped()) {
-			auto group = GetGroup();
-			if (group) {
-				int at_id = AggroMeter::AT_Group1;
-				for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
-					if (group->members[i] && group->members[i] != this) {
-						if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), group->members[i])))
-							add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
-						at_id++;
-					}
-				}
-			}
+			});
 		}
 	} else { // we might need to clear out some data now
 		if (m_aggrometer.set_pct(AggroMeter::AT_Player, 0))
@@ -9822,16 +9603,17 @@ bool Client::GotoPlayerGroup(const std::string& player_name)
 		return GotoPlayer(player_name);
 	}
 
-	for (auto &m: GetGroup()->members) {
-		if (m && m->IsClient()) {
-			auto c = m->CastToClient();
-			if (!c->GotoPlayer(player_name)) {
-				return false;
-			}
-		}
-	}
+	bool ok = true;
 
-	return true;
+	GetGroup()->ForEachClient([&](Client *c) -> bool {
+		if (!c->GotoPlayer(player_name)) {
+			ok = false;
+			return false;
+		}
+		return true;
+	});
+
+	return ok;
 }
 
 bool Client::GotoPlayerRaid(const std::string& player_name)
@@ -9840,16 +9622,16 @@ bool Client::GotoPlayerRaid(const std::string& player_name)
 		return GotoPlayer(player_name);
 	}
 
-	for (auto &m: GetRaid()->members) {
-		if (m.member && m.member->IsClient()) {
-			auto c = m.member->CastToClient();
-			if (!c->GotoPlayer(player_name)) {
-				return false;
-			}
+	bool ok = true;
+	GetRaid()->ForEachLocalMember([&](const auto& m) -> bool {
+		if (m.member->IsClient() && !m.member->CastToClient()->GotoPlayer(player_name)) {
+			ok = false;
+			return false;
 		}
-	}
+		return true;
+	});
 
-	return true;
+	return ok;
 }
 
 void Client::SendToGuildHall()
@@ -11416,26 +11198,20 @@ std::vector<Client *> Client::GetPartyMembers()
 
 	// raid
 	if (const auto raid = entity_list.GetRaidByClient(this)) {
-		for (auto &m : raid->members) {
-			if (m.is_bot) {
-				continue;
-			}
-
-			if (m.member && m.member->IsClient()) {
+		raid->ForEachLocalMember([&](const auto& m) {
+			if (m.kind != RaidMemberBot && m.member->IsClient()) {
 				clients_to_update.push_back(m.member->CastToClient());
 			}
-		}
+		});
 	}
 
 	// group
 	if (clients_to_update.empty()) {
 		Group *group = entity_list.GetGroupByClient(this);
 		if (group) {
-			for (auto &m : group->members) {
-				if (m && m->IsClient()) {
-					clients_to_update.push_back(m->CastToClient());
-				}
-			}
+			group->ForEachClient([&](Client *c) {
+				clients_to_update.push_back(c);
+			});
 		}
 	}
 
@@ -12010,71 +11786,34 @@ void Client::RegisterBug(BugReport_Struct* r) {
 	);
 }
 
-std::vector<Mob*> Client::GetApplySpellList(
-	ApplySpellType apply_type,
-	bool allow_pets,
-	bool is_raid_group_only,
-	bool allow_bots
-) {
+std::vector<Mob*> Client::GetApplySpellList(ApplySpellType apply_type, bool allow_pets, bool allow_bots)
+{
 	std::vector<Mob*> l;
+	auto add_to_l = [&l, allow_pets, allow_bots](Client* c) {
+		l.push_back(c);
 
-	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
-		auto* r = GetRaid();
-		if (r) {
-			auto group_id = r->GetGroup(this);
-			if (EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
-				for (const auto& m : r->members) {
-					if (m.member && m.member->IsClient() && (!is_raid_group_only || r->GetGroup(m.member) == group_id)) {
-						l.push_back(m.member);
+		if (allow_pets && c->HasPet())
+			l.push_back(c->GetPet());
 
-						if (allow_pets && m.member->HasPet()) {
-							l.push_back(m.member->GetPet());
-						}
-
-						if (allow_bots) {
-							const auto& sbl = entity_list.GetBotListByCharacterID(m.member->CharacterID());
-							for (const auto& b : sbl) {
-								l.push_back(b);
-							}
-						}
-					}
-				}
-			}
-		}
-	} else if (apply_type == ApplySpellType::Group && IsGrouped()) {
-		auto* g = GetGroup();
-		if (g) {
-			for (auto i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				auto* m = g->members[i];
-				if (m && m->IsClient()) {
-					l.push_back(m->CastToClient());
-
-					if (allow_pets && m->HasPet()) {
-						l.push_back(m->GetPet());
-					}
-
-					if (allow_bots) {
-						const auto& sbl = entity_list.GetBotListByCharacterID(m->CastToClient()->CharacterID());
-						for (const auto& b : sbl) {
-							l.push_back(b);
-						}
-					}
-				}
-			}
-		}
-	} else {
-		l.push_back(this);
-
-		if (allow_pets && HasPet()) {
-			l.push_back(GetPet());
-		}
-
-		if (allow_bots) {
-			const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
-			for (const auto& b : sbl) {
+		if (allow_bots)
+			for (const auto& b : entity_list.GetBotListByCharacterID(c->CharacterID()))
 				l.push_back(b);
+	};
+
+	if (apply_type == ApplySpellType::Raid && IsRaided()) {
+		GetRaid()->ForEachLocalMember([&](const auto& m) {
+			if (m.member->IsClient()) {
+				add_to_l(m.member->CastToClient());
+			} else {
+				// A bot raid member has no owned bots of its own to expand
+				// via add_to_l()'s CharacterID() lookup -- just include it.
+				l.push_back(m.member);
 			}
-		}
+		});
+	} else if (apply_type == ApplySpellType::Group && IsGrouped()) {
+		GetGroup()->ForEachClient([&add_to_l](Client* c) { add_to_l(c); });
+	} else {
+		add_to_l(this);
 	}
 
 	return l;
@@ -12086,14 +11825,12 @@ void Client::ApplySpell(
 	int level,
 	ApplySpellType apply_type,
 	bool allow_pets,
-	bool is_raid_group_only,
 	bool allow_bots
 ) {
-	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only, allow_bots);
+	const auto& l = GetApplySpellList(apply_type, allow_pets, allow_bots);
 
-	for (const auto& m : l) {
+	for (const auto& m : l)
 		m->ApplySpellBuff(spell_id, duration, level);
-	}
 }
 
 void Client::SetSpellDuration(
@@ -12102,14 +11839,12 @@ void Client::SetSpellDuration(
 	int level,
 	ApplySpellType apply_type,
 	bool allow_pets,
-	bool is_raid_group_only,
 	bool allow_bots
 ) {
-	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only, allow_bots);
+	const auto& l = GetApplySpellList(apply_type, allow_pets, allow_bots);
 
-	for (const auto& m : l) {
+	for (const auto& m : l)
 		m->SetBuffDuration(spell_id, duration, level);
-	}
 }
 
 std::string Client::GetGuildPublicNote()
@@ -12680,26 +12415,18 @@ std::vector<Mob*> Client::GetRaidOrGroupOrSelf(bool clients_only)
 {
 	std::vector<Mob*> v;
 
-	if (IsRaidGrouped()) {
-		Raid* r = GetRaid();
-
-		if (r) {
-			for (const auto& m : r->members) {
-				if (m.member && (!m.is_bot || !clients_only)) {
-					v.emplace_back(m.member);
-				}
+	if (IsRaided()) {
+		GetRaid()->ForEachLocalMember([&](const auto& m) {
+			if (m.kind != RaidMemberBot || !clients_only) {
+				v.emplace_back(m.member);
 			}
-		}
+		});
 	} else if (IsGrouped()) {
-		Group* g = GetGroup();
-
-		if (g) {
-			for (const auto& m : g->members) {
-				if (m && (m->IsClient() || !clients_only)) {
-					v.emplace_back(m);
-				}
+		GetGroup()->ForEachMember([&](Mob* m) {
+			if (m->IsClient() || !clients_only) {
+				v.emplace_back(m);
 			}
-		}
+		});
 	} else {
 		v.emplace_back(this);
 	}
@@ -12856,51 +12583,14 @@ void Client::CheckSendBulkNpcPositions(bool force)
 const uint16 scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
 const uint16 scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
 
-void Client::CheckClientToNpcAggroTimer()
+void Client::UpdateGroupMembers(const Group* group)
 {
-	LogAggroDetail(
-		"ClientUpdate [{}] {}moving, scan timer [{}]",
-		GetCleanName(),
-		IsMoving() ? "" : "NOT ",
-		m_client_npc_aggro_scan_timer.GetRemainingTime()
-	);
-
-	if (IsMoving()) {
-		if (m_client_npc_aggro_scan_timer.GetRemainingTime() > scan_npc_aggro_timer_moving) {
-			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
-			m_client_npc_aggro_scan_timer.Disable();
-			m_client_npc_aggro_scan_timer.Start(scan_npc_aggro_timer_moving);
-			m_client_npc_aggro_scan_timer.Trigger();
-		}
-	}
-	else if (m_client_npc_aggro_scan_timer.GetDuration() == scan_npc_aggro_timer_moving) {
-		LogAggroDetail("Client [{}] Restarting with idle timer", GetCleanName());
-		m_client_npc_aggro_scan_timer.Disable();
-		m_client_npc_aggro_scan_timer.Start(scan_npc_aggro_timer_idle);
-	}
-}
-
-void Client::ClientToNpcAggroProcess()
-{
-	if (zone->CanDoCombat() && !GetFeigned() && m_client_npc_aggro_scan_timer.Check()) {
-		int npc_scan_count = 0;
-		for (auto& close_mob : GetCloseMobList()) {
-			Mob* mob = close_mob.second;
-			if (!mob) {
-				continue;
-			}
-
-			if (mob->IsClient()) {
-				continue;
-			}
-
-			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
-				mob->AddToHateList(this, 25);
-			}
-
-			npc_scan_count++;
-		}
-		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+		const char* name = group->GetMemberName(i);
+		if (name[0] == '\0')
+			memset(m_pp.groupMembers[i], 0, sizeof(m_pp.groupMembers[i]));
+		else
+			strn0cpy(m_pp.groupMembers[i], name, sizeof(m_pp.groupMembers[i]));
 	}
 }
 
@@ -12929,52 +12619,27 @@ const std::vector<int16>& Client::GetInventorySlots()
 	return slot_ids;
 }
 
-void Client::ShowZoneShardMenu()
+void Client::SetAAEXPPercentage(uint8 percentage)
 {
-	auto z = GetZone(GetZoneID());
-	if (z && !z->shard_at_player_count) {
-		return;
+	const uint32 before_percentage = m_epp.perAA;
+
+	if (before_percentage > 0 && percentage == 0) {
+		MessageString(Chat::White, AA_OFF);
+	}
+	else if (before_percentage == 0 && percentage > 0) {
+		MessageString(Chat::White, AA_ON);
 	}
 
-	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
-	LogZoning("Zone sharding results count [{}]", results.size());
+	m_epp.perAA = EQ::Clamp(static_cast<int>(percentage), 0, 100);
 
-	if (results.empty()) {
-		Message(Chat::White, "No zone shards found.");
-		return;
-	}
+	SendAlternateAdvancementStats();
+	SendAlternateAdvancementTable();
+}
 
-	if (!results.empty()) {
-		Message(Chat::White, "Available Zone Shards:");
-	}
-
-	int number = 1;
-	for (auto &e: results) {
-		std::string teleport_link = Saylink::Silent(
-			fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
-			"Teleport"
-		);
-
-		std::string yours;
-		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
-			teleport_link = "Teleport";
-			yours         = " (Yours)";
-		}
-
-		Message(
-			Chat::White, fmt::format(
-				" --> [{}] #{} {} ({}) [{}/{}] players {}",
-				teleport_link,
-				number,
-				z->long_name,
-				e.instance_id,
-				e.player_count,
-				z->shard_at_player_count,
-				yours
-			).c_str()
-		);
-		number++;
-	}
+void Client::RequestLeaveGroup() const
+{
+	if (const Group *g = GetGroup())
+		g->RequestDisband(CharacterID(), GetCleanName(), GetCleanName());
 }
 
 std::string Client::SendBotCommandHelpWindow(const BotCommandHelpParams& params) {
@@ -13084,11 +12749,11 @@ std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::stri
 			if ((string_length - (x + 1)) > max_length) {
 				for (int y = end_count; y >= x; --y) {
 					if (msg[i][y] == ' ') {
-							split_count = y - x;
-							msg_split.emplace_back(msg[i].substr(x, split_count));
-							end_count = y + 1;
+						split_count = y - x;
+						msg_split.emplace_back(msg[i].substr(x, split_count));
+						end_count = y + 1;
 
-							break;
+						break;
 					}
 
 					if (y == x) {
@@ -13115,50 +12780,52 @@ std::string Client::SplitCommandHelpText(std::vector<std::string> msg, std::stri
 	return return_text;
 }
 
-void Client::SetAAEXPPercentage(uint8 percentage)
+bool Client::UncompleteTask(int task_id)
 {
-	const uint32 before_percentage = m_epp.perAA;
+	CompletedTasksRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"charid = {} AND taskid = {}",
+			CharacterID(),
+			task_id
+		)
+	);
 
-	if (before_percentage > 0 && percentage == 0) {
-		MessageString(Chat::White, AA_OFF);
-	}
-	else if (before_percentage == 0 && percentage > 0) {
-		MessageString(Chat::White, AA_ON);
-	}
-
-	m_epp.perAA = EQ::Clamp(static_cast<int>(percentage), 0, 100);
-
-	SendAlternateAdvancementStats();
-	SendAlternateAdvancementTable();
+	return task_state->UncompleteTask(task_id);
 }
 
-void Client::BroadcastPositionUpdate()
+void Client::SendMerchantEnd()
 {
-	EQApplicationPacket               outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	PlayerPositionUpdateServer_Struct *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
+	SetMerchantSessionEntityID(0);
 
-	memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
-	spu->spawn_id      = GetID();
-	spu->x_pos         = FloatToEQ19(GetX());
-	spu->y_pos         = FloatToEQ19(GetY());
-	spu->z_pos         = FloatToEQ19(GetZ());
-	spu->heading       = FloatToEQ12(GetHeading());
-	spu->delta_x       = FloatToEQ13(0);
-	spu->delta_y       = FloatToEQ13(0);
-	spu->delta_z       = FloatToEQ13(0);
-	spu->delta_heading = FloatToEQ10(0);
-	spu->animation     = 0;
-
-	entity_list.QueueCloseClients(this, &outapp, true, zone->GetClientUpdateRange());
-
-	Group *g = GetGroup();
-	if (g) {
-		for (auto &m: g->members) {
-			if (m && m->IsClient() && m != this) {
-				m->CastToClient()->QueuePacket(&outapp);
-			}
-		}
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
+		DoParcelCancel();
+		SetEngagedWithParcelMerchant(false);
 	}
+
+	EQApplicationPacket empty(OP_ShopEndConfirm);
+	QueuePacket(&empty);
+}
+
+void Client::CheckItemDiscoverability(uint32 item_id)
+{
+	if (!RuleB(Character, EnableDiscoveredItems) || IsDiscovered(item_id)) {
+		return;
+	}
+
+	if (GetGM()) {
+		const std::string& item_link = database.CreateItemLink(item_id);
+		Message(
+			Chat::White,
+			fmt::format(
+				"Your GM flag prevents {} from being added to discovered items.",
+				item_link
+			).c_str()
+		);
+		return;
+	}
+
+	DiscoverItem(item_id);
 }
 
 std::string Client::GetAccountBucket(std::string bucket_name)
@@ -13246,57 +12913,198 @@ std::string Client::GetBandolierItemName(uint8 bandolier_slot, uint8 slot_id)
 	if (
 		!EQ::ValueWithin(bandolier_slot, 0, 3) ||
 		!EQ::ValueWithin(slot_id, 0, 3)
-		) {
+	) {
 		return std::string();
 	}
 
 	return GetPP().bandoliers[bandolier_slot].Items[slot_id].Name;
 }
 
-void Client::SendMerchantEnd()
+void Client::CheckClientToNpcAggroTimer()
 {
-	SetMerchantSessionEntityID(0);
-
-	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
-		DoParcelCancel();
-		SetEngagedWithParcelMerchant(false);
-	}
-
-	EQApplicationPacket empty(OP_ShopEndConfirm);
-	QueuePacket(&empty);
-}
-
-void Client::CheckItemDiscoverability(uint32 item_id)
-{
-	if (!RuleB(Character, EnableDiscoveredItems) || IsDiscovered(item_id)) {
-		return;
-	}
-
-	if (GetGM()) {
-		const std::string& item_link = database.CreateItemLink(item_id);
-		Message(
-			Chat::White,
-			fmt::format(
-				"Your GM flag prevents {} from being added to discovered items.",
-				item_link
-			).c_str()
-		);
-		return;
-	}
-
-	DiscoverItem(item_id);
-}
-
-bool Client::UncompleteTask(int task_id)
-{
-	CompletedTasksRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"charid = {} AND taskid = {}",
-			CharacterID(),
-			task_id
-		)
+	LogAggroDetail(
+		"ClientUpdate [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		IsMoving() ? "" : "NOT ",
+		m_client_npc_aggro_scan_timer.GetRemainingTime()
 	);
 
-	return task_state->UncompleteTask(task_id);
+	if (IsMoving()) {
+		if (m_client_npc_aggro_scan_timer.GetRemainingTime() > scan_npc_aggro_timer_moving) {
+			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
+			m_client_npc_aggro_scan_timer.Disable();
+			m_client_npc_aggro_scan_timer.Start(scan_npc_aggro_timer_moving);
+			m_client_npc_aggro_scan_timer.Trigger();
+		}
+	}
+	else if (m_client_npc_aggro_scan_timer.GetDuration() == scan_npc_aggro_timer_moving) {
+		LogAggroDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		m_client_npc_aggro_scan_timer.Disable();
+		m_client_npc_aggro_scan_timer.Start(scan_npc_aggro_timer_idle);
+	}
+}
+
+void Client::ClientToNpcAggroProcess()
+{
+	if (zone->CanDoCombat() && !GetFeigned() && m_client_npc_aggro_scan_timer.Check()) {
+		int npc_scan_count = 0;
+		for (auto& close_mob : GetCloseMobList()) {
+			Mob* mob = close_mob.second;
+			if (!mob) {
+				continue;
+			}
+
+			if (mob->IsClient()) {
+				continue;
+			}
+
+			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
+				mob->AddToHateList(this, 25);
+			}
+
+			npc_scan_count++;
+		}
+		LogAggro("Checking Reverse Aggro (client->npc) scanned_npcs ([{}])", npc_scan_count);
+	}
+}
+
+void Client::BroadcastPositionUpdate()
+{
+	EQApplicationPacket               outapp(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct *spu = (PlayerPositionUpdateServer_Struct *) outapp.pBuffer;
+
+	memset(spu, 0x00, sizeof(PlayerPositionUpdateServer_Struct));
+	spu->spawn_id      = GetID();
+	spu->x_pos         = FloatToEQ19(GetX());
+	spu->y_pos         = FloatToEQ19(GetY());
+	spu->z_pos         = FloatToEQ19(GetZ());
+	spu->heading       = FloatToEQ12(GetHeading());
+	spu->delta_x       = FloatToEQ13(0);
+	spu->delta_y       = FloatToEQ13(0);
+	spu->delta_z       = FloatToEQ13(0);
+	spu->delta_heading = FloatToEQ10(0);
+	spu->animation     = 0;
+
+	entity_list.QueueCloseClients(this, &outapp, true, zone->GetClientUpdateRange());
+
+	Group *g = GetGroup();
+	if (g) {
+		g->ForEachClient([&](Client *m) {
+			if (m != this) {
+				m->QueuePacket(&outapp);
+			}
+		});
+	}
+}
+
+void Client::ShowZoneShardMenu()
+{
+	auto z = GetZone(GetZoneID());
+	if (z && !z->shard_at_player_count) {
+		return;
+	}
+
+	auto results = CharacterDataRepository::GetInstanceZonePlayerCounts(database, GetZoneID());
+	LogZoning("Zone sharding results count [{}]", results.size());
+
+	if (results.empty()) {
+		Message(Chat::White, "No zone shards found.");
+		return;
+	}
+
+	if (!results.empty()) {
+		Message(Chat::White, "Available Zone Shards:");
+	}
+
+	int number = 1;
+	for (auto &e: results) {
+		std::string teleport_link = Saylink::Silent(
+			fmt::format("#zoneshard {} {}", e.zone_id, (e.instance_id == 0 ? -1 : e.instance_id)),
+			"Teleport"
+		);
+
+		std::string yours;
+		if (e.zone_id == GetZoneID() && e.instance_id == GetInstanceID()) {
+			teleport_link = "Teleport";
+			yours         = " (Yours)";
+		}
+
+		Message(
+			Chat::White, fmt::format(
+				" --> [{}] #{} {} ({}) [{}/{}] players {}",
+				teleport_link,
+				number,
+				z->long_name,
+				e.instance_id,
+				e.player_count,
+				z->shard_at_player_count,
+				yours
+			).c_str()
+		);
+		number++;
+	}
+}
+
+void Client::OnAddToGroup()
+{
+	if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE))
+		parse->EventPlayer(EVENT_GROUP_CHANGE, this, "", 0);
+
+	// TODO: All 4 of these functions send packets, and that needs to be decoupled
+	JoinGroupXTargets();
+	HasGroup::OnAddToGroup();
+}
+
+void Client::OnRemoveFromGroup()
+{
+	const Merc* merc = GetMerc();
+	if (merc != nullptr && merc->IsGrouped()) {
+		const Group* g = merc->GetGroup();
+		g->RequestDisband(CharacterID(), GetName(), merc->GetCleanName());
+	}
+
+	if (LFP)
+		UpdateLFP();
+
+	LeaveGroupXTargets();
+	HasGroup::OnRemoveFromGroup();
+}
+
+void Client::OnAddToRaid()
+{
+	if (parse->PlayerHasQuestSub(EVENT_GROUP_CHANGE))
+		parse->EventPlayer(EVENT_GROUP_CHANGE, this, "", 0);
+
+	JoinRaidXTargets();
+	HasRaid::OnAddToRaid();
+}
+
+void Client::OnRemoveFromRaid(Raid* prev_raid)
+{
+	LeaveRaidXTargets();
+	HasRaid::OnRemoveFromRaid();
+}
+
+void Client::OnZonedInWithGroup()
+{
+	JoinGroupXTargets();
+	HasGroup::OnZonedInWithGroup();
+}
+
+void Client::OnZonedOutWithGroup()
+{
+	LeaveGroupXTargets();
+	HasGroup::OnZonedOutWithGroup();
+}
+
+void Client::OnZonedInWithRaid()
+{
+	JoinRaidXTargets();
+	HasRaid::OnZonedInWithRaid();
+}
+
+void Client::OnZonedOutWithRaid()
+{
+	LeaveRaidXTargets();
+	HasRaid::OnZonedOutWithRaid();
 }

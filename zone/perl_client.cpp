@@ -887,7 +887,7 @@ Group* Perl_Client_GetGroup(Client* self) // @categories Account and Character, 
 
 void Perl_Client_LeaveGroup(Client* self) // @categories Account and Character, Group
 {
-	self->LeaveGroup();
+	self->RequestLeaveGroup();
 }
 
 Raid* Perl_Client_GetRaid(Client* self) // @categories Account and Character, Raid
@@ -902,7 +902,7 @@ bool Perl_Client_IsGrouped(Client* self) // @categories Account and Character, G
 
 bool Perl_Client_IsRaidGrouped(Client* self) // @categories Account and Character, Group, Raid
 {
-	return self->IsRaidGrouped();
+	return self->IsRaided();
 }
 
 bool Perl_Client_Hungry(Client* self) // @categories Account and Character, Stats and Attributes
@@ -2680,7 +2680,7 @@ void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, int level,
 
 void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets, true, allow_bots);
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets);
 }
 
 void Perl_Client_ApplySpellGroup(Client* self, int spell_id)
@@ -2705,7 +2705,7 @@ void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, int l
 
 void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets, true, allow_bots);
+	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets);
 }
 
 void Perl_Client_ApplySpellRaid(Client* self, int spell_id)
@@ -2730,12 +2730,12 @@ void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int le
 
 void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+	self->ApplySpell(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+	self->ApplySpell(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 void Perl_Client_SetSpellDuration(Client* self, int spell_id)
@@ -2760,7 +2760,7 @@ void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, int 
 
 void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets, true, allow_bots);
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets, allow_bots);
 }
 
 void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id)
@@ -2785,7 +2785,7 @@ void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration,
 
 void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets, true, allow_bots);
+	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets, allow_bots);
 }
 
 void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id)
@@ -2810,12 +2810,12 @@ void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, 
 
 void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+	self->SetSpellDuration(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets);
 }
 
 void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+	self->SetSpellDuration(spell_id, duration, level, is_raid_group_only ? ApplySpellType::Group : ApplySpellType::Raid, allow_pets, allow_bots);
 }
 
 perl::array Perl_Client_GetPEQZoneFlags(Client* self)

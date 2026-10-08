@@ -136,37 +136,6 @@ enum ShowSpellType
 	Spells
 };
 
-enum XTargetType
-{
-	Empty = 0,
-	Auto = 1,
-	CurrentTargetPC = 2,
-	CurrentTargetNPC = 3,
-	TargetsTarget = 4,
-	GroupTank = 5,
-	GroupTankTarget = 6,
-	GroupAssist = 7,
-	GroupAssistTarget = 8,
-	Puller = 9,
-	PullerTarget = 10,
-	GroupMarkTarget1 = 11,
-	GroupMarkTarget2 = 12,
-	GroupMarkTarget3 = 13,
-	RaidAssist1 = 14,
-	RaidAssist2 = 15,
-	RaidAssist3 = 16,
-	RaidAssist1Target = 17,
-	RaidAssist2Target = 18,
-	RaidAssist3Target = 19,
-	RaidMarkTarget1 = 20,
-	RaidMarkTarget2 = 21,
-	RaidMarkTarget3 = 22,
-	MyPet = 23,
-	MyPetTarget = 24,
-	MyMercenary = 25,
-	MyMercenaryTarget = 26
-};
-
 struct XTarget_Struct
 {
 	XTargetType Type;
@@ -242,7 +211,7 @@ struct ExpeditionInvite
 	std::string swap_name;
 };
 
-class Client : public Mob
+class Client : public Mixed<Mob, HasRaid, HasGroup>
 {
 public:
 	//pull in opcode mappings:
@@ -279,10 +248,7 @@ public:
 	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killer_mob, int64 damage, int32 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by = KilledByTypes::Killed_NPC, bool is_buff_tic = false);
 	virtual void Damage(Mob* from, int64 damage, int32 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
-	virtual bool HasRaid() { return (GetRaid() ? true : false); }
-	virtual bool HasGroup() { return (GetGroup() ? true : false); }
-	virtual Raid* GetRaid() { return entity_list.GetRaidByClient(this); }
-	virtual Group* GetGroup() { return entity_list.GetGroupByClient(this); }
+	void UpdateGroupMembers(const Group* group);
 	virtual inline bool IsBerserk() { return berserk; }
 	virtual void SetAttackTimer();
 	int GetQuiverHaste(int delay);
@@ -346,9 +312,9 @@ public:
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0) override;
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0) override;
 	void MessageString(const CZClientMessageString_Struct* msg);
-	bool ShouldGetPacket(Mob *sender, eqFilterType filter);
-	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
-	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
+	bool ShouldGetPacket(const Mob *sender, eqFilterType filter) const;
+	void FilteredMessageString(const Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
+	void FilteredMessageString(const Mob *sender, uint32 type, eqFilterType filter,
 					uint32 string_id, const char *message1, const char *message2 = nullptr,
 					const char *message3 = nullptr, const char *message4 = nullptr,
 					const char *message5 = nullptr, const char *message6 = nullptr,
@@ -441,7 +407,7 @@ public:
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	bool ShouldISpawnFor(Client *c) { return !GMHideMe(c) && !IsHoveringForRespawn(); }
 	virtual bool Process();
-	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
+	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone) override;
 	void FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
 	void ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname = nullptr, bool is_silent = false);
 	void ChannelMessageSend(const char* from, const char* to, uint8 channel_id, uint8 language_id, uint8 language_skill, const char* message, ...);
@@ -580,8 +546,6 @@ public:
 	inline uint8 GetLanguageSkill(uint8 language_id) const { return m_pp.languages[language_id]; }
 
 	void SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQ::ItemData* item = nullptr);
-
-	inline const char* GetLastName() const { return lastname; }
 
 	inline float ProximityX() const { return m_Proximity.x; }
 	inline float ProximityY() const { return m_Proximity.y; }
@@ -760,16 +724,16 @@ public:
 	void SetLeadershipEXP(uint64 group_exp, uint64 raid_exp);
 	void AddLeadershipEXP(uint64 group_exp, uint64 raid_exp);
 	void SendLeadershipEXPUpdate();
-	bool IsLeadershipEXPOn();
+	bool IsLeadershipEXPOn() const;
 	inline int GetLeadershipAA(int AAID) { return m_pp.leader_abilities.ranks[AAID]; }
 	inline LeadershipAA_Struct &GetLeadershipAA() { return m_pp.leader_abilities; }
 	inline GroupLeadershipAA_Struct &GetGroupLeadershipAA() { return m_pp.leader_abilities.group; }
 	inline RaidLeadershipAA_Struct &GetRaidLeadershipAA() { return m_pp.leader_abilities.raid; }
-	int GroupLeadershipAAHealthEnhancement();
-	int GroupLeadershipAAManaEnhancement();
-	int GroupLeadershipAAHealthRegeneration();
-	int GroupLeadershipAAOffenseEnhancement();
-	void InspectBuffs(Client* Inspector, int Rank);
+	int GroupLeadershipAAHealthEnhancement() const;
+	int GroupLeadershipAAManaEnhancement() const;
+	int GroupLeadershipAAHealthRegeneration() const;
+	int GroupLeadershipAAOffenseEnhancement() const;
+	void InspectBuffs(Client* Inspector, uint32 Rank) const;
 	uint32 GetRaidPoints() { return(m_pp.raid_leadership_points); }
 	uint32 GetGroupPoints() { return(m_pp.group_leadership_points); }
 	uint32 GetRaidEXP() { return(m_pp.raid_leadership_exp); }
@@ -916,6 +880,7 @@ public:
 	bool TGB() const { return tgb; }
 
 	void OnDisconnect(bool hard_disconnect);
+	void Zone();
 
 	uint16 GetSkillPoints() { return m_pp.points;}
 	void SetSkillPoints(int inp) { m_pp.points = inp;}
@@ -1077,7 +1042,6 @@ public:
 	std::vector<Mob*> GetApplySpellList(
 		ApplySpellType apply_type,
 		bool allow_pets,
-		bool is_raid_group_only,
 		bool allow_bots
 	);
 
@@ -1087,7 +1051,6 @@ public:
 		int level = -1,
 		ApplySpellType apply_type = ApplySpellType::Solo,
 		bool allow_pets = false,
-		bool is_raid_group_only = true,
 		bool allow_bots = false
 	);
 
@@ -1097,7 +1060,6 @@ public:
 		int level = -1,
 		ApplySpellType apply_type = ApplySpellType::Solo,
 		bool allow_pets = false,
-		bool is_raid_group_only = true,
 		bool allow_bots = false
 	);
 
@@ -1178,7 +1140,7 @@ public:
 	void BreakInvis();
 	void BreakSneakWhenCastOn(Mob* caster, bool IsResisted);
 	void BreakFeignDeathWhenCastOn(bool IsResisted);
-	void LeaveGroup();
+	void RequestLeaveGroup() const;
 
 	bool Hungry() const {if (GetGM() || !RuleB(Character, EnableFoodRequirement)) return false; return m_pp.hunger_level <= 3000;}
 	bool Thirsty() const {if (GetGM() || !RuleB(Character, EnableFoodRequirement)) return false; return m_pp.thirst_level <= 3000;}
@@ -1576,7 +1538,7 @@ public:
 
 	bool CanEnterZone(const std::string& zone_short_name = "", int16 instance_version = -1);
 
-	uint32 GetAggroCount();
+	uint32 GetAggroCount() override;
 	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
 	void SendPVPStats();
@@ -1621,7 +1583,7 @@ public:
 	uint32 GetPendingDzInviteID() const { return m_dz_invite.dz_id; }
 	void SetPendingDzInvite(const ExpeditionInvite& invite) { m_dz_invite = invite; }
 	void RequestPendingDzInvite() const;
-	bool HasDzLockout(const std::string& expedition, const std::string& event) const;
+	bool HasDzLockout(const std::string& expedition, const std::string& event) const override;
 	void RemoveDzLockouts(const std::string& expedition, bool update_db = false);
 	void RemoveDzLockout(const std::string& expedition, const std::string& event, bool update_db = false);
 	void SendDzLockoutTimers();
@@ -1676,9 +1638,6 @@ public:
 	inline bool IsGuildBanker() { return GuildBanker; }
 	inline void SetGuildBanker(bool banker) { GuildBanker = banker; }
 	void ClearGuildBank();
-	void SendGroupCreatePacket();
-	void SendGroupLeaderChangePacket(const char *LeaderName);
-	void SendGroupJoinAcknowledge();
 	void DoTracking();
 	inline bool IsTracking() { return (TrackingID > 0); }
 	inline void SetPendingGuildInvitation(bool inPendingGuildInvitation) { PendingGuildInvitation = inPendingGuildInvitation; }
@@ -1721,23 +1680,33 @@ public:
 	bool IsXTarget(const Mob *m) const;
 	bool IsClientXTarget(const Client *c) const;
 	void UpdateClientXTarget(Client *c);
-	void UpdateXTargetType(XTargetType Type, Mob *m, const char *Name = nullptr);
+	void UpdateXTargetType(XTargetType Type, const Mob* m, const char *Name = nullptr) override;
+	void ClearXTargetsOfType(XTargetType Type) override;
+	void ClearAllRaidXTargets() override;
 	void AddAutoXTarget(Mob *m, bool send = true);
 	void RemoveXTarget(Mob *m, bool OnlyAutoSlots);
-	void SendXTargetPacket(uint32 Slot, Mob *m);
+	void SendXTargetPacket(uint32 Slot, const Mob *m);
 	void SendXTargetUpdates();
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
-	inline XTargetAutoHaters *GetXTargetAutoMgr() { return m_activeautohatermgr; } // will be either raid or group or self
-	inline void SetXTargetAutoMgr(XTargetAutoHaters *in) { if (in) m_activeautohatermgr = in; else m_activeautohatermgr = &m_autohatermgr; }
-	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
+	// Derived live from m_group/m_raid rather than a separately cached
+	// alias -- read-only, matches Group::GetXTargetAutoMgr()/
+	// Raid::GetXTargetAutoMgr()'s own const accessors. Mutation goes through
+	// IncrementActiveAutoHater()/DecrementActiveAutoHater() below, or
+	// Group::/Raid::MergeAutoHaters()/DemergeAutoHaters() for the
+	// join/leave bulk cases (zone/client.cpp's Join/LeaveGroupXTargets).
+	[[nodiscard]] const XTargetAutoHaters* GetXTargetAutoMgr() const;
+	void IncrementActiveAutoHater(Mob *m);
+	void DecrementActiveAutoHater(Mob *m);
+	void SetDirtyAutoHaters() override { m_dirtyautohaters = true; }
 	void ProcessXTargetAutoHaters(); // fixes up our auto haters
-	void JoinGroupXTargets(Group *g);
-	void LeaveGroupXTargets(Group *g);
-	void LeaveRaidXTargets(Raid *r);
+	void JoinGroupXTargets();
+	void LeaveGroupXTargets();
+	void JoinRaidXTargets();
+	void LeaveRaidXTargets();
 	void ClearXTargets();
-	bool GroupFollow(Client* inviter);
+	void GroupFollow(const char *inviter_name);
 	inline bool  GetRunMode() const { return runmode; }
 
 	virtual bool CheckWaterAutoFireLoS(Mob* m);
@@ -1866,7 +1835,6 @@ public:
 
 	void CheckItemDiscoverability(uint32 item_id);
 
-	Raid *p_raid_instance;
 
 	inline uint32 GetPotionBeltItemIcon(uint8 slot_id)
 	{
@@ -2315,7 +2283,6 @@ private:
 	bool m_dirtyautohaters;
 
 	XTargetAutoHaters m_autohatermgr;
-	XTargetAutoHaters *m_activeautohatermgr;
 
 	AggroMeter m_aggrometer;
 
@@ -2417,4 +2384,15 @@ public:
 	bool IsFilteredAFKPacket(const EQApplicationPacket *p);
 	void CheckAutoIdleAFK(PlayerPositionUpdateClient_Struct *p);
 	void SyncWorldPositionsToClient(bool ignore_idle = false);
+
+protected:
+	// callbacks
+	void OnAddToGroup() override;
+	void OnRemoveFromGroup() override;
+	void OnAddToRaid() override;
+	void OnRemoveFromRaid(Raid* prev_raid) override;
+	void OnZonedInWithGroup() override;
+	void OnZonedOutWithGroup() override;
+	void OnZonedInWithRaid() override;
+	void OnZonedOutWithRaid() override;
 };

@@ -122,27 +122,8 @@ bool Client::Process() {
 			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zone_id);
-
-			m_pp.zone_id = m_pp.binds[0].zone_id;
-			m_pp.zoneInstance = m_pp.binds[0].instance_id;
-			m_pp.x = m_pp.binds[0].x;
-			m_pp.y = m_pp.binds[0].y;
-			m_pp.z = m_pp.binds[0].z;
-			Save();
-
-			Group *mygroup = GetGroup();
-			if (mygroup)
-			{
-				entity_list.MessageGroup(this, true, 15, "%s died.", GetName());
-				mygroup->MemberZoned(this);
-			}
-			Raid *myraid = entity_list.GetRaidByClient(this);
-			if (myraid)
-			{
-				myraid->MemberZoned(this);
-			}
-			return(false);
+			GoToDeath();
+			return false;
 		}
 
 		if (charm_update_timer.Check()) {
@@ -159,17 +140,15 @@ bool Client::Process() {
 		}
 
 		if (linkdead_timer.Check()) {
-			LeaveGroup();
+			// Linkdead is a physical departure, not an actual group-leave --
+			// stay a member until explicitly kicked or self-disbanded.
+			Zone();
 			Save();
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
 
-			Raid *myraid = entity_list.GetRaidByClient(this);
-			if (myraid) {
-				myraid->MemberZoned(this);
-			}
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
 				guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
@@ -193,11 +172,10 @@ bool Client::Process() {
 		}
 
 		if (camp_timer.Check()) {
-			Raid *myraid = entity_list.GetRaidByClient(this);
-			if (myraid) {
-				myraid->MemberZoned(this);
-			}
-			LeaveGroup();
+			// Camping is a physical departure, not an actual group-leave --
+			// stay a member (able to be summoned/invited back, or removed
+			// by someone else) until explicitly kicked or self-disbanded.
+			Zone();
 			Save();
 			if (IsInAGuild()) {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
@@ -625,53 +603,18 @@ bool Client::Process() {
 	{
 		//client logged out or errored out
 		//ResetTrade();
-		if (client_state != CLIENT_KICKED && !bZoning && !instalog) {
+		if (client_state != CLIENT_KICKED && !bZoning && !instalog)
 			Save();
-		}
 
 		client_state = CLIENT_LINKDEAD;
 		if (bZoning || instalog || GetGM())
 		{
-			Group *mygroup = GetGroup();
-			if (mygroup)
-			{
-				if (!bZoning)
-				{
-					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
-					LeaveGroup();
-				}
-				else
-				{
-					entity_list.MessageGroup(this, true, 15, "%s left the zone.", GetName());
-					mygroup->MemberZoned(this);
-					if (GetMerc() && GetMerc()->HasGroup())
-					{
-						GetMerc()->RemoveMercFromGroup(GetMerc(), GetMerc()->GetGroup());
-					}
-				}
-
-			}
-			Raid *myraid = entity_list.GetRaidByClient(this);
-			if (myraid)
-			{
-				if (!bZoning)
-				{
-					//entity_list.MessageGroup(this,true,15,"%s logged out.",GetName());
-					myraid->MemberZoned(this);
-				}
-				else
-				{
-					//entity_list.MessageGroup(this,true,15,"%s left the zone.",GetName());
-					myraid->MemberZoned(this);
-				}
-			}
+			Zone();
 			OnDisconnect(false);
 			return false;
 		}
-		else
-		{
-			LinkDead();
-		}
+
+		LinkDead();
 		OnDisconnect(true);
 	}
 	// Feign Death 2 minutes and zone forgets you
@@ -691,20 +634,18 @@ bool Client::Process() {
 	return ret;
 }
 
+void Client::Zone() {
+	Save();
+}
+
 /* Just a set of actions preformed all over in Client::Process */
 void Client::OnDisconnect(bool hard_disconnect) {
 	if (hard_disconnect) {
-		LeaveGroup();
+		RequestLeaveGroup();
 
 		if (GetMerc()) {
 			GetMerc()->Save();
 			GetMerc()->Depop();
-		}
-
-		auto* r = entity_list.GetRaidByClient(this);
-
-		if (r) {
-			r->MemberZoned(this);
 		}
 	}
 
@@ -2270,23 +2211,6 @@ void Client::HandleRespawnFromHover(uint32 Option)
 	else
 	{
 		//Heading to a different zone
-		if(isgrouped)
-		{
-			Group *g = GetGroup();
-			if(g)
-				g->MemberZoned(this);
-		}
-
-		Raid* r = entity_list.GetRaidByClient(this);
-		if(r)
-			r->MemberZoned(this);
-
-		m_pp.zone_id = chosen->zone_id;
-		m_pp.zoneInstance = chosen->instance_id;
-		database.MoveCharacterToZone(CharacterID(), chosen->zone_id);
-
-		Save();
-
 		MovePC(chosen->zone_id, chosen->instance_id, chosen->x, chosen->y, chosen->z, chosen->heading, 1);
 	}
 

@@ -233,8 +233,6 @@ set(repositories
 	repositories/base/base_grid_entries_repository.h
 	repositories/base/base_grid_repository.h
 	repositories/base/base_ground_spawns_repository.h
-	repositories/base/base_group_id_repository.h
-	repositories/base/base_group_leaders_repository.h
 	repositories/base/base_guild_bank_repository.h
 	repositories/base/base_guild_members_repository.h
 	repositories/base/base_guild_permissions_repository.h
@@ -301,8 +299,6 @@ set(repositories
 	repositories/base/base_player_event_trade_repository.h
 	repositories/base/base_player_titlesets_repository.h
 	repositories/base/base_quest_globals_repository.h
-	repositories/base/base_raid_details_repository.h
-	repositories/base/base_raid_members_repository.h
 	repositories/base/base_reports_repository.h
 	repositories/base/base_respawn_times_repository.h
 	repositories/base/base_rule_sets_repository.h
@@ -429,8 +425,6 @@ set(repositories
 	repositories/gm_ips_repository.h
 	repositories/graveyard_repository.h
 	repositories/ground_spawns_repository.h
-	repositories/group_id_repository.h
-	repositories/group_leaders_repository.h
 	repositories/guild_bank_repository.h
 	repositories/guild_members_repository.h
 	repositories/guild_permissions_repository.h
@@ -497,8 +491,6 @@ set(repositories
 	repositories/player_event_trade_repository.h
 	repositories/player_titlesets_repository.h
 	repositories/quest_globals_repository.h
-	repositories/raid_details_repository.h
-	repositories/raid_members_repository.h
 	repositories/reports_repository.h
 	repositories/respawn_times_repository.h
 	repositories/rule_sets_repository.h
@@ -655,6 +647,7 @@ set(common_headers
 	packet_dump_file.h
 	packet_dump.h
 	packet_functions.h
+	party_state.h
 	patches/IBuff.h
 	patches/IMessage.h
 	patches/client_version.h

@@ -45,16 +45,16 @@ public:
 
 	bool IsRaidMember(const char *name);
 	bool IsRaidMember(Lua_Client c);
-	void CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_id);
-	int GroupCount(uint32 group_id);
+	void CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_number);
+	int GroupCount(uint32 group_number);
 	int RaidCount();
 	int GetGroup(const char *c);
 	int GetGroup(Lua_Client c);
 	void SplitExp(uint64 exp, Lua_Mob other);
 	uint32 GetTotalRaidDamage(Lua_Mob other);
-	void SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
-	void SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);
-	void BalanceHP(int penalty, uint32 group_id);
+	void SplitMoney(uint32 group_number, uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void SplitMoney(uint32 group_number, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);
+	void BalanceHP(int penalty, uint32 group_number);
 	bool IsLeader(const char *c);
 	bool IsLeader(Lua_Client c);
 	Lua_Client GetLeader();
@@ -64,7 +64,7 @@ public:
 	int GetHighestLevel();
 	int GetLowestLevel();
 	Lua_Client GetClientByIndex(int member_index);
-	void TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h, uint32 group_id);
+	void TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h, uint32 group_number);
 	void TeleportRaid(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h);
 	int GetID();
 	Lua_Client GetMember(int member_index);

@@ -68,7 +68,7 @@ public:
 	bool CheckAuth(uint32 loginserver_account_id, const char *key_password);
 	void SetOnline(CLE_Status iOnline = CLE_Status::Online);
 	void SetChar(uint32 iCharID, const char *iCharName);
-	inline CLE_Status Online() { return m_online; }
+	[[nodiscard]] CLE_Status Online() const { return m_online; }
 	inline const uint32 GetID() const { return m_id; }
 	inline const uint32 GetIP() const { return m_ip_address; }
 	inline void SetIP(const uint32 &iIP) { m_ip_address = iIP; }

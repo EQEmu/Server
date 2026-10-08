@@ -568,235 +568,91 @@ void Client::SendClearLeadershipAA()
 	FastQueuePacket(&outapp);
 }
 
-int Client::GroupLeadershipAAHealthEnhancement()
+int Client::GroupLeadershipAAHealthEnhancement() const
 {
-	if (IsRaidGrouped()) {
-		int bonus = 0;
-		Raid *raid = GetRaid();
-		if (!raid)
-			return 0;
-		uint32 group_id = raid->GetGroup(this);
-		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
-			switch (raid->GetLeadershipAA(groupAAHealthEnhancement, group_id)) {
-			case 1:
-				bonus = 30;
-				break;
-			case 2:
-				bonus = 60;
-				break;
-			case 3:
-				bonus = 100;
-				break;
-			}
-		}
-		if (raid->RaidCount() >= 18) {
-			switch (raid->GetLeadershipAA(raidAAHealthEnhancement)) {
-			case 1:
-				bonus += 30;
-				break;
-			case 2:
-				bonus += 60;
-				break;
-			case 3:
-				bonus += 100;
-				break;
-			}
-		}
-		return bonus;
-	}
-
-	Group *g = GetGroup();
-
-	if(!g || (g->GroupCount() < 3))
-		return 0;
-
-	switch(g->GetLeadershipAA(groupAAHealthEnhancement))
-	{
-		case 0:
-			return 0;
+	auto calc_bonus = [](uint32 rank) {
+		switch (rank) {
 		case 1:
 			return 30;
 		case 2:
 			return 60;
 		case 3:
 			return 100;
-	}
+		default:
+			return 0;
+		}
+	};
 
-	return 0;
+	int bonus = 0;
+	if (Raid* raid = GetRaid())
+		if (raid->RaidCount() >= 18)
+			bonus += calc_bonus(raid->GetLeadershipAA(raidAAHealthEnhancement));
+
+	if (Group* group = GetGroup())
+		if (group->GroupCount() >= 3)
+			bonus += calc_bonus(group->GetLeadershipAA(groupAAHealthEnhancement));
+
+	return bonus;
 }
 
-int Client::GroupLeadershipAAManaEnhancement()
+int Client::GroupLeadershipAAManaEnhancement() const
 {
-	if (IsRaidGrouped()) {
-		int bonus = 0;
-		Raid *raid = GetRaid();
-		if (!raid)
-			return 0;
-		uint32 group_id = raid->GetGroup(this);
-		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
-			switch (raid->GetLeadershipAA(groupAAManaEnhancement, group_id)) {
-			case 1:
-				bonus = 30;
-				break;
-			case 2:
-				bonus = 60;
-				break;
-			case 3:
-				bonus = 100;
-				break;
-			}
-		}
-		if (raid->RaidCount() >= 18) {
-			switch (raid->GetLeadershipAA(raidAAManaEnhancement)) {
-			case 1:
-				bonus += 30;
-				break;
-			case 2:
-				bonus += 60;
-				break;
-			case 3:
-				bonus += 100;
-				break;
-			}
-		}
-		return bonus;
-	}
-
-	Group *g = GetGroup();
-
-	if(!g || (g->GroupCount() < 3))
-		return 0;
-
-	switch(g->GetLeadershipAA(groupAAManaEnhancement))
-	{
-		case 0:
-			return 0;
+	auto calc_bonus = [](uint32 rank) {
+		switch (rank) {
 		case 1:
 			return 30;
 		case 2:
 			return 60;
 		case 3:
 			return 100;
-	}
+		default:
+			return 0;
+		}
+	};
 
-	return 0;
+	int bonus = 0;
+	if (Raid* raid = GetRaid())
+		if (raid->RaidCount() >= 18)
+			bonus += calc_bonus(raid->GetLeadershipAA(raidAAManaEnhancement));
+
+	if (Group* group = GetGroup())
+		if (group->GroupCount() >= 3)
+			bonus += calc_bonus(group->GetLeadershipAA(groupAAManaEnhancement));
+
+	return bonus;
 }
 
-int Client::GroupLeadershipAAHealthRegeneration()
+int Client::GroupLeadershipAAHealthRegeneration() const
 {
-	if (IsRaidGrouped()) {
-		int bonus = 0;
-		Raid *raid = GetRaid();
-		if (!raid)
-			return 0;
-		uint32 group_id = raid->GetGroup(this);
-		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
-			switch (raid->GetLeadershipAA(groupAAHealthRegeneration, group_id)) {
-			case 1:
-				bonus = 4;
-				break;
-			case 2:
-				bonus = 6;
-				break;
-			case 3:
-				bonus = 8;
-				break;
-			}
-		}
-		if (raid->RaidCount() >= 18) {
-			switch (raid->GetLeadershipAA(raidAAHealthRegeneration)) {
-			case 1:
-				bonus += 4;
-				break;
-			case 2:
-				bonus += 6;
-				break;
-			case 3:
-				bonus += 8;
-				break;
-			}
-		}
-		return bonus;
-	}
-
-	Group *g = GetGroup();
-
-	if(!g || (g->GroupCount() < 3))
-		return 0;
-
-	switch(g->GetLeadershipAA(groupAAHealthRegeneration))
-	{
-		case 0:
-			return 0;
+	auto calc_bonus = [](uint32 rank) {
+		switch (rank) {
 		case 1:
 			return 4;
 		case 2:
 			return 6;
 		case 3:
 			return 8;
-	}
+		default:
+			return 0;
+		}
+	};
 
-	return 0;
+	int bonus = 0;
+	if (Raid* raid = GetRaid())
+		if (raid->RaidCount() >= 18)
+			bonus += calc_bonus(raid->GetLeadershipAA(raidAAHealthRegeneration));
+
+	if (Group* group = GetGroup())
+		if (group->GroupCount() >= 3)
+			bonus += calc_bonus(group->GetLeadershipAA(groupAAHealthRegeneration));
+
+	return bonus;
 }
 
-int Client::GroupLeadershipAAOffenseEnhancement()
+int Client::GroupLeadershipAAOffenseEnhancement() const
 {
-	if (IsRaidGrouped()) {
-		int bonus = 0;
-		Raid *raid = GetRaid();
-		if (!raid)
-			return 0;
-		uint32 group_id = raid->GetGroup(this);
-		if (group_id < 12 && raid->GroupCount(group_id) >= 3) {
-			switch (raid->GetLeadershipAA(groupAAOffenseEnhancement, group_id)) {
-			case 1:
-				bonus = 10;
-				break;
-			case 2:
-				bonus = 19;
-				break;
-			case 3:
-				bonus = 28;
-				break;
-			case 4:
-				bonus = 34;
-				break;
-			case 5:
-				bonus = 40;
-				break;
-			}
-		}
-		if (raid->RaidCount() >= 18) {
-			switch (raid->GetLeadershipAA(raidAAOffenseEnhancement)) {
-			case 1:
-				bonus += 10;
-				break;
-			case 2:
-				bonus += 19;
-				break;
-			case 3:
-				bonus += 28;
-				break;
-			case 4:
-				bonus += 34;
-				break;
-			case 5:
-				bonus += 40;
-				break;
-			}
-		}
-		return bonus;
-	}
-
-	Group *g = GetGroup();
-
-	if(!g || (g->GroupCount() < 3))
-		return 0;
-
-	switch(g->GetLeadershipAA(groupAAOffenseEnhancement))
-	{
-		case 0:
-			return 0;
+	auto calc_bonus = [](uint32 rank) {
+		switch (rank) {
 		case 1:
 			return 10;
 		case 2:
@@ -807,11 +663,24 @@ int Client::GroupLeadershipAAOffenseEnhancement()
 			return 34;
 		case 5:
 			return 40;
-	}
-	return 0;
+		default:
+			return 0;
+		}
+	};
+
+	int bonus = 0;
+	if (Raid* raid = GetRaid())
+		if (raid->RaidCount() >= 18)
+			bonus += calc_bonus(raid->GetLeadershipAA(raidAAOffenseEnhancement));
+
+	if (Group* group = GetGroup())
+		if (group->GroupCount() >= 3)
+			bonus += calc_bonus(group->GetLeadershipAA(groupAAOffenseEnhancement));
+
+	return bonus;
 }
 
-void Client::InspectBuffs(Client* Inspector, int Rank)
+void Client::InspectBuffs(Client* Inspector, uint32 Rank) const
 {
 	// At some point the removed the restriction of being a group member for this to work
 	// not sure when, but the way it's coded now, it wouldn't work with mobs.

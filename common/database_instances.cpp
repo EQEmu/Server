@@ -24,10 +24,8 @@
 #include "common/repositories/data_buckets_repository.h"
 #include "common/repositories/dynamic_zone_members_repository.h"
 #include "common/repositories/dynamic_zones_repository.h"
-#include "common/repositories/group_id_repository.h"
 #include "common/repositories/instance_list_player_repository.h"
 #include "common/repositories/instance_list_repository.h"
-#include "common/repositories/raid_members_repository.h"
 #include "common/repositories/respawn_times_repository.h"
 #include "common/repositories/spawn_condition_values_repository.h"
 #include "common/repositories/spawn2_disabled_repository.h"
@@ -431,53 +429,18 @@ uint32 Database::GetInstanceZoneID(uint16 instance_id)
 	return i.zone;
 }
 
-void Database::AssignGroupToInstance(uint32 group_id, uint32 instance_id)
+void Database::AssignCharactersToInstance(const std::vector<uint32>& character_ids, uint32 instance_id)
 {
 	auto zone_id = GetInstanceZoneID(instance_id);
 	auto version = GetInstanceVersion(instance_id);
 
-	const auto& l = GroupIdRepository::GetWhere(
-		*this,
-		fmt::format(
-			"`group_id` = {}",
-			group_id
-		)
-	);
-
-	if (l.empty()) {
-		return;
-	}
-
-	for (const auto& e : l) {
-		if (!e.character_id) {
+	for (const auto& character_id : character_ids) {
+		if (!character_id) {
 			continue;
 		}
 
-		if (!GetInstanceID(zone_id, e.character_id, version)) {
-			AddClientToInstance(instance_id, e.character_id);
-		}
-	}
-}
-
-void Database::AssignRaidToInstance(uint32 raid_id, uint32 instance_id)
-{
-	auto zone_id = GetInstanceZoneID(instance_id);
-	auto version = GetInstanceVersion(instance_id);
-
-	auto l = RaidMembersRepository::GetWhere(
-		*this,
-		fmt::format(
-			"raidid = {}",
-			raid_id
-		)
-	);
-	if (l.empty()) {
-		return;
-	}
-
-	for (const auto& e : l) {
-		if (!GetInstanceID(zone_id, e.charid, version)) {
-			AddClientToInstance(instance_id, e.charid);
+		if (!GetInstanceID(zone_id, character_id, version)) {
+			AddClientToInstance(instance_id, character_id);
 		}
 	}
 }
@@ -498,42 +461,21 @@ void Database::DeleteInstance(uint16 instance_id)
 	}
 }
 
-void Database::FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 group_id)
+void Database::FlagInstanceByLeader(uint32 zone_id, int16 version, uint32 character_id, const std::string& leader_name)
 {
 	auto instance_id = GetInstanceID(zone_id, character_id, version);
 	if (instance_id) {
 		return;
 	}
 
-	char ln[128];
-	memset(ln, 0, 128);
-	GetGroupLeadershipInfo(group_id, ln);
+	auto leader_id = GetCharacterID(leader_name);
+	auto leader_instance_id = GetInstanceID(zone_id, leader_id, version);
 
-	auto group_leader_id = GetCharacterID((const char*)ln);
-	auto group_leader_instance_id = GetInstanceID(zone_id, group_leader_id, version);
-
-	if (!group_leader_instance_id) {
+	if (!leader_instance_id) {
 		return;
 	}
 
-	AddClientToInstance(group_leader_instance_id, character_id);
-}
-
-void Database::FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 raid_id)
-{
-	uint16 instance_id = GetInstanceID(zone_id, character_id, version);
-	if (instance_id) {
-		return;
-	}
-
-	auto raid_leader_id = GetCharacterID(GetRaidLeaderName(raid_id).c_str());
-	auto raid_leader_instance_id = GetInstanceID(zone_id, raid_leader_id, version);
-
-	if (!raid_leader_instance_id) {
-		return;
-	}
-
-	AddClientToInstance(raid_leader_instance_id, character_id);
+	AddClientToInstance(leader_instance_id, character_id);
 }
 
 void Database::GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids)

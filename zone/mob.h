@@ -36,8 +36,6 @@
 #include <set>
 #include <vector>
 
-char* strn0cpy(char* dest, const char* source, uint32 size);
-
 class Client;
 class EQApplicationPacket;
 class Group;
@@ -50,6 +48,40 @@ struct PlayerPositionUpdateServer_Struct;
 class MobMovementManager;
 
 const int COLLISION_BOX_SIZE = 8;
+
+// Lives here (not client.h) so Mob::UpdateXTargetType's signature can name
+// it -- only Client actually populates XTargets, but Raid/Group need to
+// update a raid/group-wide xtarget slot via a Mob* without knowing that.
+enum XTargetType
+{
+	Empty = 0,
+	Auto = 1,
+	CurrentTargetPC = 2,
+	CurrentTargetNPC = 3,
+	TargetsTarget = 4,
+	GroupTank = 5,
+	GroupTankTarget = 6,
+	GroupAssist = 7,
+	GroupAssistTarget = 8,
+	Puller = 9,
+	PullerTarget = 10,
+	GroupMarkTarget1 = 11,
+	GroupMarkTarget2 = 12,
+	GroupMarkTarget3 = 13,
+	RaidAssist1 = 14,
+	RaidAssist2 = 15,
+	RaidAssist3 = 16,
+	RaidAssist1Target = 17,
+	RaidAssist2Target = 18,
+	RaidAssist3Target = 19,
+	RaidMarkTarget1 = 20,
+	RaidMarkTarget2 = 21,
+	RaidMarkTarget3 = 22,
+	MyPet = 23,
+	MyPetTarget = 24,
+	MyMercenary = 25,
+	MyMercenaryTarget = 26
+};
 
 namespace EQ
 {
@@ -595,9 +627,8 @@ public:
 	inline const char* GetOrigName() const { return orig_name; }
 	inline const char* GetLastName() const { return lastname; }
 	inline const uint8 GetPreviousPetOrder() const { return m_previous_pet_order; }
-	const char *GetCleanName();
-	virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) :
-		strn0cpy(name, GetName(), 64); return; };
+	const char* GetCleanName() const { return clean_name; };
+	void SetName(const char *new_name);
 	inline Mob* GetTarget() const { return target; }
 	std::string GetTargetDescription(Mob* target, uint8 description_type = TargetDescriptionType::LCSelf, uint16 entity_id_override = 0);
 	virtual void SetTarget(Mob* mob);
@@ -705,11 +736,42 @@ public:
 	void CopyHateList(Mob* to);
 
 	//Group
-	virtual bool HasRaid() = 0;
-	virtual bool HasGroup() = 0;
-	virtual Raid* GetRaid() = 0;
-	virtual Group* GetGroup() = 0;
-	bool IsInGroupOrRaid(Mob* other, bool same_raid_group = false);
+	virtual bool HasRaid() const { return false; }
+	virtual bool HasGroup() const { return false; }
+	virtual Raid* GetRaid() const { return nullptr; }
+	virtual Group* GetGroup() const { return nullptr; }
+	virtual void SetRaid(Raid*) {}
+	virtual void SetGroup(Group*) {}
+	// Same pointer swap as SetRaid/SetGroup, but for a member whose
+	// membership itself isn't changing -- only becoming (or ceasing to be)
+	// locally resolvable in this zone (zoning in/out). Fires
+	// OnZonedInWithRaid/OnZonedOutWithRaid (resp. Group) instead of
+	// OnAddToRaid/OnRemoveFromRaid, so overriders can tell the two apart.
+	virtual void SetRaidZoned(Raid*) {}
+	virtual void SetGroupZoned(Group*) {}
+	[[nodiscard]] [[nodiscard]] bool IsInGroupOrRaid(const Mob* other) const;
+	// Neutral default: only Client/Bot track an xtarget autohaters dirty
+	// flag, so anything else (NPC, Merc, pet) is correctly a no-op here.
+	virtual void SetDirtyAutoHaters() {}
+	// Neutral default: only Client has a live network connection to send a
+	// packet to -- Bot/NPC/Merc correctly do nothing. Lets Group/Raid
+	// member-iteration code queue a packet without knowing it's a Client.
+	virtual void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter = FilterNone) {}
+	// Neutral default: only Client tracks XTargets -- Bot/NPC/Merc correctly
+	// do nothing. Lets Raid/Group update a raid/group-wide xtarget slot
+	// (assist, mark target, etc) via a Mob* without knowing it's a Client.
+	virtual void UpdateXTargetType(XTargetType type, const Mob* m, const char* name = nullptr) {}
+	virtual void ClearXTargetsOfType(XTargetType type) {}
+	virtual void ClearAllRaidXTargets() {}
+	// Neutral default: only a Client's real character can hold a dz lockout.
+	virtual bool HasDzLockout(const std::string& expedition, const std::string& event) const { return false; }
+	// Neutral default: a Client owns itself (no separate owning character);
+	// Bot/Merc override to report their owning character's real id.
+	virtual uint32 GetOwnerCharacterID() const { return 0; }
+	// Neutral default: AggroCount tracks a Client's rest-state flag -- Bot/
+	// NPC/Merc have no equivalent, so IsEngaged() alone is authoritative for
+	// them.
+	virtual uint32 GetAggroCount() { return 0; }
 
 	//Faction
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
@@ -898,7 +960,7 @@ public:
 	virtual bool IsRaidTarget() const { return false; };
 	virtual bool IsAttackAllowed(Mob *target, bool isSpellAttack = false);
 	bool IsTargeted() const { return (targeted > 0); }
-	inline void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
+	void IsTargeted(int in_tar) { targeted += in_tar; if(targeted < 0) targeted = 0;}
 	void SetFollowID(uint32 id) { follow_id = id; }
 	void SetFollowDistance(uint32 dist) { follow_dist = dist; }
 	void SetFollowCanRun(bool v) { follow_run = v; }
@@ -908,13 +970,13 @@ public:
 	inline bool IsRareSpawn() const { return rare_spawn; }
 	inline void SetRareSpawn(bool in) { rare_spawn = in; }
 
-	virtual void Message(uint32 type, const char* message, ...) { }
+	virtual void Message(uint32 type, const char* message, ...) const { }
 	virtual void MessageString(uint32 type, uint32 string_id, uint32 distance = 0) { }
 	virtual void MessageString(uint32 type, uint32 string_id, const char* message, const char* message2 = 0,
 		const char* message3 = 0, const char* message4 = 0, const char* message5 = 0, const char* message6 = 0,
 		const char* message7 = 0, const char* message8 = 0, const char* message9 = 0, uint32 distance = 0) { }
-	virtual void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id) { }
-	virtual void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
+	virtual void FilteredMessageString(const Mob *sender, uint32 type, eqFilterType filter, uint32 string_id) { }
+	virtual void FilteredMessageString(const Mob *sender, uint32 type, eqFilterType filter,
 			uint32 string_id, const char *message1, const char *message2 = nullptr,
 			const char *message3 = nullptr, const char *message4 = nullptr,
 			const char *message5 = nullptr, const char *message6 = nullptr,
@@ -1282,10 +1344,10 @@ public:
 	inline float GetSpellX() const {return m_SpellLocation.x;}
 	inline float GetSpellY() const {return m_SpellLocation.y;}
 	inline float GetSpellZ() const {return m_SpellLocation.z;}
-	inline bool IsGrouped() const { return isgrouped; }
-	void SetGrouped(bool v);
-	inline bool IsRaidGrouped() const { return israidgrouped; }
-	void SetRaidGrouped(bool v);
+	virtual bool IsGrouped() const { return false; }
+	virtual uint32 GetGroupID() const { return 0; }
+	virtual bool IsRaided() const { return false; }
+	virtual uint32 GetRaidID() const { return 0; }
 	inline uint16 IsLooting() const { return entity_id_being_looted; }
 	void SetLooting(uint16 val) { entity_id_being_looted = val; }
 
@@ -1510,6 +1572,7 @@ public:
 	void CheckScanCloseMobsMovingTimer();
 
 	void ClearDataBucketCache();
+	[[nodiscard]] [[nodiscard]] bool IsInGroup(const Mob* other) const;
 	bool IsGuildmaster() const;
 	bool IsDestroying() const { return m_destroying; }
 
@@ -1539,8 +1602,6 @@ protected:
 	bool m_AllowBeneficial;
 	bool m_DisableMelee;
 
-	bool isgrouped;
-	bool israidgrouped;
 	uint16 entity_id_being_looted; //the id of the entity being looted, 0 if not looting.
 	uint8 texture;
 	uint8 helmtexture;
@@ -1946,4 +2007,129 @@ private:
 
 	void DoSpellInterrupt(int32 spell_id, int32 mana_cost, int my_curmana);
 	void HandleDoorOpen();
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Mixins to provide guaranteed existence and scoped friending
+// ---------------------------------------------------------------------------------------------------------------------
+
+template <typename M, template<typename> class...>
+struct MixinChain { using type = M; };
+
+template <typename M, template<typename> class Head, template<typename> class... Tail>
+struct MixinChain<M, Head, Tail...> { using type = Head<typename MixinChain<M, Tail...>::type>; };
+
+template <typename M, template<typename> class... Mixins>
+using Mixed = MixinChain<M, Mixins...>::type;
+
+class RaidMembership
+{
+public:
+	virtual ~RaidMembership() = default;
+
+protected:
+	virtual void SetRaid(Raid* raid);
+
+	Raid* m_raid = nullptr;
+	uint32 m_raid_id = 0;
+};
+
+template <typename M>
+class HasRaid : public M, protected RaidMembership
+{
+public:
+	using M::M;
+
+	[[nodiscard]] bool IsRaided() const override { return m_raid != nullptr; }
+	[[nodiscard]] Raid* GetRaid() const override { return m_raid; }
+	[[nodiscard]] uint32 GetRaidID() const override { return m_raid_id; }
+
+protected:
+	friend class EntityList;
+
+	void SetRaid(Raid* raid) override
+	{
+		if (raid != m_raid) {
+			if (raid != nullptr) {
+				RaidMembership::SetRaid(raid);
+				OnAddToRaid();
+			} else {
+				OnRemoveFromRaid();
+				RaidMembership::SetRaid(raid);
+			}
+		}
+	}
+
+	// See Mob::SetZoneWithRaid's comment.
+	void SetZoneWithRaid(Raid* raid) override
+	{
+		if (raid != nullptr) {
+			RaidMembership::SetRaid(raid);
+			OnZonedInWithRaid();
+		} else {
+			OnZonedOutWithRaid();
+			RaidMembership::SetRaid(raid);
+		}
+	}
+
+	virtual void OnAddToRaid() {}
+	virtual void OnRemoveFromRaid() {}
+	virtual void OnZonedInWithRaid() {}
+	virtual void OnZonedOutWithRaid() {}
+};
+
+class GroupMembership
+{
+public:
+	virtual ~GroupMembership() = default;
+
+protected:
+	virtual void SetGroup(Group* group);
+
+	Group* m_group = nullptr;
+	uint32 m_group_id = 0;
+};
+
+template <typename M>
+class HasGroup : public M, protected GroupMembership
+{
+public:
+	using M::M;
+
+	[[nodiscard]] bool IsGrouped() const override { return m_group != nullptr; }
+	[[nodiscard]] Group* GetGroup() const override { return m_group; }
+	[[nodiscard]] uint32 GetGroupID() const override { return m_group_id; }
+
+protected:
+	friend class EntityList;
+
+	void SetGroup(Group* group) override
+	{
+		if (group != m_group) {
+			if (group != nullptr) {
+				GroupMembership::SetGroup(group);
+				OnAddToGroup();
+			} else {
+				OnRemoveFromGroup();
+				GroupMembership::SetGroup(group);
+			}
+		}
+	}
+
+	// See Mob::SetZoneWithGroup's comment.
+	void SetZoneWithGroup(Group* group) override
+	{
+		if (group != nullptr) {
+			GroupMembership::SetGroup(group);
+			OnZonedInWithGroup();
+		} else {
+			OnZonedOutWithGroup();
+			GroupMembership::SetGroup(group);
+		}
+	}
+
+	virtual void OnAddToGroup() {}
+	virtual void OnRemoveFromGroup() {}
+	virtual void OnZonedInWithGroup() {}
+	virtual void OnZonedOutWithGroup() {}
 };
