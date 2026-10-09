@@ -87,6 +87,7 @@ void MapOpcodes()
 	ConnectingOpcodes[OP_ClientError] = &Client::Handle_Connect_OP_ClientError;
 	ConnectingOpcodes[OP_ClientReady] = &Client::Handle_Connect_OP_ClientReady;
 	ConnectingOpcodes[OP_ClientUpdate] = &Client::Handle_Connect_OP_ClientUpdate;
+	ConnectingOpcodes[OP_DragonHoard] = &Client::Handle_OP_DragonHoard; // slot count is requested at zone-in
 	ConnectingOpcodes[OP_GetGuildsList] = &Client::Handle_OP_GetGuildsList; // temporary hack
 	ConnectingOpcodes[OP_ReqClientSpawn] = &Client::Handle_Connect_OP_ReqClientSpawn;
 	ConnectingOpcodes[OP_ReqNewZone] = &Client::Handle_Connect_OP_ReqNewZone;
@@ -772,17 +773,7 @@ void Client::CompleteConnect()
 	else
 		TaskPeriodic_Timer.Disable();
 
-	const bool first_connect = (conn_state != ClientConnectFinished);
 	conn_state = ClientConnectFinished;
-	if (first_connect) {
-		// Dragon's Hoard: the feature GRANT now rides the player-profile claims array (see the TOB
-		// OP_PlayerProfile encode) — that replaces the standalone OP_FeatureUnlock. SendUnlock still
-		// sets the DH window's own enable/slot fields (OP_DragonHoard action 8/2 -> player+0x2468/
-		// 0x246C), which the claim doesn't populate. SendItemList pushes the stored items. Fires on
-		// OP_ClientReady -> CompleteConnect, after OP_EnterWorld (DH window global is valid).
-		DragonHoard::SendUnlock(this);
-		DragonHoard::SendItemList(this);
-	}
 
 	if (zone)
 		zone->weatherSend(this);
@@ -1711,6 +1702,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
+	SendMembership();
+	
 	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 
 	/* The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA */
@@ -17451,18 +17444,7 @@ void Client::SyncWorldPositionsToClient(bool ignore_idle)
 	}
 }
 
-// Dragon's Hoard handlers
 void Client::Handle_OP_DragonHoard(const EQApplicationPacket *app)
 {
-	// Carries several actions; route by the leading action field.
-	if (!app || app->size < 4) {
-		return;
-	}
-	const uint32 action = *reinterpret_cast<const uint32*>(app->pBuffer);
-	if (action == DragonHoard::Deposit) {
-		DragonHoard::HandleDeposit(this, app);
-	} else if (action == DragonHoard::Retrieve) {
-		DragonHoard::HandleRetrieve(this, app);
-	}
-	// DragonHoard::WindowOpen needs no server response.
+	DragonHoard::HandlePacket(this, app);
 }

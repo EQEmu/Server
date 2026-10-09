@@ -73,6 +73,7 @@ namespace EQ
 #include "common/seperator.h"
 #include "common/timer.h"
 #include "common/zone_store.h"
+#include "zone/dragonshoard_cache.h"
 
 #include <cfloat>
 #include <set>
@@ -1852,6 +1853,7 @@ public:
 	void ResetHPUpdateTimer() { hpupdate_timer.Start(); }
 
 	void SendHPUpdateMarquee();
+	void SendMembership();
 
 	void CheckRegionTypeChanges();
 
@@ -1897,6 +1899,7 @@ public:
 	Timer m_list_task_timers_rate_limit = {};
 
 	std::string GetGuildPublicNote();
+	DragonHoard::HoardCache& GetHoardCache() { return m_hoard_cache; }
 
 	PlayerEvent::PlayerEvent GetPlayerEvent();
 	void RecordKilledNPCEvent(NPC *n);
@@ -1963,6 +1966,8 @@ protected:
 	bool los_status;
 	bool los_status_facing;
 	QGlobalCache *qGlobals;
+
+	DragonHoard::HoardCache m_hoard_cache;
 
 	/** Adventure Variables **/
 	Timer *adventure_request_timer;

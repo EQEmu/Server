@@ -39,9 +39,11 @@ Copyright (C) 2001-2026 EQEmu Development Team
 #include "common/packet_dump.h"
 #include "common/races.h"
 #include "common/raid.h"
+#include "common/emu_constants.h"
 #include "zone/mob.h"
 #include "zone/string_ids.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <numeric>
@@ -104,9 +106,6 @@ namespace TOB
 				return;
 			}
 		}
-
-		// OP_DragonHoard1/2 and OP_FeatureUnlock are defined in patch_TOB.conf and loaded by
-		// the RegularOpcodeManager like every other TOB opcode — no manual registration here.
 
 		//ok, now we have what we need to register.
 
@@ -2101,17 +2100,14 @@ namespace TOB
 		//u32 bank_shared_plat;
 		out.WriteUInt32(emu->platinum_shared);
 
-		// Claims — the features the account has unlocked, sent with the player profile at zone-in.
-		// Each is { claim_id (= feature id), value (= current unlocked amount, e.g. slot count) }.
-		// This is how the client is told which store features it has; the standalone OP_FeatureUnlock
-		// message is only for live marketplace-purchase updates. (In MQ these are GameFeatures.)
-		constexpr uint32 kClaimDragonHoard = 2016763; // 0x1EC5FB — Dragon's Hoard
-		const bool dragonhoard_enabled = RuleB(Features, DragonHoardEnabled);
+		const auto dragonhoard_slots = static_cast<uint32>(std::max(RuleI(Features, DragonsHoard), 0));
 
-		out.WriteUInt32(dragonhoard_enabled ? 1 : 0); // claim_count
-		if (dragonhoard_enabled) {
-			out.WriteUInt32(kClaimDragonHoard);
-			out.WriteUInt32(static_cast<uint32>(RuleI(Features, DragonHoardSlots))); // current unlocked amount
+		//u32 claim_count;
+		out.WriteUInt32(dragonhoard_slots ? 1 : 0);
+		//Claim claims[claim_count]; { u32 claim_id, u32 value }
+		if (dragonhoard_slots) {
+			out.WriteUInt32(static_cast<uint32>(EQ::ClaimId::DragonsHoard));
+			out.WriteUInt32(dragonhoard_slots);
 		}
 
 		//Tribute tribute;
@@ -2908,7 +2904,7 @@ namespace TOB
 		eq->membership = emu->membership;
 		eq->races = emu->races;
 		eq->classes = emu->classes;
-		eq->entrysize = 33;
+		eq->entrysize = static_cast<uint32>(std::size(eq->entries));
 		eq->entries[0] = -1;  // Max AA Restriction
 		eq->entries[1] = -1;  // Max Level Restriction
 		eq->entries[2] = -1;  // Max Char Slots per Account (not used by client?)
@@ -2938,10 +2934,11 @@ namespace TOB
 		eq->entries[26] = 0;  // FamiliarKeyRingSlots
 		eq->entries[27] = 0;  // FamiliarAutoLeave
 		eq->entries[28] = 0;  // HeroForgeKeyRingSlots
-		eq->entries[29] = RuleI(Features, DragonHoardSlots);  // DragonHoardSlots
+		eq->entries[29] = std::max(RuleI(Features, DragonsHoard), 0);  // DragonHoardSlots
 		eq->entries[30] = 0;  // TeleportKeyRingSlots
 		eq->entries[31] = 0;  // PersonalDepotSlots
-		eq->entries[32] = 0;
+		eq->entries[32] = 0;  // NameReservations
+		eq->entries[33] = 0;  // ActivatedKeyRingSlots
 
 		FINISH_ENCODE();
 	}

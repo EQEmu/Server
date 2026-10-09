@@ -32,6 +32,7 @@ set(zone_sources
 	dialogue_window.cpp
 	doors.cpp
 	dragonshoard.cpp
+	dragonshoard_cache.cpp
 	dynamic_zone.cpp
 	effects.cpp
 	embparser.cpp
@@ -138,6 +139,7 @@ set(zone_headers
 	dialogue_window.h
 	doors.h
 	dragonshoard.h
+	dragonshoard_cache.h
 	dynamic_zone.h
 	embparser.h
 	embperl.h

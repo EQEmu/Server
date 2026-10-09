@@ -1180,8 +1180,7 @@ RULE_BOOL(EvolvingItems, DestroyAugmentsOnEvolve, false, "If this is enabled, an
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Features)
-RULE_BOOL(Features, DragonHoardEnabled, false, "Enables the Dragon's Hoard storage feature. Requires The Outer Brood (TOB) client. Default off.")
-RULE_INT(Features, DragonHoardSlots, 200, "Number of Dragon's Hoard storage slots granted. Server-driven (the TOB client applies no hard cap); retail's purchasable max is 200.")
+RULE_INT(Features, DragonsHoard, 0, "Dragon's Hoard slot count. 0 disables the feature (TOB client only).")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

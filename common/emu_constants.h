@@ -100,6 +100,12 @@ namespace EQ
 	using RoF2::IINVALID;
 	using RoF2::INULL;
 
+	// Store-feature claim ids (client-defined). Sent in the OP_PlayerProfile claims array as
+	// { claim_id, value }; the client enables the matching feature/window when the id is present.
+	enum class ClaimId : uint32 {
+		DragonsHoard = 2016763,
+	};
+
 	namespace invtype {
 		using namespace RoF2::invtype::enum_;
 
