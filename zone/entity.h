@@ -545,6 +545,7 @@ public:
 	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }
 	inline const std::unordered_map<uint16, Merc *> &GetMercList() { return merc_list; }
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
+	void ReKeyClient(Client *c);
 	inline const std::unordered_map<uint16, Bot*> &GetBotList() { return bot_list; }
 	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = Class::None);
 	std::vector<Bot *> GetBotListByClientName(std::string client_name, uint8 class_id = Class::None);

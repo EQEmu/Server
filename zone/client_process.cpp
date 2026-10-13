@@ -2287,7 +2287,13 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 		Save();
 
-		MovePC(chosen->zone_id, chosen->instance_id, chosen->x, chosen->y, chosen->z, chosen->heading, 1);
+		// The bind choice goes through the normal death-to-bind path, which sends OP_ZonePlayerToBind:
+		// that packet is what closes the respawn window on newer clients.
+		if (Option == 0 || default_to_bind) {
+			MovePC(chosen->zone_id, chosen->instance_id, chosen->x, chosen->y, chosen->z, chosen->heading, 1, ZoneToBindPoint);
+		} else {
+			MovePC(chosen->zone_id, chosen->instance_id, chosen->x, chosen->y, chosen->z, chosen->heading, 1);
+		}
 	}
 
 	safe_delete(default_to_bind);
@@ -2297,6 +2303,7 @@ void Client::ClearHover()
 {
 	// Our Entity ID is currently zero, set in Client::Death
 	SetID(entity_list.GetFreeID());
+	entity_list.ReKeyClient(this);
 
 	auto outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
 	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;

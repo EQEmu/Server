@@ -1097,7 +1097,8 @@ Entity *EntityList::GetEntityEncounter(uint16 id)
 Entity *EntityList::GetID(uint16 get_id)
 {
 	Entity *ent = 0;
-	if ((ent = entity_list.GetEntityMob(get_id)) != 0)
+	// skip a stale mob_list key left by a client hovering for respawn (its corpse owns this id now)
+	if ((ent = entity_list.GetEntityMob(get_id)) != 0 && ent->GetID() == get_id)
 		return ent;
 	else if ((ent=entity_list.GetEntityDoor(get_id)) != 0)
 		return ent;
@@ -1153,7 +1154,10 @@ Mob *EntityList::GetMob(uint16 get_id)
 	if (get_id == 0)
 		return nullptr;
 
-	if ((ent = entity_list.GetEntityMob(get_id)))
+	// A client hovering after death (Character:RespawnFromHover) stays in mob_list under its old id
+	// with GetID() == 0, while its corpse takes that id. Skip the stale entry so the corpse is found
+	// (otherwise targeting the corpse targets the dead player and rez fails with "only works on corpses").
+	if ((ent = entity_list.GetEntityMob(get_id)) && ent->GetID() == get_id)
 		return ent->CastToMob();
 	else if ((ent = entity_list.GetEntityCorpse(get_id)))
 		return ent->CastToMob();
@@ -2821,6 +2825,35 @@ bool EntityList::RemoveNPC(uint16 delete_id)
  * @param mob
  * @return
  */
+// A client's id changes around a respawn-from-hover (Client::Death sets 0 and the corpse takes the old id,
+// ClearHover assigns a new one). Move its mob_list/client_list entries to the current id so lookups find it.
+void EntityList::ReKeyClient(Client *c)
+{
+	if (!c || c->GetID() == 0) {
+		return;
+	}
+
+	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+		if (it->second == c) {
+			if (it->first != c->GetID()) {
+				mob_list.erase(it);
+				mob_list[c->GetID()] = c;
+			}
+			break;
+		}
+	}
+
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
+		if (it->second == c) {
+			if (it->first != c->GetID()) {
+				client_list.erase(it);
+				client_list[c->GetID()] = c;
+			}
+			break;
+		}
+	}
+}
+
 bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 {
 	uint16 entity_id = mob->GetID() > 0 ? mob->GetID() : mob->GetInitialId();

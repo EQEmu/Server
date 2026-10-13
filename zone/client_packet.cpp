@@ -13660,6 +13660,11 @@ void Client::Handle_OP_RespawnWindow(const EQApplicationPacket *app)
 	}
 	char *Buffer = (char *)app->pBuffer;
 
+	// ignore repeat clicks after the player has already respawned
+	if (!IsHoveringForRespawn()) {
+		return;
+	}
+
 	uint32 Option = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 	HandleRespawnFromHover(Option);
 }
