@@ -2315,12 +2315,9 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	}
 
 	// 06/11/2016 This formula matches RoF2 client side calculation.
-	uint32 price = EQ::Clamp(
-		price,
-		EQ::ClampUpper(
-			(item->LDoNPrice + 1) * item->LDoNSellBackRate / 100,
-			item->LDoNPrice
-		),
+	// (clamping the uninitialised price itself could refund the full LDoNPrice)
+	uint32 price = EQ::ClampUpper(
+		(item->LDoNPrice + 1) * item->LDoNSellBackRate / 100,
 		item->LDoNPrice
 	);
 
