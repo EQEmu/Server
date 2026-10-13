@@ -2851,7 +2851,13 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 			}
 
 			DeleteItemInInventory(sell->slot_id, sell->charges);
-			cost *= sell->charges;
+			// Handle_OP_AltCurrencyPurchase hands out MaxCharges units for one price, so a stack
+			// sells back pro rata (multiply first so small prices don't truncate to 0)
+			if (item->MaxCharges > 1) {
+				cost = cost * sell->charges / item->MaxCharges;
+			} else {
+				cost *= sell->charges;
+			}
 		}
 
 		sell->cost = cost;
