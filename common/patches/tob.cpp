@@ -1545,7 +1545,8 @@ namespace TOB
 
 			auto outapp = new EQApplicationPacket(OP_GroupUpdateB, packet_length);
 			char *buffer = (char*)outapp->pBuffer;
-			VARSTRUCT_ENCODE_TYPE(uint32, buffer, 0);
+			// group id; the Advanced Loot window ignores the group while this is 0
+			VARSTRUCT_ENCODE_TYPE(uint32, buffer, gu2->group_id ? gu2->group_id : 1);
 			VARSTRUCT_ENCODE_TYPE(uint32, buffer, member_count);
 			VARSTRUCT_ENCODE_STRING(buffer, gu2->leadersname);
 
@@ -4157,13 +4158,15 @@ namespace TOB
 		switch (t) {
 			case 3: return 1; // RaidDelegateMainAssist -> eqstr 0x2242/0x2248
 			case 4: return 2; // RaidDelegateMainMarker -> eqstr 0x2243/0x2249
-			default: return 0xFFFFFFFF; // RoF2 type 5 has no ToB case; ToB type 0 has no emu value
+			case 100: return 0; // RaidDelegateMasterLooter
+			default: return 0xFFFFFFFF; // RoF2 type 5 has no ToB case
 		}
 	}
 
 	static inline uint32 TOBToServerDelegateType(uint32 t)
 	{
 		switch (t) {
+			case 0: return 100; // Raid Master Looter
 			case 1: return 3;
 			case 2: return 4;
 			default: return 0xFFFFFFFF; // unknown to the server; Handle_OP_RaidDelegateAbility ignores it
@@ -4978,6 +4981,74 @@ namespace TOB
 
 
 	// ---- alt currency, group make leader/follow2, guild bank, adventure merchant ----
+
+	// The zone builds this packet in TOB wire order (see Corpse::SendAdvancedLootItems), with item links in
+	// server format. Only the links need converting:
+	//   u8, u8, u32 unlock_secs, u32 corpse_id, u32 count, cstr name,
+	//   count x { u64 item_id, u32 icon, u32 shared_qty, u32 stack_size, u8, u32, u32 personal_qty, cstr name,
+	//             5 x u32, u32 link_length, link (no NUL) }
+	ENCODE(OP_AdvLootCorpseItems)
+	{
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		const uint8 *buf = in->pBuffer;
+		const size_t size = in->size;
+		size_t pos = 0;
+		SerializeBuffer out(size + 64);
+
+		auto copy = [&](size_t n) {
+			if (pos + n > size) {
+				return false;
+			}
+			for (size_t i = 0; i < n; ++i) {
+				out.WriteUInt8(buf[pos + i]);
+			}
+			pos += n;
+			return true;
+		};
+		auto copy_cstr = [&]() {
+			size_t end = pos;
+			while (end < size && buf[end] != 0) {
+				++end;
+			}
+			return end < size && copy(end - pos + 1);
+		};
+
+		bool ok = copy(10);
+		uint32 count = 0;
+		if (ok && pos + 4 <= size) {
+			count = *(const uint32 *)(buf + pos);
+		}
+		ok = ok && copy(4) && copy_cstr();
+		for (uint32 i = 0; ok && i < count; ++i) {
+			ok = copy(8 + 4 * 4 + 1 + 4) && copy_cstr() && copy(5 * 4) && pos + 4 <= size;
+			if (!ok) {
+				break;
+			}
+			uint32 link_length = *(const uint32 *)(buf + pos);
+			pos += 4;
+			if (pos + link_length > size) {
+				ok = false;
+				break;
+			}
+			std::string link_in((const char *)buf + pos, link_length);
+			std::string link_out;
+			ServerToTOBConvertLinks(link_out, link_in, false);
+			pos += link_length;
+			out.WriteLengthString(link_out);
+		}
+
+		if (!ok) {
+			LogNetcode("[{}] Malformed OP_AdvLootCorpseItems ({} bytes), dropped", __FUNCTION__, size);
+			delete in;
+			return;
+		}
+
+		auto outapp = new EQApplicationPacket(OP_AdvLootCorpseItems, std::move(out));
+		delete in;
+		dest->FastQueuePacket(&outapp, ack_req);
+	}
 
 	ENCODE(OP_AltCurrency)
 	{
@@ -10243,6 +10314,8 @@ namespace TOB
 			return structs::TOBAppearance::Pet;
 		case AppearanceType::Summoned:
 			return structs::TOBAppearance::Summoned;
+		case AppearanceType::Split:
+			return structs::TOBAppearance::Split;
 		case AppearanceType::SetType:
 			return structs::TOBAppearance::NPCName;
 		case AppearanceType::CancelSneakHide:
@@ -10267,6 +10340,10 @@ namespace TOB
 			return structs::TOBAppearance::GuildShow;
 		case AppearanceType::OfflineMode:
 			return structs::TOBAppearance::OfflineMode;
+		case AppearanceType::AdvancedLooting:
+			return structs::TOBAppearance::AdvancedLooting;
+		case AppearanceType::MasterLooterCandidate:
+			return structs::TOBAppearance::MasterLooterCandidate;
 		default:
 			return structs::TOBAppearance::None;
 		}
@@ -10309,6 +10386,8 @@ namespace TOB
 			return AppearanceType::Pet;
 		case structs::TOBAppearance::Summoned:
 			return AppearanceType::Summoned;
+		case structs::TOBAppearance::Split:
+			return AppearanceType::Split;
 		case structs::TOBAppearance::SetType:
 			return AppearanceType::NPCName;
 		case structs::TOBAppearance::CancelSneakHide:
@@ -10333,6 +10412,10 @@ namespace TOB
 			return AppearanceType::GuildShow;
 		case structs::TOBAppearance::OfflineMode:
 			return AppearanceType::OfflineMode;
+		case structs::TOBAppearance::AdvancedLooting:
+			return AppearanceType::AdvancedLooting;
+		case structs::TOBAppearance::MasterLooterCandidate:
+			return AppearanceType::MasterLooterCandidate;
 		default:
 			return AppearanceType::Die;
 		}
