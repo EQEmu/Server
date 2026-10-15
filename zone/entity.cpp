@@ -464,6 +464,7 @@ void EntityList::MobProcess()
 		Mob *mob = it->second;
 
 		size_t sz = mob_list.size();
+		const uint32 erasures = mob_list_erasures;
 
 		static int   old_client_count  = 0;
 		static Timer *mob_settle_timer = new Timer();
@@ -527,7 +528,27 @@ void EntityList::MobProcess()
 
 		size_t a_sz = mob_list.size();
 
-		if (a_sz > sz) {
+		if (erasures != mob_list_erasures) {
+			// An entry was erased while this mob processed (a client re-keyed on respawn from hover, a mob
+			// removed by a script or by a new NPC taking its name), so the iterator may point at a freed node.
+			// Find our place again; if the mob itself is gone there is nothing left to clean up.
+			auto found = mob_list.find(id);
+			if (found == mob_list.end() || found->second != mob) {
+				for (found = mob_list.begin(); found != mob_list.end(); ++found) {
+					if (found->second == mob) {
+						break;
+					}
+				}
+			}
+
+			if (found == mob_list.end()) {
+				mob_dead = false;
+				it = mob_list.begin();
+			} else {
+				id = found->first;
+				it = std::next(found);
+			}
+		} else if (a_sz > sz) {
 			//increased size can potentially screw with iterators so reset it to current value
 			//if buckets are re-orderered we may skip a process here and there but since
 			//process happens so often it shouldn't matter much
@@ -2647,6 +2668,7 @@ void EntityList::RemoveAllMobs()
 		safe_delete(it->second);
 		free_ids.push(it->first);
 		it = mob_list.erase(it);
+		mob_list_erasures++;
 	}
 }
 
@@ -2795,6 +2817,7 @@ bool EntityList::RemoveMob(uint16 delete_id)
 			free_ids.push(it->first);
 		}
 		mob_list.erase(it);
+		mob_list_erasures++;
 		return true;
 	}
 	return false;
@@ -2837,6 +2860,7 @@ void EntityList::ReKeyClient(Client *c)
 		if (it->second == c) {
 			if (it->first != c->GetID()) {
 				mob_list.erase(it);
+				mob_list_erasures++;
 				mob_list[c->GetID()] = c;
 			}
 			break;
