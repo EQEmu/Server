@@ -4853,6 +4853,8 @@ void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app)
 
 	if (g)
 		g->ClearAllNPCMarks();
+	else
+		ClearSoloNPCMarks(true);
 }
 
 void Client::Handle_OP_ClearSurname(const EQApplicationPacket *app)
@@ -6151,6 +6153,8 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 			Group* g = GetGroup();
 			if (g)
 				g->MarkNPC(GetTarget(), dglas->Parameter);
+			else if (!IsRaidGrouped() && RuleB(Character, SoloMarkNPC))
+				SoloMarkNPC(GetTarget(), dglas->Parameter);
 		}
 		break;
 	}
@@ -6170,7 +6174,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 			if (!raid)
 				return;
 			uint32 group_id = raid->GetGroup(this);
-			if (group_id > 11 || raid->GroupCount(group_id) < 3)
+			if (group_id > 11 || raid->GroupCount(group_id) < RuleI(Character, LeadershipMinGroupSize))
 				return;
 			Target->CastToClient()->InspectBuffs(this, raid->GetLeadershipAA(groupAAInspectBuffs, group_id), only_mine);
 			return;
@@ -6178,7 +6182,14 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 
 		Group *g = GetGroup();
 
-		if (!g || (g->GroupCount() < 3))
+		if (!g) {
+			if (const int rank = GetSoloLeadershipAA(groupAAInspectBuffs)) {
+				Target->CastToClient()->InspectBuffs(this, rank, only_mine);
+			}
+			return;
+		}
+
+		if (g->GroupCount() < RuleI(Character, LeadershipMinGroupSize))
 			return;
 
 		Target->CastToClient()->InspectBuffs(this, g->GetLeadershipAA(groupAAInspectBuffs), only_mine);
