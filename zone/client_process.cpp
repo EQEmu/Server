@@ -2242,6 +2242,10 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			FastQueuePacket(&outapp);
 
+			// Client::SetMaxHP does nothing while dead is set, and ClearHover only clears it below,
+			// so the respawn kept the death HP and the client bled out again.
+			dead = false;
+
 			CalcBonuses();
 			RestoreHealth();
 			RestoreMana();
