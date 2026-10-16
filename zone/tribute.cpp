@@ -455,7 +455,7 @@ void Client::SendGuildTributes()
 			gtas->ability.tiers[i].tribute_item_id = htonl(tier.tribute_item_id);
 			gtas->ability.tiers[i].level           = htonl(tier.level);
 		}
-		strn0cpy(gtas->ability.name, t.second.name.data(), t.second.name.length());
+		strn0cpy(gtas->ability.name, t.second.name.data(), len);
 
 		if (trailer) {
 			AppendTributeItemTrailer(outapp, sizeof(GuildTributeAbility_Struct) + len, tob_items);
