@@ -27,6 +27,9 @@ read_eqemu_config_json();
 
 my $dbh = DBI->connect("DBI:mysql:database=$db_name;host=$db_host;port=$db_port", $db_user, $db_pass) or die "Cannot connect to MySql.";
 
+#::: Disable strict mode for this session. Caps values based on field type.
+$dbh->do(q{ SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION' });
+
 read_items_file_from_13th_floor_text();
 update_items_table();
 
@@ -64,7 +67,7 @@ sub read_items_file_from_13th_floor_text {
         #::: Chomp this array...
         my @newitem_file_lines;
         chomp($item_file_lines[0]);
-        @fields = split("(?<!\\\\)\\|", $item_file_lines[0]);
+        @fields = split(/(?<!\\)(?:\\\\)*\|/, $item_file_lines[0]);
 
         my $sth = $dbh->prepare("SHOW TABLES LIKE 'items_floor'");
         $sth->execute();
@@ -88,7 +91,7 @@ sub read_items_file_from_13th_floor_text {
 
         #::: Iterate through each item in items.txt
         for (1 .. $#item_file_lines) {
-                @f = split("(?<!\\\\)\\|", $item_file_lines[$_]);
+                @f = split(/(?<!\\)(?:\\\\)*\|/, $item_file_lines[$_]);
 
                 #::: Build our individual prepared statement (?, ?) values in the insert_ph
                 #::: ?, ? placeholders will be resolved via @field_values in the execute
