@@ -1131,6 +1131,7 @@ struct PlayerProfile_Struct
 /*19559*/	uint8				unknown19595[5];	// ***Placeholder (6/29/2005)
 /*19564*/	uint32				RestTimer;
 /*19568*/	uint32				char_id;			// Found as part of bazaar revamp (5/15/2024)
+			uint8				tob_keyring_unlocks;	// server only: bit r = key ring r unlocked (sent to TOB+ as store claims)
 
 	// All player profile packets are translated and this overhead is ignored in out-bound packets
 	PlayerProfile_Struct() : m_player_profile_version(EQ::versions::MobVersion::Unknown) { }
@@ -1561,6 +1562,7 @@ enum ItemPacketType {
     ItemPacketCharmUpdate    = 0x6E, // noted as incorrect
     ItemPacketRecovery       = 0x71,
     ItemPacketParcel         = 0x73,
+    ItemPacketOverflow       = 0x75, // TOB+ Item Overflow window
     ItemPacketInvalid        = 0xFF
 };
 
@@ -1714,7 +1716,7 @@ struct TradeMoneyUpdate_Struct{
 */
 struct Surname_Struct
 {
-/*0000*/	char name[64];
+/*0000*/	char name[64];	// ToB: bytes 0-7 carry the client's char/world id, echoed back by the encoder
 /*0064*/	uint32 unknown0064;
 /*0068*/	char lastname[32];
 /*0100*/
@@ -2148,7 +2150,10 @@ struct MerchantClick_Struct
     /*008*/ uint32 command;     // 1=open, 0=cancel/close
     /*012*/ float  rate;        // cost multiplier, dosent work anymore
     /*016*/ int32  tab_display; // bitmask b000 none, b001 Purchase/Sell, b010 Recover, b100 Parcels
-    /*020*/ int32  unknown020;  // Seen 2592000 from Server or -1 from Client
+    /*020*/ union {
+        int32  unknown020;   // RoF2 and older: Seen 2592000 from Server or -1 from Client
+        uint32 alt_currency; // points merchants (ToB+): alternate currency id, LOYALTY_MERCHANT_CURRENCY for loyalty merchants
+    };
     /*024*/
 };
 
@@ -2271,7 +2276,8 @@ struct Adventure_Sell_Struct {
 
 struct AdventurePoints_Update_Struct {
 /*000*/	uint32	ldon_available_points;		// Total available points
-/*004*/	uint8	unknown004[36];
+/*004*/	uint8	unknown004[32];
+/*036*/	uint32	ldon_generic_points;		// generic ('---') theme, read by the ToB points-merchant buy check
 /*040*/	uint8	unknown040[16];
 /*056*/	uint32	ldon_guk_points;		// Earned Deepest Guk points
 /*060*/	uint8	unknown060[16];
@@ -2516,7 +2522,8 @@ struct GroupUpdate2_Struct {
 /*0452*/	GroupLeadershipAA_Struct leader_aas;
 /*0580*/	uint8	unknown580[196];
 /*0766*/	uint32	NPCMarkerID;	// EntityID of player delegated MarkNPC ability
-/*0780*/	uint8	unknown780[56];
+/*0780*/	uint32	group_id;		// TOB+: sent first in the roster; the client needs it non-zero
+/*0784*/	uint8	unknown784[52];
 /*0836*/
 };
 struct GroupJoin_Struct {
@@ -3151,6 +3158,7 @@ struct BazaarSearchResults_Struct {
 //
 //
 #define MAX_BUYER_COMPENSATION_ITEMS 10
+#define MAX_BUYER_LINES 255 // bound on buy lines in one OP_BuyerItems packet
 
 enum BarterBuyerActions {
 	Barter_BuyerSearch               = 0,
@@ -3876,6 +3884,7 @@ struct Internal_GuildMemberEntry_Struct {
 
 struct Internal_GuildMembers_Struct {	//just for display purposes, this is not actually used in the message encoding.
 	char	player_name[64];		//variable length.
+	uint32	guild_id;			//the guild the list is for (ToB sends it in the list header)
 	uint32	count;				//network byte order
 	uint32	name_length;	//total length of all of the char names, excluding terminators
 	uint32	note_length;	//total length of all the public notes, excluding terminators
@@ -3939,7 +3948,8 @@ struct GuildPermission_Struct
 struct GuildUpdateURLAndChannel_Struct
 {
 /*0000*/	uint32	Action;	// 0 = Update URL, 1 = Update Channel
-/*0004*/	char	Unknown0004[76];
+/*0004*/	uint32	WindowOpen;	// 1 = reply to the client's guild-window-open request (ToB only delivers these)
+/*0008*/	char	Unknown0008[72];
 /*0080*/	char	Text[512];	// URL can be up to 512, SoD client caps the Channel at 128;
 /*0592*/	char	Unknown0592[3584];
 /*4176*/
@@ -4420,6 +4430,72 @@ struct FindPersonRequest_Struct {
 	FindPerson_Point client_pos;
 };
 
+// TOB+ request: also carries the row type and the destination of Find window zone connection rows
+struct FindPersonRequestTOB_Struct {
+	FindPersonRequest_Struct request;
+	uint32 request_type; // 1 = findable NPC, 6 = zone point by id, 7 = path to dest
+	uint32 id;
+	FindPerson_Point dest;
+};
+
+// TOB+ Find window "Zone Connection" rows (same layout on the wire)
+struct FindZoneConnection_Struct {
+/*00*/ uint32 row_type;     // 7 = client asks for a path to loc, 6 = client asks by id
+/*04*/ uint32 id;
+/*08*/ uint32 unknown08;
+/*12*/ uint32 zone_id;      // row text is this zone's name
+/*16*/ uint32 number;       // != 0 adds " - N" to the row text
+/*20*/ FindPerson_Point loc;
+/*32*/
+};
+static_assert(sizeof(FindZoneConnection_Struct) == 32, "FindZoneConnection_Struct is sent as is to TOB clients");
+
+struct FindZoneConnections_Struct {
+	uint32 count;
+	FindZoneConnection_Struct entries[0];
+};
+
+// TOB+ Faction window list (same layout on the wire). Raw personal values: the client adds
+// the race/class/deity modifiers itself from Resources/Faction/FactionAssociations.txt
+struct FactionListEntry_Struct {
+/*00*/ uint32 faction_id;
+/*04*/ int32  value;
+/*08*/
+};
+
+struct FactionList_Struct {
+	uint32 count;
+	FactionListEntry_Struct entries[0];
+};
+
+// TOB+ standing change (same layout on the wire). The client applies new_value - old_value
+// to its copy and, if show_message is set, prints the standing line itself
+struct FactionUpdate_Struct {
+/*00*/ uint8  show_message;
+/*01*/ int32  message_type; // 0 = did not change (14526), 1 = at the cap (469/471 by direction), 2 = adjusted by (14261)
+/*05*/ uint32 faction_id;
+/*09*/ int32  direction;    // sign only, used by message_type 1
+/*13*/ int32  old_value;
+/*17*/ int32  new_value;
+/*21*/
+};
+static_assert(sizeof(FactionUpdate_Struct) == 21, "FactionUpdate_Struct is sent as is to TOB clients");
+
+// TOB+ Item Overflow window (0x1bd5); the TOB patch converts to and from the wire layout
+enum ItemOverflowAction : uint32 {
+	ItemOverflowList        = 0, // C2S
+	ItemOverflowRetrieve    = 1, // C2S, item_index
+	ItemOverflowRetrieveAll = 2, // C2S
+	ItemOverflowRemoved     = 4, // S2C, item_index
+	ItemOverflowClear       = 7  // S2C
+};
+
+struct ItemOverflow_Struct {
+/*00*/ uint32 action;
+/*04*/ uint64 item_index; // the 8-byte id in the serialized item (the item's serial number)
+/*12*/
+};
+
 //variable length packet of points
 struct FindPersonResult_Struct {
 	FindPerson_Point dest;
@@ -4877,6 +4953,14 @@ struct MarkNPC_Struct
 struct InspectBuffs_Struct {
 /*000*/ int32 spell_id[BUFF_COUNT];
 /*100*/ int32 tics_remaining[BUFF_COUNT];
+};
+
+// TOB+ inspectors: the same lists plus the target, the caster of each buff and the "mine" filter flag
+struct InspectBuffsTOB_Struct {
+	InspectBuffs_Struct buffs;
+	uint32 target_id;
+	uint32 caster_id[BUFF_COUNT];
+	uint8  cast_by_you;
 };
 
 struct RaidGeneral_Struct {
