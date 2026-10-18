@@ -151,7 +151,8 @@ sub update_items_table {
         #::: Establish items_new table
         print "Setting up new items table...\n";
         $dbh->do("DROP TABLE IF EXISTS items_new");
-        $dbh->do("CREATE TABLE items_new AS SELECT * FROM items");
+        $dbh->do("CREATE TABLE items_new LIKE items");
+        $dbh->do("INSERT INTO items_new SELECT * FROM items");
 
         print "Updating new items table...\n";
 
