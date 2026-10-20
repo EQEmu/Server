@@ -121,6 +121,11 @@ namespace EQ
 			/*----*/ ItemTypeCount,
 			/*----*/ ItemTypeCollectible,
 			/*----*/ ItemTypeContainer,
+			/*----*/ ItemTypeMount = 68,          // Live types the TOB key rings take
+			/*----*/ ItemTypeIllusion,
+			/*----*/ ItemTypeFamiliar,            // 70
+			/*----*/ ItemTypeHeroForgeOrnament,
+			/*----*/ ItemTypeTeleportation,
 			/*----*/ ItemTypeAll     = 0xFF
 
 /*
@@ -350,6 +355,10 @@ namespace EQ
 		int16 slot_id;
 		const void * inst;
 	};
+
+	// OP_TributeInfo / OP_SendGuildTributes for ToB carry {magic, count, InternalSerializedItem_Struct[count]}
+	// after the name; the patch serializes the item instances
+	constexpr uint32 TRIBUTE_ITEMS_TRAILER_MAGIC = 0x49424F54;
 
 	struct ItemData {
 		// Non packet based fields
